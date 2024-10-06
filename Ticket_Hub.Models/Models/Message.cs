@@ -9,7 +9,7 @@ public class Message
     public Guid MessageId { get; set; }
     [StringLength(200)] 
     public string MessageContent { get; set; } = null!;
-    public Guid UserId { get; set; }
+    [StringLength(450)] public string UserId { get; set; } = null!;
     [ForeignKey("UserId")] public ApplicationUser User { get; set; } = null!;
     public DateTime CreateTime { get; set; }
 }

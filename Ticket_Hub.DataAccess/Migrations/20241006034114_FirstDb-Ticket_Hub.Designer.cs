@@ -12,8 +12,8 @@ using Ticket_Hub.DataAccess.Context;
 namespace Ticket_Hub.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241005072413_CreateDB-Ticket_Hub")]
-    partial class CreateDBTicket_Hub
+    [Migration("20241006034114_FirstDb-Ticket_Hub")]
+    partial class FirstDbTicket_Hub
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,11 +25,10 @@ namespace Ticket_Hub.DataAccess.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -53,7 +52,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.ToTable("AspNetRoles", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -67,8 +66,9 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.Property<string>("ClaimValue")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("RoleId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("RoleId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
@@ -77,7 +77,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.ToTable("AspNetRoleClaims", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -91,8 +91,9 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.Property<string>("ClaimValue")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
@@ -101,7 +102,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.ToTable("AspNetUserClaims", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
                     b.Property<string>("LoginProvider")
                         .HasColumnType("nvarchar(450)");
@@ -112,8 +113,9 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("LoginProvider", "ProviderKey");
 
@@ -122,13 +124,13 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.ToTable("AspNetUserLogins", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
 
-                    b.Property<Guid>("RoleId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("RoleId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("UserId", "RoleId");
 
@@ -137,10 +139,10 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.ToTable("AspNetUserRoles", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("LoginProvider")
                         .HasColumnType("nvarchar(450)");
@@ -156,33 +158,36 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Ticket_Hub.Models.ApplicationUser", b =>
+            modelBuilder.Entity("Ticket_Hub.Models.Models.ApplicationUser", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
                     b.Property<string>("Address")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("AvatarUrl")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime?>("BirthDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Cccd")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Country")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -192,7 +197,8 @@ namespace Ticket_Hub.DataAccess.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("FullName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -240,7 +246,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("Ticket_Hub.Models.CartDetail", b =>
+            modelBuilder.Entity("Ticket_Hub.Models.Models.CartDetail", b =>
                 {
                     b.Property<Guid>("CartDetailId")
                         .ValueGeneratedOnAdd()
@@ -277,7 +283,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.ToTable("CartDetails");
                 });
 
-            modelBuilder.Entity("Ticket_Hub.Models.CartHeader", b =>
+            modelBuilder.Entity("Ticket_Hub.Models.Models.CartHeader", b =>
                 {
                     b.Property<Guid>("CartHeaderId")
                         .ValueGeneratedOnAdd()
@@ -304,8 +310,10 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.Property<DateTime?>("UpdatedTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("CartHeaderId");
 
@@ -314,7 +322,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.ToTable("CartHeaders");
                 });
 
-            modelBuilder.Entity("Ticket_Hub.Models.Category", b =>
+            modelBuilder.Entity("Ticket_Hub.Models.Models.Category", b =>
                 {
                     b.Property<Guid>("CategoryId")
                         .ValueGeneratedOnAdd()
@@ -322,14 +330,15 @@ namespace Ticket_Hub.DataAccess.Migrations
 
                     b.Property<string>("CategoryName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("CategoryId");
 
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("Ticket_Hub.Models.Event", b =>
+            modelBuilder.Entity("Ticket_Hub.Models.Models.Event", b =>
                 {
                     b.Property<Guid>("EventId")
                         .ValueGeneratedOnAdd()
@@ -340,11 +349,13 @@ namespace Ticket_Hub.DataAccess.Migrations
 
                     b.Property<string>("EventDescription")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("EventName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<Guid>("LocationId")
                         .HasColumnType("uniqueidentifier");
@@ -354,7 +365,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.ToTable("Events");
                 });
 
-            modelBuilder.Entity("Ticket_Hub.Models.Favourite", b =>
+            modelBuilder.Entity("Ticket_Hub.Models.Models.Favourite", b =>
                 {
                     b.Property<Guid>("FavouriteId")
                         .ValueGeneratedOnAdd()
@@ -363,8 +374,10 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.Property<Guid>("TicketId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("FavouriteId");
 
@@ -373,14 +386,15 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.ToTable("Favourites");
                 });
 
-            modelBuilder.Entity("Ticket_Hub.Models.Feedback", b =>
+            modelBuilder.Entity("Ticket_Hub.Models.Models.Feedback", b =>
                 {
                     b.Property<Guid>("FeedbackId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Content")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(max)");
@@ -397,8 +411,10 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.Property<DateTime?>("UpdatedTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("FeedbackId");
 
@@ -407,7 +423,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.ToTable("Feedbacks");
                 });
 
-            modelBuilder.Entity("Ticket_Hub.Models.Location", b =>
+            modelBuilder.Entity("Ticket_Hub.Models.Models.Location", b =>
                 {
                     b.Property<Guid>("LocationId")
                         .ValueGeneratedOnAdd()
@@ -415,22 +431,25 @@ namespace Ticket_Hub.DataAccess.Migrations
 
                     b.Property<string>("City")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("District")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Street")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("LocationId");
 
                     b.ToTable("Locations");
                 });
 
-            modelBuilder.Entity("Ticket_Hub.Models.MemberRating", b =>
+            modelBuilder.Entity("Ticket_Hub.Models.Models.MemberRating", b =>
                 {
                     b.Property<Guid>("MemberRatingId")
                         .ValueGeneratedOnAdd()
@@ -454,8 +473,10 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.Property<DateTime?>("UpdatedTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("MemberRatingId");
 
@@ -464,7 +485,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.ToTable("MemberRatings");
                 });
 
-            modelBuilder.Entity("Ticket_Hub.Models.Message", b =>
+            modelBuilder.Entity("Ticket_Hub.Models.Models.Message", b =>
                 {
                     b.Property<Guid>("MessageId")
                         .ValueGeneratedOnAdd()
@@ -475,16 +496,175 @@ namespace Ticket_Hub.DataAccess.Migrations
 
                     b.Property<string>("MessageContent")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("MessageId");
 
                     b.HasIndex("UserId");
 
                     b.ToTable("Messages");
+                });
+
+            modelBuilder.Entity("Ticket_Hub.Models.Models.SubCategory", b =>
+                {
+                    b.Property<Guid>("SubCategoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SubCategoryName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("SubCategoryId");
+
+                    b.HasIndex("CategoryId");
+
+                    b.ToTable("SubCategories");
+                });
+
+            modelBuilder.Entity("Ticket_Hub.Models.Models.Ticket", b =>
+                {
+                    b.Property<Guid>("TicketId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SerialNumber")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TicketDescription")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("TicketName")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<double>("TicketPrice")
+                        .HasColumnType("float");
+
+                    b.Property<int>("TicketQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("TicketId");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("EventId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Tickets");
+                });
+
+            modelBuilder.Entity("Ticket_Hub.Models.Models.TicketDetail", b =>
+                {
+                    b.Property<Guid>("TicketDetailId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("PurchaseDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("TicketId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("TicketImageUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("TicketDetailId");
+
+                    b.HasIndex("TicketId");
+
+                    b.ToTable("TicketDetails");
+                });
+
+            modelBuilder.Entity("Ticket_Hub.Models.Models.Transactions", b =>
+                {
+                    b.Property<Guid>("TransactionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("Amount")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime>("CreateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("WalletId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("TransactionId");
+
+                    b.HasIndex("WalletId");
+
+                    b.ToTable("Transactions");
+                });
+
+            modelBuilder.Entity("Ticket_Hub.Models.Models.Wallet", b =>
+                {
+                    b.Property<Guid>("WalletId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("AvailableBalance")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Currencies")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("TotalBalance")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime>("UpdateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<double>("WithdrawnBalance")
+                        .HasColumnType("float");
+
+                    b.HasKey("WalletId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Wallets");
                 });
 
             modelBuilder.Entity("Ticket_Hub.Models.Orders", b =>
@@ -524,205 +704,60 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.ToTable("Orders");
                 });
 
-            modelBuilder.Entity("Ticket_Hub.Models.SubCategory", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
-                    b.Property<Guid>("SubCategoryId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CategoryId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("SubCategoryName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("SubCategoryId");
-
-                    b.HasIndex("CategoryId");
-
-                    b.ToTable("SubCategories");
-                });
-
-            modelBuilder.Entity("Ticket_Hub.Models.Ticket", b =>
-                {
-                    b.Property<Guid>("TicketId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CategoryId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("EventId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("SerialNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TicketDescription")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TicketName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("TicketPrice")
-                        .HasColumnType("float");
-
-                    b.Property<int>("TicketQuantity")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("TicketId");
-
-                    b.HasIndex("EventId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Tickets");
-                });
-
-            modelBuilder.Entity("Ticket_Hub.Models.TicketDetail", b =>
-                {
-                    b.Property<Guid>("TicketDetailId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("PurchaseDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("TicketId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("TicketImageUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("TicketDetailId");
-
-                    b.HasIndex("TicketId");
-
-                    b.ToTable("TicketDetails");
-                });
-
-            modelBuilder.Entity("Ticket_Hub.Models.Transactions", b =>
-                {
-                    b.Property<Guid>("TransactionId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<double>("Amount")
-                        .HasColumnType("float");
-
-                    b.Property<DateTime>("CreateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("WalletId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("TransactionId");
-
-                    b.HasIndex("WalletId");
-
-                    b.ToTable("Transactions");
-                });
-
-            modelBuilder.Entity("Ticket_Hub.Models.Wallet", b =>
-                {
-                    b.Property<Guid>("WalletId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<double>("AvailableBalance")
-                        .HasColumnType("float");
-
-                    b.Property<string>("Currencies")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("TotalBalance")
-                        .HasColumnType("float");
-
-                    b.Property<DateTime>("UpdateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<double>("WithdrawnBalance")
-                        .HasColumnType("float");
-
-                    b.HasKey("WalletId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Wallets");
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
-                {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("Ticket_Hub.Models.ApplicationUser", null)
+                    b.HasOne("Ticket_Hub.Models.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("Ticket_Hub.Models.ApplicationUser", null)
+                    b.HasOne("Ticket_Hub.Models.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Ticket_Hub.Models.ApplicationUser", null)
+                    b.HasOne("Ticket_Hub.Models.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("Ticket_Hub.Models.ApplicationUser", null)
+                    b.HasOne("Ticket_Hub.Models.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Ticket_Hub.Models.CartDetail", b =>
+            modelBuilder.Entity("Ticket_Hub.Models.Models.CartDetail", b =>
                 {
-                    b.HasOne("Ticket_Hub.Models.CartHeader", "CartHeader")
+                    b.HasOne("Ticket_Hub.Models.Models.CartHeader", "CartHeader")
                         .WithMany("CartDetails")
                         .HasForeignKey("CartHeaderId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -731,9 +766,9 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.Navigation("CartHeader");
                 });
 
-            modelBuilder.Entity("Ticket_Hub.Models.CartHeader", b =>
+            modelBuilder.Entity("Ticket_Hub.Models.Models.CartHeader", b =>
                 {
-                    b.HasOne("Ticket_Hub.Models.ApplicationUser", "ApplicationUser")
+                    b.HasOne("Ticket_Hub.Models.Models.ApplicationUser", "ApplicationUser")
                         .WithMany("CartHeaders")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -742,9 +777,9 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.Navigation("ApplicationUser");
                 });
 
-            modelBuilder.Entity("Ticket_Hub.Models.Favourite", b =>
+            modelBuilder.Entity("Ticket_Hub.Models.Models.Favourite", b =>
                 {
-                    b.HasOne("Ticket_Hub.Models.ApplicationUser", "ApplicationUser")
+                    b.HasOne("Ticket_Hub.Models.Models.ApplicationUser", "ApplicationUser")
                         .WithMany("Favourites")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -753,9 +788,9 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.Navigation("ApplicationUser");
                 });
 
-            modelBuilder.Entity("Ticket_Hub.Models.Feedback", b =>
+            modelBuilder.Entity("Ticket_Hub.Models.Models.Feedback", b =>
                 {
-                    b.HasOne("Ticket_Hub.Models.ApplicationUser", "ApplicationUser")
+                    b.HasOne("Ticket_Hub.Models.Models.ApplicationUser", "ApplicationUser")
                         .WithMany("Feedbacks")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -764,9 +799,9 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.Navigation("ApplicationUser");
                 });
 
-            modelBuilder.Entity("Ticket_Hub.Models.MemberRating", b =>
+            modelBuilder.Entity("Ticket_Hub.Models.Models.MemberRating", b =>
                 {
-                    b.HasOne("Ticket_Hub.Models.ApplicationUser", "ApplicationUser")
+                    b.HasOne("Ticket_Hub.Models.Models.ApplicationUser", "ApplicationUser")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -775,10 +810,81 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.Navigation("ApplicationUser");
                 });
 
-            modelBuilder.Entity("Ticket_Hub.Models.Message", b =>
+            modelBuilder.Entity("Ticket_Hub.Models.Models.Message", b =>
                 {
-                    b.HasOne("Ticket_Hub.Models.ApplicationUser", "User")
+                    b.HasOne("Ticket_Hub.Models.Models.ApplicationUser", "User")
                         .WithMany("Messages")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Ticket_Hub.Models.Models.SubCategory", b =>
+                {
+                    b.HasOne("Ticket_Hub.Models.Models.Category", "Category")
+                        .WithMany("SubCategories")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("Ticket_Hub.Models.Models.Ticket", b =>
+                {
+                    b.HasOne("Ticket_Hub.Models.Models.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Ticket_Hub.Models.Models.Event", "Event")
+                        .WithMany("Tickets")
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Ticket_Hub.Models.Models.ApplicationUser", "ApplicationUser")
+                        .WithMany("Tickets")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ApplicationUser");
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Event");
+                });
+
+            modelBuilder.Entity("Ticket_Hub.Models.Models.TicketDetail", b =>
+                {
+                    b.HasOne("Ticket_Hub.Models.Models.Ticket", "Ticket")
+                        .WithMany("TicketDetails")
+                        .HasForeignKey("TicketId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Ticket");
+                });
+
+            modelBuilder.Entity("Ticket_Hub.Models.Models.Transactions", b =>
+                {
+                    b.HasOne("Ticket_Hub.Models.Models.Wallet", "Wallet")
+                        .WithMany()
+                        .HasForeignKey("WalletId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Wallet");
+                });
+
+            modelBuilder.Entity("Ticket_Hub.Models.Models.Wallet", b =>
+                {
+                    b.HasOne("Ticket_Hub.Models.Models.ApplicationUser", "User")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -788,7 +894,7 @@ namespace Ticket_Hub.DataAccess.Migrations
 
             modelBuilder.Entity("Ticket_Hub.Models.Orders", b =>
                 {
-                    b.HasOne("Ticket_Hub.Models.CartHeader", "CartHeader")
+                    b.HasOne("Ticket_Hub.Models.Models.CartHeader", "CartHeader")
                         .WithMany()
                         .HasForeignKey("CartHeaderId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -797,70 +903,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.Navigation("CartHeader");
                 });
 
-            modelBuilder.Entity("Ticket_Hub.Models.SubCategory", b =>
-                {
-                    b.HasOne("Ticket_Hub.Models.Category", "Category")
-                        .WithMany("SubCategories")
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Category");
-                });
-
-            modelBuilder.Entity("Ticket_Hub.Models.Ticket", b =>
-                {
-                    b.HasOne("Ticket_Hub.Models.Event", "Event")
-                        .WithMany("Tickets")
-                        .HasForeignKey("EventId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Ticket_Hub.Models.ApplicationUser", "ApplicationUser")
-                        .WithMany("Tickets")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ApplicationUser");
-
-                    b.Navigation("Event");
-                });
-
-            modelBuilder.Entity("Ticket_Hub.Models.TicketDetail", b =>
-                {
-                    b.HasOne("Ticket_Hub.Models.Ticket", "Ticket")
-                        .WithMany("TicketDetails")
-                        .HasForeignKey("TicketId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Ticket");
-                });
-
-            modelBuilder.Entity("Ticket_Hub.Models.Transactions", b =>
-                {
-                    b.HasOne("Ticket_Hub.Models.Wallet", "Wallet")
-                        .WithMany()
-                        .HasForeignKey("WalletId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Wallet");
-                });
-
-            modelBuilder.Entity("Ticket_Hub.Models.Wallet", b =>
-                {
-                    b.HasOne("Ticket_Hub.Models.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Ticket_Hub.Models.ApplicationUser", b =>
+            modelBuilder.Entity("Ticket_Hub.Models.Models.ApplicationUser", b =>
                 {
                     b.Navigation("CartHeaders");
 
@@ -873,22 +916,22 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.Navigation("Tickets");
                 });
 
-            modelBuilder.Entity("Ticket_Hub.Models.CartHeader", b =>
+            modelBuilder.Entity("Ticket_Hub.Models.Models.CartHeader", b =>
                 {
                     b.Navigation("CartDetails");
                 });
 
-            modelBuilder.Entity("Ticket_Hub.Models.Category", b =>
+            modelBuilder.Entity("Ticket_Hub.Models.Models.Category", b =>
                 {
                     b.Navigation("SubCategories");
                 });
 
-            modelBuilder.Entity("Ticket_Hub.Models.Event", b =>
+            modelBuilder.Entity("Ticket_Hub.Models.Models.Event", b =>
                 {
                     b.Navigation("Tickets");
                 });
 
-            modelBuilder.Entity("Ticket_Hub.Models.Ticket", b =>
+            modelBuilder.Entity("Ticket_Hub.Models.Models.Ticket", b =>
                 {
                     b.Navigation("TicketDetails");
                 });

@@ -6,7 +6,7 @@ using Ticket_Hub.Models.Models;
 
 namespace Ticket_Hub.DataAccess.Context;
 
-public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>
+public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {

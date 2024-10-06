@@ -17,9 +17,9 @@ public class AuthService : IAuthService
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IUnitOfWork _unitOfWork;
     private readonly UserManager<ApplicationUser> _userManager;
-    private readonly ITokenService _tokenService;
-    private readonly IFirebaseService _firebaseService;
-    private readonly IEmailService _emailService;
+    //private readonly ITokenService _tokenService;
+    //private readonly IFirebaseService _firebaseService;
+    //private readonly IEmailService _emailService;
 
     private static readonly ConcurrentDictionary<string, (int Count, DateTime LastRequest)> ResetPasswordAttempts =
         new();
@@ -28,109 +28,122 @@ public class AuthService : IAuthService
     (
         RoleManager<IdentityRole> roleManager,
         IUnitOfWork unitOfWork,
-        UserManager<ApplicationUser> userManager,
-        ITokenService tokenService,
-        IFirebaseService firebaseService,
-        IEmailService emailService
+        UserManager<ApplicationUser> userManager
+        //ITokenService tokenService,
+        //IFirebaseService firebaseService,
+        //IEmailService emailService
     )
     {
         _roleManager = roleManager;
         _unitOfWork = unitOfWork;
         _userManager = userManager;
-        _tokenService = tokenService;
-        _firebaseService = firebaseService;
-        _emailService = emailService;
+        //_tokenService = tokenService;
+        //_firebaseService = firebaseService;
+        //_emailService = emailService;
     }
 
     public async Task<ResponseDto> SignUp(RegisterDto registerDto)
     {
-        // Kiểm tra email đã tồn tại
-        var isEmailExit = await _userManager.FindByEmailAsync(registerDto.Email);
-        if (isEmailExit is not null)
+        try
         {
-            return new ResponseDto()
+
+            // Kiểm tra email đã tồn tại
+            var isEmailExit = await _userManager.FindByEmailAsync(registerDto.Email);
+            if (isEmailExit is not null)
             {
-                Message = "Email is being used by another user",
-                Result = registerDto,
-                IsSuccess = false,
-                StatusCode = 400
+                return new ResponseDto()
+                {
+                    Message = "Email is being used by another user",
+                    Result = registerDto,
+                    IsSuccess = false,
+                    StatusCode = 400
+                };
+            }
+
+            // Kiểm tra số điện thoại đã tồn tại
+            var isPhoneNumberExit = await _userManager.Users
+                .AnyAsync(u => u.PhoneNumber == registerDto.PhoneNumber);
+            if (isPhoneNumberExit)
+            {
+                return new ResponseDto()
+                {
+                    Message = "Phone number is being used by another user",
+                    Result = registerDto,
+                    IsSuccess = false,
+                    StatusCode = 400
+                };
+            }
+
+            // Tạo đối tượng ApplicationUser mới
+            ApplicationUser newUser = new ApplicationUser()
+            {
+                Email = registerDto.Email,
+                UserName = registerDto.Email,
+                FullName = registerDto.FullName,
+                Country = registerDto.Country,
+                BirthDate = registerDto.BirthDate,
+                PhoneNumber = registerDto.PhoneNumber,
+                Cccd = registerDto.Cccd,
+                AvatarUrl = "",
+                LockoutEnabled = false
             };
-        }
 
-        // Kiểm tra số điện thoại đã tồn tại
-        var isPhoneNumberExit = await _userManager.Users
-            .AnyAsync(u => u.PhoneNumber == registerDto.PhoneNumber);
-        if (isPhoneNumberExit)
-        {
+            // Thêm người dùng mới vào database
+            var createUserResult = await _userManager.CreateAsync(newUser, registerDto.Password);
+
+            // Kiểm tra lỗi khi tạo
+            if (!createUserResult.Succeeded)
+            {
+                return new ResponseDto()
+                {
+                    Message = "Create user failed",
+                    IsSuccess = false,
+                    StatusCode = 400,
+                    Result = registerDto
+                };
+            }
+
+            var user = newUser;
+            var isRoleExist = await _roleManager.RoleExistsAsync(StaticUserRoles.Member);
+
+            if (!isRoleExist)
+            {
+                await _roleManager.CreateAsync(new IdentityRole(StaticUserRoles.Member));
+            }
+
+            // Thêm role "Customer" cho người dùng
+            var isRoleAdded = await _userManager.AddToRoleAsync(user, StaticUserRoles.Member);
+
+            if (!isRoleAdded.Succeeded)
+            {
+                return new ResponseDto()
+                {
+                    Message = "Error adding role",
+                    IsSuccess = false,
+                    StatusCode = 500,
+                    Result = registerDto
+                };
+            }
+
+            // Lưu thay đổi vào cơ sở dữ liệu
+            await _unitOfWork.SaveAsync();
             return new ResponseDto()
             {
-                Message = "Phone number is being used by another user",
-                Result = registerDto,
-                IsSuccess = false,
-                StatusCode = 400
-            };
-        }
-
-        // Tạo đối tượng ApplicationUser mới
-        ApplicationUser newUser = new ApplicationUser()
-        {
-            Email = registerDto.Email,
-            UserName = registerDto.Email,
-            FullName = registerDto.FullName,
-            Country = registerDto.Country,
-            BirthDate = registerDto.BirthDate,
-            PhoneNumber = registerDto.PhoneNumber,
-            Cccd = registerDto.Cccd,
-            AvatarUrl = "",
-            LockoutEnabled = false
-        };
-
-        // Thêm người dùng mới vào database
-        var createUserResult = await _userManager.CreateAsync(newUser, registerDto.Password);
-
-        // Kiểm tra lỗi khi tạo
-        if (!createUserResult.Succeeded)
-        {
-            return new ResponseDto()
-            {
-                Message = "Create user failed",
-                IsSuccess = false,
-                StatusCode = 400,
+                Message = "User created successfully",
+                IsSuccess = true,
+                StatusCode = 200,
                 Result = registerDto
             };
-        }
-
-        var user = newUser;
-        var isRoleExist = await _roleManager.RoleExistsAsync(StaticUserRoles.Member);
-
-        if (!isRoleExist)
-        {
-            await _roleManager.CreateAsync(new IdentityRole(StaticUserRoles.Member));
-        }
-
-        // Thêm role "Customer" cho người dùng
-        var isRoleAdded = await _userManager.AddToRoleAsync(user, StaticUserRoles.Member);
-
-        if (!isRoleAdded.Succeeded)
+        }catch (Exception e)
         {
             return new ResponseDto()
             {
-                Message = "Error adding role",
+                Message = e.Message,
                 IsSuccess = false,
                 StatusCode = 500,
                 Result = registerDto
             };
         }
-
-        // Lưu thay đổi vào cơ sở dữ liệu
-        await _unitOfWork.SaveAsync();
-        return new ResponseDto()
-        {
-            Message = "User created successfully",
-            IsSuccess = true,
-            StatusCode = 200,
-            Result = registerDto
-        };
     }
 
     public Task<ResponseDto> SignIn(SignDto signDto)
