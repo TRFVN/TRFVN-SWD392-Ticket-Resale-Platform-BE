@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Ticket_Hub.Models.Models
 {
-    public class ApplicationUser : IdentityUser<Guid>
+    public class ApplicationUser : IdentityUser
     {
         [StringLength(30)] public string? FullName { get; set; }
         public DateTime? BirthDate { get; set; }

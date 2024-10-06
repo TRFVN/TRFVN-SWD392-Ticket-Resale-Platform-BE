@@ -10,3 +10,16 @@ D:\SWD392\Ticket_Hub\Ticket_Hub.Models\obj\Debug\net8.0\Ticket_Hub.Models.dll
 D:\SWD392\Ticket_Hub\Ticket_Hub.Models\obj\Debug\net8.0\refint\Ticket_Hub.Models.dll
 D:\SWD392\Ticket_Hub\Ticket_Hub.Models\obj\Debug\net8.0\Ticket_Hub.Models.pdb
 D:\SWD392\Ticket_Hub\Ticket_Hub.Models\obj\Debug\net8.0\ref\Ticket_Hub.Models.dll
+D:\SWD392\SWD392-Last\Ticket_Hub\Ticket_Hub.Models\bin\Debug\net8.0\Ticket_Hub.Models.deps.json
+D:\SWD392\SWD392-Last\Ticket_Hub\Ticket_Hub.Models\bin\Debug\net8.0\Ticket_Hub.Models.dll
+D:\SWD392\SWD392-Last\Ticket_Hub\Ticket_Hub.Models\bin\Debug\net8.0\Ticket_Hub.Models.pdb
+D:\SWD392\SWD392-Last\Ticket_Hub\Ticket_Hub.Models\obj\Debug\net8.0\Ticket_Hub.Models.csproj.AssemblyReference.cache
+D:\SWD392\SWD392-Last\Ticket_Hub\Ticket_Hub.Models\obj\Debug\net8.0\Ticket_Hub.Models.GeneratedMSBuildEditorConfig.editorconfig
+D:\SWD392\SWD392-Last\Ticket_Hub\Ticket_Hub.Models\obj\Debug\net8.0\Ticket_Hub.Models.AssemblyInfoInputs.cache
+D:\SWD392\SWD392-Last\Ticket_Hub\Ticket_Hub.Models\obj\Debug\net8.0\Ticket_Hub.Models.AssemblyInfo.cs
+D:\SWD392\SWD392-Last\Ticket_Hub\Ticket_Hub.Models\obj\Debug\net8.0\Ticket_Hub.Models.csproj.CoreCompileInputs.cache
+D:\SWD392\SWD392-Last\Ticket_Hub\Ticket_Hub.Models\obj\Debug\net8.0\Ticket_Hub.Models.sourcelink.json
+D:\SWD392\SWD392-Last\Ticket_Hub\Ticket_Hub.Models\obj\Debug\net8.0\Ticket_Hub.Models.dll
+D:\SWD392\SWD392-Last\Ticket_Hub\Ticket_Hub.Models\obj\Debug\net8.0\refint\Ticket_Hub.Models.dll
+D:\SWD392\SWD392-Last\Ticket_Hub\Ticket_Hub.Models\obj\Debug\net8.0\Ticket_Hub.Models.pdb
+D:\SWD392\SWD392-Last\Ticket_Hub\Ticket_Hub.Models\obj\Debug\net8.0\ref\Ticket_Hub.Models.dll

@@ -1,7 +1,10 @@
+using Microsoft.AspNetCore.Identity;
 using Ticket_Hub.DataAccess.Context;
 using Ticket_Hub.Utility.Constants;
 using Microsoft.EntityFrameworkCore;
+using Ticket_Hub.API.Extension;
 using Ticket_Hub.API.Middleware;
+using Ticket_Hub.Models.Models;
 
 namespace Ticket_Hub.API
 {
@@ -22,13 +25,22 @@ namespace Ticket_Hub.API
                 options.UseSqlServer(
                     builder.Configuration.GetConnectionString(StaticConnectionString.SqldbDefaultConnection));
             });
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+            
+            // Register services life cycle
+            builder.Services.RegisterServices();
+            
+            // Configure Identity
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
             
-            app.UseMiddleware<ErrorHandlerMiddleware>();
+            //app.UseMiddleware<ErrorHandlerMiddleware>();
+            
             
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
