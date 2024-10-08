@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using Ticket_Hub.Models.DTO;
 using Microsoft.AspNetCore.Http;
+using Ticket_Hub.Models.DTO.Auth;
 
 namespace Ticket_Hub.Services.IServices;
 
