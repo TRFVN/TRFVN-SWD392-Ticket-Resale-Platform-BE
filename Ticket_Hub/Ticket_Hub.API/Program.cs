@@ -21,21 +21,23 @@ namespace Ticket_Hub.API
             // Add services to the container.
 
             builder.Services.AddControllers();
-            
-            
+
             // Configure DbContext with SQL Server
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlServer(
                     builder.Configuration.GetConnectionString(StaticConnectionString.SqldbDefaultConnection));
             });
-            
+
             // Register AutoMapper
             //builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
-            
+
             // Register services life cycle
             builder.Services.RegisterServices();
-            
+
+            // Register Firebase Service
+            builder.Services.AddFirebaseService();
+
             // Configure Identity
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -56,13 +58,14 @@ namespace Ticket_Hub.API
                     ValidateAudience = true,
                     ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
                     ValidAudience = builder.Configuration["JWT:ValidAudience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]))
+                    IssuerSigningKey =
+                        new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]))
                 };
             });
 
             builder.Services.AddAuthorization();
-            
-            
+
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(options =>
             {
@@ -93,12 +96,12 @@ namespace Ticket_Hub.API
             });
 
             var app = builder.Build();
-            
+
             app.UseMiddleware<ErrorHandlerMiddleware>();
-            
+
             // Apply database migrations
             ApplyMigration(app);
-            
+
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
@@ -115,6 +118,7 @@ namespace Ticket_Hub.API
 
             app.Run();
         }
+
         //auto update database
         private static void ApplyMigration(IApplicationBuilder app)
         {

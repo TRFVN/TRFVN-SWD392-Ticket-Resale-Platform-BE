@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Ticket_Hub.DataAccess.Seedings;
 using Ticket_Hub.Models;
 using Ticket_Hub.Models.Models;
 
@@ -28,5 +29,17 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Orders> Orders { get; set; }
     public DbSet<Transactions> Transactions { get; set; }
     public DbSet<Wallet> Wallets { get; set; }
+    public DbSet<EmailTemplate> EmailTemplates { get; set; }
     public DbSet<RefreshTokens> RefreshTokens { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        // Seed data
+        ApplicationDbContextSeed.SeedAdminAccount(modelBuilder);
+
+        //Seed Email Template
+        ApplicationDbContextSeed.SeedEmailTemplate(modelBuilder);
+    }
 }
