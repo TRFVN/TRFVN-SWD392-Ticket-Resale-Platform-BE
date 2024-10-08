@@ -5,15 +5,17 @@ using Ticket_Hub.Models.Models;
 
 namespace Ticket_Hub.DataAccess.Repository;
 
-public class UnitOfWork: IUnitOfWork
+public class UnitOfWork : IUnitOfWork
 {
     private readonly ApplicationDbContext _context;
     public IRefreshTokenRepository RefreshTokens { get; set; }
+    public IEmailTemplateRepository EmailTemplateRepository { get; set; }
 
     public UnitOfWork(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
     {
         _context = context;
         RefreshTokens = new RefreshTokenRepository(_context);
+        EmailTemplateRepository = new EmailTemplateRepository(_context);
     }
 
     public async Task<int> SaveAsync()
