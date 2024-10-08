@@ -2,7 +2,7 @@
 
 public class ErrorHandlerMiddleware
 {
-    /*private readonly RequestDelegate _next;
+    private readonly RequestDelegate _next;
 
     public ErrorHandlerMiddleware(RequestDelegate next)
     {
@@ -39,5 +39,5 @@ public class ErrorHandlerMiddleware
         {
             await context.Response.WriteAsync("Bad Request");
         }
-    }*/
+    }
 }

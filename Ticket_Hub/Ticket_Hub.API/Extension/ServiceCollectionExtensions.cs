@@ -1,4 +1,5 @@
-﻿using Ticket_Hub.DataAccess.IRepository;
+﻿using NuGet.Common;
+using Ticket_Hub.DataAccess.IRepository;
 using Ticket_Hub.DataAccess.Repository;
 using Ticket_Hub.Services.IServices;
 using Ticket_Hub.Services.Services;
@@ -11,6 +12,8 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<IFirebaseService, FirebaseService>();
         
         return services;
     }

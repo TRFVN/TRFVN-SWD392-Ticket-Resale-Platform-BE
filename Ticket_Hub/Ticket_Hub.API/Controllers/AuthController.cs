@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Ticket_Hub.Models.DTO;
+using Ticket_Hub.Models.DTO.Auth;
 using Ticket_Hub.Models.Models;
 using Ticket_Hub.Services.IServices;
 
@@ -51,6 +52,14 @@ namespace Ticket_Hub.API.Controllers
                     Message = e.Message
                 });
             }
+        }
+        
+        [HttpPost]
+        [Route("sign-in")]
+        public async Task<ActionResult<ResponseDto>> SignIn([FromBody] SignDto signDto)
+        {
+            var responseDto = await _authService.SignIn(signDto);
+            return StatusCode(responseDto.StatusCode, responseDto);
         }
     }
 }

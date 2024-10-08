@@ -1,42 +1,46 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Ticket_Hub.Utility.ValidationAttribute;
 
-namespace Ticket_Hub.Models.DTO;
+namespace Ticket_Hub.Models.DTO.Auth;
 
 public class RegisterDto
 {
-    [Required(ErrorMessage = "Email is required.")]
-    [EmailAddress(ErrorMessage = "Invalid email address format.")]
-    public string Email { get; set; }
+    [Required]
+    [DataType(DataType.EmailAddress)]
+    [EmailAddress]
+    public string Email { get; set; } = null!;
 
-    [Required(ErrorMessage = "Password is required.")]
+    [Required]
     [DataType(DataType.Password)]
-    [RegularExpression(@"^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?""{}|<>])(?=.*\d).{6,}$",
-        ErrorMessage =
-            "Password must be at least 6 characters long, at least 1 number and contain at least one uppercase letter, one special character, and one number.")]
-    public string Password { get; set; }
+    [Password]
+    public string Password { get; set; } = null!;
 
-    [Required(ErrorMessage = "ConfirmPassword is required.")]
+    [Required]
     [DataType(DataType.Password)]
-    [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+    [ConfirmPassword("Password")]
     [NotMapped]
-    public string ConfirmPassword { get; set; }
+    public string ConfirmPassword { get; set; } = null!;
+    
+    [Required]
+    [Cccd]
+    public string Cccd { get; set; } = null!;
 
-    [Required(ErrorMessage = "FullName is required")]
-    public string FullName { get; set; }
-
-    [Required(ErrorMessage = "Country is required")]
-    public string Country { get; set; }
-
-    [Required(ErrorMessage = "Cccd is required")]
-    public string Cccd { get; set; }
-
-    [Required(ErrorMessage = "Birth date is required.")]
-    [DataType(DataType.Date, ErrorMessage = "Invalid date format.")]
+    [Required]
+    [DataType(DataType.DateTime)]
     public DateTime BirthDate { get; set; }
 
-    [Required(ErrorMessage = "Phone number is required.")]
-    [Phone(ErrorMessage = "Provided phone number is not valid.")]
-    [DataType(DataType.PhoneNumber, ErrorMessage = "Provided phone number not valid.")]
-    public string PhoneNumber { get; set; }
+    [Required]
+    [DataType(DataType.PhoneNumber)]
+    [Phone]
+    public string PhoneNumber { get; set; } = null!;
+    
+    [Required]
+    public string FullName { get; set; } = null!;
+
+    [Required]
+    public string Country { get; set; } = null!;
+    
+    [Required]
+    public string Address { get; set; } = null!;
 }
