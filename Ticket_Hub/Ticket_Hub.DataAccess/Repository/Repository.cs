@@ -85,4 +85,14 @@ public class Repository<T> : IRepository<T> where T : class
     {
         _dbSet.RemoveRange(entities);
     }
+
+    public async Task<T?> GetByIdAsync(Guid id)
+    {
+        return await _dbSet.FindAsync(id);
+    }
+
+    public void Update(T entity)
+    {
+        _dbSet.Update(entity);
+    }
 }
