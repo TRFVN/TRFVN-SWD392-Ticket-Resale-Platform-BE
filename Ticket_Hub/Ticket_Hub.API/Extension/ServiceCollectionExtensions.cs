@@ -15,7 +15,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IFirebaseService, FirebaseService>();
         services.AddScoped<IEmailService, EmailService>();
-        
+        services.AddScoped<ITicketService, TicketService>();
         return services;
     }
 }

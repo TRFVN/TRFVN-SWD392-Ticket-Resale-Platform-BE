@@ -4,5 +4,10 @@ public interface IUnitOfWork
 {
     IRefreshTokenRepository RefreshTokens { get; }
     IEmailTemplateRepository EmailTemplateRepository { get; }
+    ITicketRepository TicketRepository { get; }
+    IEventRepository EventRepository { get; }
+    ILocationRepository LocationRepository { get; }
+    ICategoryRepository CategoryRepository { get; }
+    ISubCategoryRepository SubCategoryRepository { get; }
     Task<int> SaveAsync();
 }

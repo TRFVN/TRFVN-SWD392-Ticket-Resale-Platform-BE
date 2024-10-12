@@ -9,6 +9,8 @@ using Microsoft.OpenApi.Models;
 using Ticket_Hub.API.Extension;
 using Ticket_Hub.API.Middleware;
 using Ticket_Hub.Models.Models;
+using Ticket_Hub.Services.Mappings;
+using Ticket_Hub.Services.Services;
 
 namespace Ticket_Hub.API
 {
@@ -30,7 +32,7 @@ namespace Ticket_Hub.API
             });
 
             // Register AutoMapper
-            //builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
+            builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
             // Register services life cycle
             builder.Services.RegisterServices();
