@@ -14,9 +14,9 @@ public class EventRepository : Repository<Event>, IEventRepository
         _context = context;
     }
     
-    public void Update(Event location)
+    public void Update(Event events)
     {
-        _context.Events.Update(location);
+        _context.Events.Update(events);
     }
 
     public void UpdateRange(IEnumerable<Event> events)

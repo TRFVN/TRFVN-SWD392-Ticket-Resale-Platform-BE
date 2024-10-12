@@ -18,6 +18,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITicketService, TicketService>();
         services.AddScoped<ILocationService, LocationService>();
         services.AddScoped<IEventService, EventService>();
+        services.AddScoped<ICategoryService, CategoryService>();
         return services;
     }
 }

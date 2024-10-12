@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Ticket_Hub.Models.DTO.Category;
 using Ticket_Hub.Models.DTO.Event;
 using Ticket_Hub.Models.DTO.Location;
 using Ticket_Hub.Models.DTO.Ticket;
@@ -13,5 +14,6 @@ public class AutoMapperProfile : Profile
         CreateMap<Ticket, GetTicketDto>().ReverseMap();
         CreateMap<Location, GetLocationDto>().ReverseMap();
         CreateMap<Event, GetEventDto>().ReverseMap();
+        CreateMap<Category, GetCategoryDto>().ReverseMap();
     }
 }

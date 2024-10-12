@@ -24,7 +24,7 @@ public class UnitOfWork : IUnitOfWork
         TicketRepository = new TicketRepository(_context);
         EventRepository = new EventRepository(_context);
         LocationRepository = new LocationRepository(_context);
-        //CategoryRepository = new CategoryRepository(_context);
+        CategoryRepository = new CategoryRepository(_context);
         //SubCategoryRepository = new SubCategoryRepository(_context);
     }
 
