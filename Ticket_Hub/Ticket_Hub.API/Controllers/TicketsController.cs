@@ -16,15 +16,24 @@ namespace Ticket_Hub.API.Controllers
         {
             _ticketService = ticketService;
         }
-
+        
+        /// <summary>
+        /// Get all tickets
+        /// </summary>
+        /// <param name="filterOn"></param>
+        /// <param name="filterQuery"></param>
+        /// <param name="sortBy"></param>
+        /// <param name="pageNumber"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
         [HttpGet]
         public async Task<ActionResult<ResponseDto>> GetTickets
         (
             [FromQuery] string? filterOn,
             [FromQuery] string? filterQuery,
             [FromQuery] string? sortBy,
-            [FromQuery] int pageNumber = 0,
-            [FromQuery] int pageSize = 0
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10
         )
         {
             var responseDto = await _ticketService.GetTickets
@@ -38,9 +47,30 @@ namespace Ticket_Hub.API.Controllers
             );
             return StatusCode(responseDto.StatusCode, responseDto);
         }
-
+        
+        /// <summary>
+        /// Get ticket by ticketId
+        /// </summary>
+        /// <param name="ticketId"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("{ticketId}")]
+        public async Task<ActionResult<ResponseDto>> GetTicket
+        (
+            [FromRoute] Guid ticketId
+        )
+        {
+            var responseDto = await _ticketService.GetTicket(User, ticketId);
+            return StatusCode(responseDto.StatusCode, responseDto);
+        }
+        
+        /// <summary>
+        /// Create a new ticket
+        /// </summary>
+        /// <param name="createLevelDto"></param>
+        /// <returns></returns>
         [HttpPost]
-        public async Task<ActionResult<ResponseDto>> CreateLevel
+        public async Task<ActionResult<ResponseDto>> CreateTicket
         (
             [FromBody] CreateTicketDto createLevelDto
         )
@@ -48,9 +78,14 @@ namespace Ticket_Hub.API.Controllers
             var responseDto = await _ticketService.CreateTicket(User, createLevelDto);
             return StatusCode(responseDto.StatusCode, responseDto);
         }
-
+        
+        /// <summary>
+        /// Update ticket
+        /// </summary>
+        /// <param name="updateLevelDto"></param>
+        /// <returns></returns>
         [HttpPut]
-        public async Task<ActionResult<ResponseDto>> UpdateLevel
+        public async Task<ActionResult<ResponseDto>> UpdateTicket
         (
             [FromBody] UpdateTicketDto updateLevelDto
         )
@@ -59,8 +94,13 @@ namespace Ticket_Hub.API.Controllers
             return StatusCode(responseDto.StatusCode, responseDto);
         }
         
+        /// <summary>
+        /// Delete ticket
+        /// </summary>
+        /// <param name="ticketId"></param>
+        /// <returns></returns>
         [HttpDelete("{ticketId}")]
-        public async Task<ActionResult<ResponseDto>> DeleteLevel
+        public async Task<ActionResult<ResponseDto>> DeleteTicket
         (
             [FromRoute] Guid ticketId
         )

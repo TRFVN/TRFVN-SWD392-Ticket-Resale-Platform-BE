@@ -16,7 +16,7 @@ public interface ITicketService
         int pageSize = 0
     );
 
-    Task<ResponseDto> GetTicket(ClaimsPrincipal user, Guid levelId);
+    Task<ResponseDto> GetTicket(ClaimsPrincipal user, Guid ticketId);
     Task<ResponseDto> CreateTicket(ClaimsPrincipal user, CreateTicketDto createTicketDto);
     Task<ResponseDto> UpdateTicket(ClaimsPrincipal user, UpdateTicketDto updateTicketDto);
     Task<ResponseDto> DeleteTicket(ClaimsPrincipal user, Guid ticketId);
