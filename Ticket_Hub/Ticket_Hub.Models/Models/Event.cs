@@ -12,6 +12,6 @@ namespace Ticket_Hub.Models.Models
         public Guid LocationId { get; set; }
         [ForeignKey("LocationId")] public virtual Location Location { get; set; } = null!;
 
-        public virtual ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
+        public virtual ICollection<Ticket> Tickets { get; set; } = null!;
     }
 }
