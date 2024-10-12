@@ -1,8 +1,6 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Ticket_Hub.Models.DTO;
 using Ticket_Hub.Models.DTO.Event;
-using Ticket_Hub.Models.DTO.Location;
 using Ticket_Hub.Services.IServices;
 
 namespace Ticket_Hub.API.Controllers
@@ -24,8 +22,8 @@ namespace Ticket_Hub.API.Controllers
             [FromQuery] string? filterOn,
             [FromQuery] string? filterQuery,
             [FromQuery] string? sortBy,
-            [FromQuery] int pageNumber = 0,
-            [FromQuery] int pageSize = 0
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10
         )
         {
             var responseDto = await _eventService.GetEvents(User, filterOn, filterQuery, sortBy, pageNumber, pageSize);

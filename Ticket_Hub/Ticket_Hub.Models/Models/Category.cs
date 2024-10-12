@@ -6,5 +6,5 @@ public class Category : BaseEntity<string, string, int>
 {
     [Key] public Guid CategoryId { get; set; }
     [StringLength(50)] public string CategoryName { get; set; } = null!;
-    public virtual ICollection<SubCategory> SubCategories { get; set; } = new List<SubCategory>();
+    public virtual ICollection<SubCategory>? SubCategories { get; set; }
 }
