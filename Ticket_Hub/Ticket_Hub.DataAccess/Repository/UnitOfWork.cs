@@ -25,7 +25,7 @@ public class UnitOfWork : IUnitOfWork
         EventRepository = new EventRepository(_context);
         LocationRepository = new LocationRepository(_context);
         CategoryRepository = new CategoryRepository(_context);
-        //SubCategoryRepository = new SubCategoryRepository(_context);
+        SubCategoryRepository = new SubCategoryRepository(_context);
     }
 
     public async Task<int> SaveAsync()
