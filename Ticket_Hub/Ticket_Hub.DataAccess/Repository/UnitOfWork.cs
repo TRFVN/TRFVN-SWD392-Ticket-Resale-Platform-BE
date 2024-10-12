@@ -22,7 +22,7 @@ public class UnitOfWork : IUnitOfWork
         RefreshTokens = new RefreshTokenRepository(_context);
         EmailTemplateRepository = new EmailTemplateRepository(_context);
         TicketRepository = new TicketRepository(_context);
-        //EventRepository = new EventRepository(_context);
+        EventRepository = new EventRepository(_context);
         LocationRepository = new LocationRepository(_context);
         //CategoryRepository = new CategoryRepository(_context);
         //SubCategoryRepository = new SubCategoryRepository(_context);

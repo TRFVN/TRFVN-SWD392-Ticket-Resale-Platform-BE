@@ -1,7 +1,5 @@
 ﻿using System.Security.Claims;
 using AutoMapper;
-using Ticket_Hub.DataAccess.Context;
-using Ticket_Hub.DataAccess.Repository;
 using Ticket_Hub.Models.DTO;
 using Ticket_Hub.Models.DTO.Location;
 using Ticket_Hub.Models.Models;
@@ -20,34 +18,29 @@ public class LocationService : ILocationService
         _mapper = mapper;
     }
 
-    public Task<ResponseDto> GetLocations
+    public async Task<ResponseDto> GetLocations
     (
         ClaimsPrincipal user,
         string? filterOn,
         string? filterQuery,
         string? sortBy,
-        int pageNumber = 0,
-        int pageSize = 0
+        int pageNumber = 1,
+        int pageSize = 10
     )
     {
-        IEnumerable<Location> locations = null!;
-
-        // Lấy tất cả các vé có trong database
-        locations = _unitOfWork.LocationRepository.GetAllAsync().GetAwaiter()
-            .GetResult()
-            .ToList();
-
+        // Lấy tất cả các vị trí từ cơ sở dữ liệu
+        var locations = await _unitOfWork.LocationRepository.GetAllAsync();
 
         // Kiểm tra nếu danh sách location là null hoặc rỗng
-        if (!locations.Any())
+        if (locations == null || !locations.Any())
         {
-            return Task.FromResult(new ResponseDto()
+            return new ResponseDto()
             {
-                Message = "There are no location",
+                Message = "There are no locations",
                 IsSuccess = true,
                 StatusCode = 404,
                 Result = null
-            });
+            };
         }
 
         var listLocations = locations.ToList();
@@ -58,61 +51,54 @@ public class LocationService : ILocationService
             switch (filterOn.Trim().ToLower())
             {
                 case "city":
-                    listLocations = listLocations.Where(x =>
-                        x.City.Contains(filterQuery, StringComparison.CurrentCultureIgnoreCase)).ToList();
+                    listLocations = listLocations
+                        .Where(x => x.City.Contains(filterQuery, StringComparison.CurrentCultureIgnoreCase))
+                        .ToList();
                     break;
                 case "district":
-                    listLocations = listLocations.Where(x =>
-                        x.District.Contains(filterQuery, StringComparison.CurrentCultureIgnoreCase)).ToList();
+                    listLocations = listLocations
+                        .Where(x => x.District.Contains(filterQuery, StringComparison.CurrentCultureIgnoreCase))
+                        .ToList();
                     break;
                 case "street":
-                    listLocations = listLocations.Where(x =>
-                        x.Street.Contains(filterQuery, StringComparison.CurrentCultureIgnoreCase)).ToList();
-                    break;
-                default:
+                    listLocations = listLocations
+                        .Where(x => x.Street.Contains(filterQuery, StringComparison.CurrentCultureIgnoreCase))
+                        .ToList();
                     break;
             }
         }
 
-        // Sort Query (có thể truyền hướng sắp xếp trong `sortBy`)
+        // Thực hiện sắp xếp
         if (!string.IsNullOrEmpty(sortBy))
         {
-            var sortParams = sortBy.Trim().ToLower().Split('_'); // Chia chuỗi sortBy theo ký tự '_'
-            var sortField = sortParams[0]; // Tên cột cần sắp xếp
-            var sortDirection = sortParams.Length > 1 ? sortParams[1] : "asc"; // Lấy hướng sắp xếp
+            var sortParams = sortBy.Trim().ToLower().Split('_');
+            var sortField = sortParams[0];
+            var sortDirection = sortParams.Length > 1 && sortParams[1] == "desc" ? "desc" : "asc";
 
             switch (sortField)
             {
                 case "city":
-                    listLocations = sortDirection == "desc"
-                        ? listLocations.OrderByDescending(x => x.City).ToList()
-                        : listLocations.OrderBy(x => x.City).ToList();
+                    locations = sortDirection == "desc"
+                        ? listLocations.OrderByDescending(x => x.City)
+                        : listLocations.OrderBy(x => x.City);
                     break;
-
                 case "district":
-                    listLocations = sortDirection == "desc"
-                        ? listLocations.OrderByDescending(x => x.District).ToList()
-                        : listLocations.OrderBy(x => x.District).ToList();
+                    locations = sortDirection == "desc"
+                        ? listLocations.OrderByDescending(x => x.District)
+                        : listLocations.OrderBy(x => x.District);
                     break;
-
                 case "street":
-                    listLocations = sortDirection == "desc"
-                        ? listLocations.OrderByDescending(x => x.Street).ToList()
-                        : listLocations.OrderBy(x => x.Street).ToList();
-                    break;
-
-                default:
-                    // Sắp xếp theo mặc định nếu không có cột phù hợp
-                    listLocations = listLocations.OrderBy(x => x.City).ToList();
+                    locations = sortDirection == "desc"
+                        ? listLocations.OrderByDescending(x => x.Street)
+                        : listLocations.OrderBy(x => x.Street);
                     break;
             }
         }
         else
         {
-            // Sắp xếp mặc định nếu không có `sortBy`
-            listLocations = listLocations.OrderBy(x => x.City).ToList();
+            // Sắp xếp mặc định theo city
+            locations = listLocations.OrderBy(x => x.City);
         }
-
 
         // Phân trang
         if (pageNumber > 0 && pageSize > 0)
@@ -121,23 +107,24 @@ public class LocationService : ILocationService
             listLocations = listLocations.Skip(skipResult).Take(pageSize).ToList();
         }
 
-        // Chuyển đổi danh sách bình luận thành DTO
-        var locationDto = listLocations.Select(locationsID => new GetLocationDto()
+        // Chuyển đổi danh sách vị trí thành DTO
+        var locationDto = listLocations.Select(location => new GetLocationDto()
         {
-            LocationId = locationsID.LocationId,
-            City = locationsID.City,
-            District = locationsID.District,
-            Street = locationsID.Street
+            LocationId = location.LocationId,
+            City = location.City,
+            District = location.District,
+            Street = location.Street
         }).ToList();
 
-        return Task.FromResult(new ResponseDto()
+        return new ResponseDto()
         {
-            Message = "Get Tickets successfully",
+            Message = "Get Locations successfully",
             IsSuccess = true,
-            StatusCode = 201,
+            StatusCode = 200,
             Result = locationDto
-        });
+        };
     }
+
 
     public async Task<ResponseDto> GetLocation(ClaimsPrincipal user, Guid locationId)
     {
@@ -157,7 +144,7 @@ public class LocationService : ILocationService
 
         return new ResponseDto
         {
-            Message = "Location found",
+            Message = "Location found successfully",
             Result = locationDto,
             IsSuccess = true,
             StatusCode = 200
@@ -193,12 +180,13 @@ public class LocationService : ILocationService
     public async Task<ResponseDto> UpdateLocation(ClaimsPrincipal user, UpdateLocationDto updateLocationDto)
     {
         //Check if location exists
-        var location = await _unitOfWork.LocationRepository.GetAsync(x => x.LocationId == updateLocationDto.LocationId);
+        var location =
+            await _unitOfWork.LocationRepository.GetAsync(x => x.LocationId == updateLocationDto.LocationId);
         if (location == null)
         {
             return new ResponseDto
             {
-                Message = "Ticket not found",
+                Message = "Location not found",
                 Result = null,
                 IsSuccess = false,
                 StatusCode = 404

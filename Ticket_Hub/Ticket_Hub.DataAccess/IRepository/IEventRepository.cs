@@ -1,6 +1,10 @@
-﻿namespace Ticket_Hub.DataAccess.IRepository;
+﻿using Ticket_Hub.Models.Models;
 
-public interface IEventRepository
+namespace Ticket_Hub.DataAccess.IRepository;
+
+public interface IEventRepository : IRepository<Event>
 {
-    
+    void Update(Event location);
+    void UpdateRange(IEnumerable<Event> events);
+    Task<Event> GetById(Guid eventId);
 }

@@ -17,6 +17,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<ITicketService, TicketService>();
         services.AddScoped<ILocationService, LocationService>();
+        services.AddScoped<IEventService, EventService>();
         return services;
     }
 }
