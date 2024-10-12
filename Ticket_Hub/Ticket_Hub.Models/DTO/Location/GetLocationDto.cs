@@ -1,10 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Ticket_Hub.Models.Models;
 
-namespace Ticket_Hub.Models.Models
-{
-    public class Location : BaseEntity<string, string , int>
+    public class GetLocationDto : BaseEntity<string, string , int>
     {
-        [Key]
         public Guid LocationId { get; set; }
         [StringLength(50)] 
         public string City { get; set; } = null!;
@@ -14,4 +12,3 @@ namespace Ticket_Hub.Models.Models
         public string Street { get; set; } = null!;
 
     }
-}

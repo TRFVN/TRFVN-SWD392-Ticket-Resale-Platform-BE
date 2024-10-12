@@ -147,9 +147,30 @@ public class TicketService : ITicketService
         });
     }
 
-    public Task<ResponseDto> GetTicket(ClaimsPrincipal user, Guid levelId)
+    public async Task<ResponseDto> GetTicket(ClaimsPrincipal user, Guid ticketId)
     {
-        throw new NotImplementedException();
+        var ticketById  = await _unitOfWork.TicketRepository.GeTicketById(ticketId);
+        if (ticketById == null)
+        {
+            return new ResponseDto
+            {
+                Message = "Ticket not found",
+                Result = null,
+                IsSuccess = false,
+                StatusCode = 404
+            };
+        }
+
+        GetTicketDto ticketDto;
+        ticketDto = _mapper.Map<GetTicketDto>(ticketById);
+        
+        return new ResponseDto
+        {
+            Message = "Get Ticket successfully",
+            Result = ticketDto,
+            IsSuccess = true,
+            StatusCode = 201
+        };
     }
 
     public async Task<ResponseDto> CreateTicket(ClaimsPrincipal user, CreateTicketDto createTicketDto)

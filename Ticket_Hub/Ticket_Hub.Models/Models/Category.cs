@@ -2,7 +2,7 @@
 
 namespace Ticket_Hub.Models.Models;
 
-public class Category
+public class Category : BaseEntity<string, string, int>
 {
     [Key] public Guid CategoryId { get; set; }
     [StringLength(50)] public string CategoryName { get; set; } = null!;

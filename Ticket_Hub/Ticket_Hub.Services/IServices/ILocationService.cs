@@ -17,8 +17,8 @@ public interface ILocationService
         int pageSize = 0
     );
 
-    Task<ResponseDto> GetLocation(ClaimsPrincipal user, Guid levelId);
-    Task<ResponseDto> CreateTLocation(ClaimsPrincipal user, CreateLocationDto createLocationDto);
+    Task<ResponseDto> GetLocation(ClaimsPrincipal user, Guid locationId);
+    Task<ResponseDto> CreateLocation(ClaimsPrincipal user, CreateLocationDto createLocationDto);
     Task<ResponseDto> UpdateLocation(ClaimsPrincipal user, UpdateLocationDto updateLocationDto);
-    Task<ResponseDto> DeleteLocation(ClaimsPrincipal user, Guid ticketId);
+    Task<ResponseDto> DeleteLocation(ClaimsPrincipal user, Guid locationId);
 }

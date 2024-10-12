@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Ticket_Hub.Models.Models;
 
-public class SubCategory
+public class SubCategory : BaseEntity<string, string, int>
 {
     [Key]
     public Guid SubCategoryId { get; set; }

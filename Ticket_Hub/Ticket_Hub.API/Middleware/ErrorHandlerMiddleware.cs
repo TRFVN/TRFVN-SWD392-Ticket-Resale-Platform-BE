@@ -1,4 +1,6 @@
-﻿namespace Ticket_Hub.API.Middleware;
+﻿using Ticket_Hub.Models.DTO;
+
+namespace Ticket_Hub.API.Middleware;
 
 public class ErrorHandlerMiddleware
 {
@@ -18,26 +20,49 @@ public class ErrorHandlerMiddleware
         }
         catch (UnauthorizedAccessException)
         {
-            // Trả về lỗi 401 nếu xảy ra UnauthorizedAccessException
             context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-            await context.Response.WriteAsync("Unauthorized");
+            var response = new ResponseDto
+            {
+                IsSuccess = false,
+                StatusCode = StatusCodes.Status401Unauthorized,
+                Message = "Unauthorized"
+            };
+            await context.Response.WriteAsJsonAsync(response);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // Nếu là lỗi khác, trả về lỗi 500
+            // Nếu là lỗi khác, trả về lỗi 500 với thông báo lỗi chi tiết
             context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-            await context.Response.WriteAsync("An unexpected error occurred. Please try again later.");
-            // Log lỗi ra (nếu cần)
+            var response = new ResponseDto
+            {
+                IsSuccess = false,
+                StatusCode = StatusCodes.Status500InternalServerError,
+                Message = ex.Message // Hoặc bạn có thể thêm thông tin khác từ exception nếu cần
+            };
+            await context.Response.WriteAsJsonAsync(response);
+            // Log lỗi nếu cần
         }
 
         // Kiểm tra các mã lỗi 403 và 400
         if (context.Response.StatusCode == StatusCodes.Status403Forbidden)
         {
-            await context.Response.WriteAsync("Forbidden");
+            var response = new ResponseDto
+            {
+                IsSuccess = false,
+                StatusCode = StatusCodes.Status403Forbidden,
+                Message = "Forbidden"
+            };
+            await context.Response.WriteAsJsonAsync(response);
         }
         else if (context.Response.StatusCode == StatusCodes.Status400BadRequest)
         {
-            await context.Response.WriteAsync("Bad Request");
+            var response = new ResponseDto
+            {
+                IsSuccess = false,
+                StatusCode = StatusCodes.Status400BadRequest,
+                Message = "Bad Request"
+            };
+            await context.Response.WriteAsJsonAsync(response);
         }
     }
 }

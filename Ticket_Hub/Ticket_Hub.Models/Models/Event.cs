@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Ticket_Hub.Models.Models
 {
-    public class Event
+    public class Event : BaseEntity<string, string, int>
     {
         [Key] public Guid EventId { get; set; }
         [StringLength(100)] public string EventName { get; set; } = null!;
