@@ -21,7 +21,7 @@ public class TicketService : ITicketService
         _userManager = userManager;
     }
 
-    public Task<ResponseDto> GetTickets
+    public async Task<ResponseDto> GetTickets
     (
         ClaimsPrincipal user,
         string? filterOn,
@@ -31,24 +31,19 @@ public class TicketService : ITicketService
         int pageSize = 0
     )
     {
-        IEnumerable<Ticket> tickets = null!;
-
         // Lấy tất cả các vé có trong database
-        tickets = _unitOfWork.TicketRepository.GetAllAsync().GetAwaiter()
-            .GetResult()
-            .ToList();
+        var tickets = await _unitOfWork.TicketRepository.GetAllAsync();
 
-
-        // Kiểm tra nếu danh sách bình luận là null hoặc rỗng
+        // Kiểm tra nếu danh sách tickets là null hoặc rỗng
         if (!tickets.Any())
         {
-            return Task.FromResult(new ResponseDto()
+            return new ResponseDto()
             {
-                Message = "There are no ticket",
+                Message = "There are no tickets",
                 IsSuccess = true,
                 StatusCode = 404,
                 Result = null
-            });
+            };
         }
 
         var listTickets = tickets.ToList();
@@ -62,6 +57,7 @@ public class TicketService : ITicketService
                     listTickets = listTickets.Where(x =>
                         x.TicketName.Contains(filterQuery, StringComparison.CurrentCultureIgnoreCase)).ToList();
                     break;
+
                 case "ticketprice":
                     if (double.TryParse(filterQuery, out double price))
                     {
@@ -69,24 +65,21 @@ public class TicketService : ITicketService
                     }
 
                     break;
+
                 case "ticketquantity":
-                    // Chuyển filterQuery sang dạng số nguyên trước khi so sánh TicketQuantity
                     if (int.TryParse(filterQuery, out int quantity))
                     {
                         listTickets = listTickets.Where(x => x.TicketQuantity == quantity).ToList();
                     }
 
                     break;
+
                 case "ticketdescription":
                     listTickets = listTickets.Where(x =>
                         x.TicketDescription.Contains(filterQuery, StringComparison.CurrentCultureIgnoreCase)).ToList();
                     break;
-                default:
-                    if (double.TryParse(filterQuery, out double prices))
-                    {
-                        listTickets = listTickets.Where(x => x.TicketPrice == prices).ToList();
-                    }
 
+                default:
                     break;
             }
         }
@@ -105,7 +98,7 @@ public class TicketService : ITicketService
                     break;
 
                 default:
-                    // Nếu không có giá trị `sortBy` hợp lệ, sắp xếp theo `CreatedTime` giảm dần
+                    // Nếu không có giá trị `sortBy` hợp lệ, sắp xếp theo `TicketPrice` giảm dần
                     listTickets = listTickets.OrderByDescending(x => x.TicketPrice).ToList();
                     break;
             }
@@ -123,7 +116,7 @@ public class TicketService : ITicketService
             listTickets = listTickets.Skip(skipResult).Take(pageSize).ToList();
         }
 
-        // Chuyển đổi danh sách bình luận thành DTO
+        // Chuyển đổi danh sách vé thành DTO
         var ticketsDto = listTickets.Select(ticket => new GetTicketDto()
         {
             TicketId = ticket.TicketId,
@@ -138,18 +131,18 @@ public class TicketService : ITicketService
             Status = ticket.Status
         }).ToList();
 
-        return Task.FromResult(new ResponseDto()
+        return new ResponseDto()
         {
             Message = "Get Tickets successfully",
             IsSuccess = true,
-            StatusCode = 201,
+            StatusCode = 200,
             Result = ticketsDto
-        });
+        };
     }
 
     public async Task<ResponseDto> GetTicket(ClaimsPrincipal user, Guid ticketId)
     {
-        var ticketById  = await _unitOfWork.TicketRepository.GeTicketById(ticketId);
+        var ticketById = await _unitOfWork.TicketRepository.GeTicketById(ticketId);
         if (ticketById == null)
         {
             return new ResponseDto
@@ -163,7 +156,7 @@ public class TicketService : ITicketService
 
         GetTicketDto ticketDto;
         ticketDto = _mapper.Map<GetTicketDto>(ticketById);
-        
+
         return new ResponseDto
         {
             Message = "Get Ticket successfully",
@@ -209,7 +202,7 @@ public class TicketService : ITicketService
             Message = "Ticket created successfully",
             IsSuccess = true,
             StatusCode = 201,
-            Result = null
+            Result = ticket
         };
     }
 
