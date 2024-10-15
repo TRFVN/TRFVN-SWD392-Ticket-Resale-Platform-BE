@@ -15,6 +15,7 @@ public class UnitOfWork : IUnitOfWork
     public ILocationRepository LocationRepository { get; set; }
     public ICategoryRepository CategoryRepository { get; set; }
     public ISubCategoryRepository SubCategoryRepository { get; set; }
+    public IMemberRatingRepository MemberRatingRepository { get; set; }
 
     public UnitOfWork(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
     {
@@ -26,6 +27,7 @@ public class UnitOfWork : IUnitOfWork
         LocationRepository = new LocationRepository(_context);
         CategoryRepository = new CategoryRepository(_context);
         SubCategoryRepository = new SubCategoryRepository(_context);
+        MemberRatingRepository = new MemberRatingRepository(_context);
     }
 
     public async Task<int> SaveAsync()

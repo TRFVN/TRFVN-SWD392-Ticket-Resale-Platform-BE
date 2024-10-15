@@ -9,5 +9,6 @@ public interface IUnitOfWork
     ILocationRepository LocationRepository { get; }
     ICategoryRepository CategoryRepository { get; }
     ISubCategoryRepository SubCategoryRepository { get; }
+    IMemberRatingRepository MemberRatingRepository { get; }
     Task<int> SaveAsync();
 }
