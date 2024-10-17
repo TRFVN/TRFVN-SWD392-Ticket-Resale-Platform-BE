@@ -10,7 +10,7 @@ namespace Ticket_Hub.Models.DTO.MemberRating
     public class GetMemberRatingDto
     {
         public Guid MemberRatingId { get; set; }
-        public string UserId { get; set; }
+        public required string UserId { get; set; }
         public int Rate { get; set; }
     }
 }

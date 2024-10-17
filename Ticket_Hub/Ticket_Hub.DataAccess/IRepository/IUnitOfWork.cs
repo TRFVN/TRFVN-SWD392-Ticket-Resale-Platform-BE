@@ -10,5 +10,7 @@ public interface IUnitOfWork
     ICategoryRepository CategoryRepository { get; }
     ISubCategoryRepository SubCategoryRepository { get; }
     IMemberRatingRepository MemberRatingRepository { get; }
+    IFeedbackRepository FeedbackRepository { get; }
+    IFavouriteRepository FavoriteRepository { get; }
     Task<int> SaveAsync();
 }
