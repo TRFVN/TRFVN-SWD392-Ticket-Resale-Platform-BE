@@ -105,7 +105,7 @@ namespace Ticket_Hub.API
             app.UseMiddleware<ErrorHandlerMiddleware>();
 
             // Apply database migrations
-            ApplyMigration(app);
+            //ApplyMigration(app);
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
