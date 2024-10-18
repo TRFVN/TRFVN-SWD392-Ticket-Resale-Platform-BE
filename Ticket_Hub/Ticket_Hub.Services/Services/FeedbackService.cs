@@ -9,6 +9,7 @@ using Ticket_Hub.Models.DTO.Feedback;
 using Ticket_Hub.Models.DTO;
 using Ticket_Hub.Services.IServices;
 using Ticket_Hub.Models.Models;
+using Ticket_Hub.Models.DTO.MemberRating;
 
 namespace Ticket_Hub.Services.Services
 {
@@ -87,7 +88,7 @@ namespace Ticket_Hub.Services.Services
         {
             var newFeedback = new Feedback
             {
-                UserId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value,
+                UserId = createFeedbackDto.UserId,
                 Content = createFeedbackDto.Content,
                 CreatedBy = user.Identity.Name,
                 CreatedTime = DateTime.UtcNow,

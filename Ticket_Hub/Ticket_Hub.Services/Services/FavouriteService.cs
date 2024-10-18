@@ -29,7 +29,7 @@ namespace Ticket_Hub.Services.Services
         {
             var newFavourite = new Favourite
             {
-                UserId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value,
+                UserId = createFavouriteDto.UserId,
                 TicketId = createFavouriteDto.TicketId,
                 CreatedBy = user.Identity.Name,
                 CreatedTime = DateTime.UtcNow,

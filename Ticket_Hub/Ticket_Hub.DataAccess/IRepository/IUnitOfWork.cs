@@ -12,5 +12,6 @@ public interface IUnitOfWork
     IMemberRatingRepository MemberRatingRepository { get; }
     IFeedbackRepository FeedbackRepository { get; }
     IFavouriteRepository FavoriteRepository { get; }
+    IMessageRepository MessageRepository { get; }
     Task<int> SaveAsync();
 }

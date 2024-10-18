@@ -5,6 +5,7 @@ using Ticket_Hub.Models.DTO.Favourite;
 using Ticket_Hub.Models.DTO.Feedback;
 using Ticket_Hub.Models.DTO.Location;
 using Ticket_Hub.Models.DTO.MemberRating;
+using Ticket_Hub.Models.DTO.Message;
 using Ticket_Hub.Models.DTO.SubCategory;
 using Ticket_Hub.Models.DTO.Ticket;
 using Ticket_Hub.Models.Models;
@@ -23,5 +24,6 @@ public class AutoMapperProfile : Profile
         CreateMap<MemberRating, GetMemberRatingDto>().ReverseMap();
         CreateMap<Feedback, GetFeedbackDto>().ReverseMap();
         CreateMap<Favourite, GetFavouriteDto>().ReverseMap();
+        CreateMap<Message, GetMessageDto>().ReverseMap();
     }
 }
