@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Ticket_Hub.DataAccess.Context;
@@ -11,6 +11,7 @@ using Ticket_Hub.API.Middleware;
 using Ticket_Hub.Models.Models;
 using Ticket_Hub.Services.Mappings;
 using Ticket_Hub.Services.Services;
+using Ticket_Hub.Models.DTO.Hubs;
 
 namespace Ticket_Hub.API
 {
@@ -67,6 +68,8 @@ namespace Ticket_Hub.API
 
             builder.Services.AddAuthorization();
 
+            // Thêm dịch vụ SignalR
+            builder.Services.AddSignalR();
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(options =>
@@ -118,6 +121,8 @@ namespace Ticket_Hub.API
             app.UseAuthentication();
             app.UseAuthorization();
 
+            // Thêm cấu hình SignalR endpoint
+            app.MapHub<NotificationHub>("/notificationHub");
 
             app.MapControllers();
 

@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Ticket_Hub.Models.Models
 {
+
     public class Favourite : BaseEntity<string, string, int>
     {
         [Key] public Guid FavouriteId { get; set; }

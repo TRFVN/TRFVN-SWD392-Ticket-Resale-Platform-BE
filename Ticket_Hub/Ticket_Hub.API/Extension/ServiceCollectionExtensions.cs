@@ -20,6 +20,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IEventService, EventService>();
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<ISubCategoryService, SubCategoryService>();
+        services.AddScoped<IMemberRatingService, MemberRatingService>();
+        services.AddScoped<IFeedbackService, FeedbackService>();
+        services.AddScoped<IFavouriteService, FavouriteService>();
+        services.AddScoped<IMessageService, MessageService>();
         return services;
     }
 }
