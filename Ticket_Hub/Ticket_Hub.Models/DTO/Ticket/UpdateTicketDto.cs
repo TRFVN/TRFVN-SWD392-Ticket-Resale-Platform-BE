@@ -1,4 +1,6 @@
-﻿namespace Ticket_Hub.Models.DTO.Ticket;
+﻿using Ticket_Hub.Models.Models;
+
+namespace Ticket_Hub.Models.DTO.Ticket;
 
 public class UpdateTicketDto
 {
@@ -10,5 +12,7 @@ public class UpdateTicketDto
     public double TicketPrice { get; set; }
     public int TicketQuantity { get; set; }
     public string SerialNumber { get; set; } = null!;
-    public int Status { get; set; }
+    public TicketStatus Status { get; set; }
+    public bool IsVisible { get; set; } = true;
+    
 }

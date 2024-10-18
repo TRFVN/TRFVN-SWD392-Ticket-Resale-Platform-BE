@@ -141,7 +141,7 @@ public class AuthService : IAuthService
         {
             Message = "User created successfully",
             IsSuccess = true,
-            StatusCode = 200,
+            StatusCode = 201,
             Result = registerDto
         };
     }
