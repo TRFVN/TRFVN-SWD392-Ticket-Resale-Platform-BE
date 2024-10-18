@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Ticket_Hub.Models.Models;
 
 namespace Ticket_Hub.Models.DTO.Ticket;
 
@@ -13,5 +14,6 @@ public class GetTicketDto
     public int TicketQuantity { get; set; }
     public string TicketDescription { get; set; } = null!;
     public string SerialNumber { get; set; } = null!;
-    public int Status { get; set; }
+    public TicketStatus Status { get; set; }
+    public bool IsVisible { get; set; }
 }

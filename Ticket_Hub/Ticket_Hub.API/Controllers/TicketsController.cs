@@ -108,5 +108,22 @@ namespace Ticket_Hub.API.Controllers
             var responseDto = await _ticketService.DeleteTicket(User, ticketId);
             return StatusCode(responseDto.StatusCode, responseDto);
         }
+        
+        [HttpPost("upload-image/{ticketId}")]
+        public async Task<ActionResult<ResponseDto>> UploadCourseVersionBackground
+        (
+            [FromRoute] Guid TicketId,
+            UploadTicketImgDto uploadTicketImgDto
+        )
+        {
+            var responseDto =
+                await _ticketService.UploadTicketImage
+                (
+                    User,
+                    TicketId,
+                    uploadTicketImgDto
+                );
+            return StatusCode(responseDto.StatusCode, responseDto);
+        }
     }
 }

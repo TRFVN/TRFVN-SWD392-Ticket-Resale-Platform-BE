@@ -33,5 +33,10 @@ namespace Ticket_Hub.DataAccess.Repository
         {
             _context.Tickets.UpdateRange(tickets);
         }
+        
+        public async Task<int> SaveAsync()
+        {
+            return await _context.SaveChangesAsync();
+        }
     }
 }
