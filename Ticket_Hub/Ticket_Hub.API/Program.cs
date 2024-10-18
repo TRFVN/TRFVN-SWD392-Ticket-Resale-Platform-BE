@@ -111,6 +111,9 @@ namespace Ticket_Hub.API
                 app.UseSwaggerUI();
             }
 
+            app.UseSwagger();
+            app.UseSwaggerUI();
+
             app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseAuthorization();

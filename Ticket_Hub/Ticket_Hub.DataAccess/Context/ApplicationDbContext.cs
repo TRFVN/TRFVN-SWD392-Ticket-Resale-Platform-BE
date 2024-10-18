@@ -20,7 +20,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Feedback> Feedbacks { get; set; }
     public DbSet<Message> Messages { get; set; }
     public DbSet<Ticket> Tickets { get; set; }
-    public DbSet<TicketDetail> TicketDetails { get; set; }
     public DbSet<Category> Categories { get; set; }
     public DbSet<SubCategory> SubCategories { get; set; }
     public DbSet<Event> Events { get; set; }

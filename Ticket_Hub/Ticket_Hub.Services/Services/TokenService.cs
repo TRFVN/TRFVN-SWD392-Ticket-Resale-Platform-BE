@@ -170,7 +170,5 @@ public class TokenService : ITokenService
         await _unitOfWork.RefreshTokens.RemoveTokenAsync(existingToken);
         await _unitOfWork.SaveAsync();
         return true;
-
-        return false;
     }
 }
