@@ -2,6 +2,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
 using Ticket_Hub.Models.DTO;
 using Ticket_Hub.Models.DTO.Ticket;
 using Ticket_Hub.Models.Models;
@@ -293,23 +294,24 @@ public class TicketService : ITicketService
         };
     }
 
-    public async Task<ResponseDto> UploadTicketImage(ClaimsPrincipal user, Guid ticketId, UploadTicketImgDto uploadTicketImgDto)
+    public async Task<ResponseDto> UploadTicketImage
+    (
+        ClaimsPrincipal user,
+        Guid ticketId,
+        UploadTicketImgDto uploadTicketImgDto
+    )
     {
-        var userId = user.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
-
-        if (string.IsNullOrEmpty(userId))
+        if (uploadTicketImgDto.File == null)
         {
             return new ResponseDto()
             {
-                Message = "Not authenticated!",
-                Result = null,
                 IsSuccess = false,
-                StatusCode = 401
+                StatusCode = 400,
+                Message = "No file uploaded."
             };
         }
 
         var ticket = await _unitOfWork.TicketRepository.GetAsync(t => t.TicketId == ticketId);
-
         if (ticket == null)
         {
             return new ResponseDto()
@@ -320,9 +322,9 @@ public class TicketService : ITicketService
                 StatusCode = 404 // Not Found
             };
         }
-        var filePath = $"Ticket/{ticketId}/Image";
-        var responseDto = await _firebaseService.UploadImage(uploadTicketImgDto.File, filePath);
 
+        //var filePath = $"Ticket/{ticketId}/Images";
+        var responseDto = await _firebaseService.UploadImage(uploadTicketImgDto.File, StaticFirebaseFolders.TicketImages);
         if (!responseDto.IsSuccess)
         {
             return new ResponseDto()
@@ -336,18 +338,7 @@ public class TicketService : ITicketService
 
         ticket.TicketImage = responseDto.Result?.ToString();
         _unitOfWork.TicketRepository.Update(ticket);
-        var updateResult = await _unitOfWork.SaveAsync();
-
-        if (updateResult <= 0)
-        {
-            return new ResponseDto()
-            {
-                Message = "Save ticket image failed!",
-                Result = null,
-                IsSuccess = false,
-                StatusCode = 500 // Internal Server Error
-            };
-        }
+        await _unitOfWork.SaveAsync();
 
         return new ResponseDto()
         {
@@ -358,8 +349,15 @@ public class TicketService : ITicketService
         };
     }
 
-    public Task<MemoryStream> GetTicketImage(Guid ticketId, ClaimsPrincipal user)
+    public async Task<MemoryStream> GetTicketImage(ClaimsPrincipal user, Guid ticketId)
     {
-        throw new NotImplementedException();
+        var ticket = await _unitOfWork.TicketRepository.GetAsync(t => t.TicketId == ticketId);
+        if (ticket != null && ticket.TicketImage.IsNullOrEmpty())
+        {
+            return null;
+        }
+
+        var image = await _firebaseService.GetImage(ticket.TicketImage);
+        return image;
     }
 }
