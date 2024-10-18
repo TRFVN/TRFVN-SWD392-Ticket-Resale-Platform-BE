@@ -109,10 +109,11 @@ namespace Ticket_Hub.API.Controllers
             return StatusCode(responseDto.StatusCode, responseDto);
         }
         
-        [HttpPost("upload-image/{ticketId}")]
-        public async Task<ActionResult<ResponseDto>> UploadCourseVersionBackground
+        [HttpPost]
+        [Route("{ticketId}/upload-image")]
+        public async Task<ActionResult<ResponseDto>> UploadTicketImage
         (
-            [FromRoute] Guid TicketId,
+            [FromRoute] Guid ticketId,
             UploadTicketImgDto uploadTicketImgDto
         )
         {
@@ -120,10 +121,26 @@ namespace Ticket_Hub.API.Controllers
                 await _ticketService.UploadTicketImage
                 (
                     User,
-                    TicketId,
+                    ticketId,
                     uploadTicketImgDto
                 );
             return StatusCode(responseDto.StatusCode, responseDto);
         }
+        [HttpGet]
+        [Route("{ticketId}/display-image")]
+        public async Task<ActionResult> DisplayTicketImage
+        (
+            [FromRoute] Guid ticketId
+        )
+        {
+            var responseDto = await _ticketService.GetTicketImage(User, ticketId);
+            if (responseDto is null)
+            {
+                return null;
+            }
+
+            return File(responseDto, "image/png");
+        }
+
     }
 }

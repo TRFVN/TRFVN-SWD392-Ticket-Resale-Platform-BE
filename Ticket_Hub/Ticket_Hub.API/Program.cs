@@ -102,7 +102,7 @@ namespace Ticket_Hub.API
 
             var app = builder.Build();
 
-            app.UseMiddleware<ErrorHandlerMiddleware>();
+            //app.UseMiddleware<ErrorHandlerMiddleware>();
 
             // Apply database migrations
             //ApplyMigration(app);
