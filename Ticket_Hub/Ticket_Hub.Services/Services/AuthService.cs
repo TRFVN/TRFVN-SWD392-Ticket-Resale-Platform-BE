@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -7,7 +8,6 @@ using FirebaseAdmin.Auth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
 using Ticket_Hub.Models.DTO;
 using Ticket_Hub.Models.DTO.Auth;
@@ -21,7 +21,6 @@ public class AuthService : IAuthService
 {
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IUnitOfWork _unitOfWork;
-
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly ITokenService _tokenService;
     private readonly IFirebaseService _firebaseService;
@@ -39,9 +38,10 @@ public class AuthService : IAuthService
         UserManager<ApplicationUser> userManager,
         ITokenService tokenService,
         IFirebaseService firebaseService,
-        IEmailService emailService,
-        IHttpContextAccessor httpContextAccessor
+        IEmailService emailService
     )
+
+
     {
         _roleManager = roleManager;
         _unitOfWork = unitOfWork;
@@ -49,7 +49,6 @@ public class AuthService : IAuthService
         _tokenService = tokenService;
         _firebaseService = firebaseService;
         _emailService = emailService;
-        _httpContextAccessor = httpContextAccessor;
         _tokenHandler = new JwtSecurityTokenHandler();
     }
 
@@ -140,7 +139,7 @@ public class AuthService : IAuthService
         }
 
         // Lưu thay đổi vào cơ sở dữ liệu
-        var isSuccess = await _unitOfWork.SaveAsync();
+        await _unitOfWork.SaveAsync();
         return new ResponseDto()
         {
             Message = "User created successfully",
@@ -263,8 +262,8 @@ public class AuthService : IAuthService
             {
                 Result = new SignResponseDto()
                 {
-                    RefreshToken = null,
-                    AccessToken = null,
+                    RefreshToken = "",
+                    AccessToken = "",
                 },
                 Message = "The email is using by another user",
                 IsSuccess = false,
@@ -288,9 +287,9 @@ public class AuthService : IAuthService
             await _userManager.AddLoginAsync(user, new UserLoginInfo(StaticLoginProvider.Google, userId, "GOOGLE"));
         }
 
-        var accessToken = await _tokenService.GenerateJwtAccessTokenAsync(user);
-        var refreshToken = await _tokenService.GenerateJwtRefreshTokenAsync(user);
-        await _tokenService.StoreRefreshToken(user.Id, refreshToken);
+        var accessToken = await _tokenService.GenerateJwtAccessTokenAsync(user!);
+        var refreshToken = await _tokenService.GenerateJwtRefreshTokenAsync(user!);
+        await _tokenService.StoreRefreshToken(user!.Id, refreshToken);
         await _userManager.UpdateAsync(user);
 
         return new ResponseDto()
@@ -307,7 +306,7 @@ public class AuthService : IAuthService
     }
 
     /// <summary>
-    /// 
+    /// Get infor user
     /// </summary>
     /// <param name="token"></param>
     /// <returns></returns>
@@ -338,14 +337,14 @@ public class AuthService : IAuthService
             {
                 Id = user.Id,
                 FullName = jwtToken.Claims.First(claim => claim.Type == "FullName").Value,
-                Email = user.Email,
-                PhoneNumber = user.PhoneNumber,
+                Email = user.Email!,
+                PhoneNumber = user.PhoneNumber!,
                 Address = jwtToken.Claims.First(claim => claim.Type == "Address").Value,
                 Country = jwtToken.Claims.First(claim => claim.Type == "Country").Value,
                 Cccd = jwtToken.Claims.First(claim => claim.Type == "Cccd").Value,
                 BirthDate = DateTime.Parse(jwtToken.Claims.First(claim => claim.Type == "BirthDate").Value),
                 AvatarUrl = jwtToken.Claims.First(claim => claim.Type == "AvatarUrl").Value,
-                UserName = user.UserName,
+                UserName = user.UserName!,
                 Roles = roles.ToList()
             };
 
@@ -369,17 +368,6 @@ public class AuthService : IAuthService
         }
     }
 
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="email"></param>
-    /// <returns></returns>
-    /// <exception cref="NotImplementedException"></exception>
-    public Task<ResponseDto> CheckEmailExist(string email)
-    {
-        throw new NotImplementedException();
-    }
 
     /// <summary>
     /// Upload user avatar.
@@ -435,7 +423,7 @@ public class AuthService : IAuthService
         }
 
         // Cập nhật AvatarUrl của user
-        user.AvatarUrl = responseDto.Result?.ToString();
+        user.AvatarUrl = responseDto.Result?.ToString()!;
         var updateResult = await _userManager.UpdateAsync(user);
 
         // Kiểm tra kết quả cập nhật
@@ -460,17 +448,28 @@ public class AuthService : IAuthService
         };
     }
 
+    /// <summary>
+    /// Get user avatar.
+    /// </summary>
+    /// <param name="User"></param>
+    /// <returns></returns>
     public async Task<MemoryStream> GetUserAvatar(ClaimsPrincipal User)
     {
         var userId = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
 
-        var user = await _userManager.FindByIdAsync(userId);
+        var user = await _userManager.FindByIdAsync(userId!);
 
-        var stream = await _firebaseService.GetImage(user.AvatarUrl);
+        var stream = await _firebaseService.GetImage(user!.AvatarUrl);
 
         return stream;
     }
 
+    /// <summary>
+    /// Send verify email.
+    /// </summary>
+    /// <param name="email"></param>
+    /// <param name="confirmationLink"></param>
+    /// <returns></returns>
     public async Task<ResponseDto> SendVerifyEmail(string email, string confirmationLink)
     {
         await _emailService.SendVerifyEmail(email, confirmationLink);
@@ -485,7 +484,7 @@ public class AuthService : IAuthService
 
 
     /// <summary>
-    /// 
+    /// Verify email.
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="token"></param>
@@ -494,7 +493,7 @@ public class AuthService : IAuthService
     {
         var user = await _userManager.FindByIdAsync(userId);
 
-        if (user.EmailConfirmed)
+        if (user!.EmailConfirmed)
         {
             return new ResponseDto()
             {
@@ -530,7 +529,7 @@ public class AuthService : IAuthService
     }
 
     /// <summary>
-    /// 
+    /// Change Password
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="oldPassword"></param>
@@ -553,14 +552,14 @@ public class AuthService : IAuthService
         if (newPassword != confirmNewPassword)
         {
             return new ResponseDto
-                { IsSuccess = false, Message = "New password and confirm new password not match." };
+            { IsSuccess = false, Message = "New password and confirm new password not match." };
         }
 
         // Không cho phép thay đổi mật khẩu cũ
         if (newPassword == oldPassword)
         {
             return new ResponseDto
-                { IsSuccess = false, Message = "New password cannot be the same as the old password." };
+            { IsSuccess = false, Message = "New password cannot be the same as the old password." };
         }
 
         // Thực hiện thay đổi mật khẩu
@@ -581,13 +580,13 @@ public class AuthService : IAuthService
 
 
     /// <summary>
-    /// 
+    /// Forgot Password
     /// </summary>
-    private string ip;
+    private string _ip;
 
-    private string city;
-    private string region;
-    private string country;
+    private string _city;
+    private string _region;
+    private string _country;
     private const int MaxAttemptsPerDay = 3;
 
     public async Task<ResponseDto> ForgotPassword(ForgotPasswordDto forgotPasswordDto)
@@ -616,18 +615,18 @@ public class AuthService : IAuthService
             var email = user.Email;
             var now = DateTime.Now;
 
-            if (ResetPasswordAttempts.TryGetValue(email, out var attempts))
+            if (ResetPasswordAttempts.TryGetValue(email!, out var attempts))
             {
                 // Kiểm tra xem đã quá 1 ngày kể từ lần thử cuối cùng chưa
                 if (now - attempts.LastRequest >= TimeSpan.FromSeconds(1))
                 {
                     // Reset số lần thử về 0 và cập nhật thời gian thử cuối cùng
-                    ResetPasswordAttempts[email] = (1, now);
+                    ResetPasswordAttempts[email!] = (1, now);
                 }
                 else if (attempts.Count >= MaxAttemptsPerDay)
                 {
                     // Quá số lần reset cho phép trong vòng 1 ngày, gửi thông báo 
-                    await _emailService.SendEmailAsync(user.Email,
+                    await _emailService.SendEmailAsync(user.Email!,
                         "Password Reset Request Limit Exceeded",
                         $"You have exceeded the daily limit for password reset requests. Please try again after 24 hours."
                     );
@@ -644,13 +643,13 @@ public class AuthService : IAuthService
                 else
                 {
                     // Chưa vượt quá số lần thử và thời gian chờ, tăng số lần thử và cập nhật thời gian
-                    ResetPasswordAttempts[email] = (attempts.Count + 1, now);
+                    ResetPasswordAttempts[email!] = (attempts.Count + 1, now);
                 }
             }
             else
             {
                 // Email chưa có trong danh sách, thêm mới với số lần thử là 1 và thời gian hiện tại
-                ResetPasswordAttempts.AddOrUpdate(email, (1, now), (key, old) => (old.Count + 1, now));
+                ResetPasswordAttempts.AddOrUpdate(email!, (1, now), (key, old) => (old.Count + 1, now));
             }
 
             // Tạo mã token
@@ -666,10 +665,10 @@ public class AuthService : IAuthService
             var userAgent = _httpContextAccessor.HttpContext?.Request.Headers["User-Agent"];
 
             // Lấy tên hệ điều hành
-            var operatingSystem = GetUserAgentOperatingSystem(userAgent);
+            var operatingSystem = GetUserAgentOperatingSystem(userAgent!);
 
             // Lấy tên trình duyệt
-            var browser = GetUserAgentBrowser(userAgent);
+            var browser = GetUserAgentBrowser(userAgent!);
 
             // Lấy location
             var url = "https://ipinfo.io/14.169.10.115/json?token=823e5c403c980f";
@@ -681,10 +680,10 @@ public class AuthService : IAuthService
                     string jsonContent = await response.Content.ReadAsStringAsync();
                     JObject data = JObject.Parse(jsonContent);
 
-                    this.ip = data["ip"].ToString();
-                    this.city = data["city"].ToString();
-                    this.region = data["region"].ToString();
-                    this.country = data["country"].ToString();
+                    this._ip = data["ip"]!.ToString();
+                    this._city = data["city"]!.ToString();
+                    this._region = data["region"]!.ToString();
+                    this._country = data["country"]!.ToString();
                 }
                 else
                 {
@@ -698,17 +697,17 @@ public class AuthService : IAuthService
             }
 
             // Gửi email chứa đường link đặt lại mật khẩu
-            await _emailService.SendEmailResetAsync(user.Email, "Reset password for your Cursus account", user,
-                currentDate, resetLink, operatingSystem, browser, ip, region, city, country);
+            await _emailService.SendEmailResetAsync(user.Email!, "Reset password for your Cursus account", user,
+                currentDate, resetLink, operatingSystem, browser, _ip, _region, _city, _country);
 
             // Helper functions (you might need to refine these based on your User-Agent parsing logic)
-            string GetUserAgentOperatingSystem(string userAgent)
+            string GetUserAgentOperatingSystem(string userAgentOs)
             {
                 // ... Logic to extract the operating system from the user-agent string
                 // Example:
-                if (userAgent.Contains("Windows")) return "Windows";
-                else if (userAgent.Contains("Mac")) return "macOS";
-                else if (userAgent.Contains("Linux")) return "Linux";
+                if (userAgentOs.Contains("Windows")) return "Windows";
+                else if (userAgentOs.Contains("Mac")) return "macOS";
+                else if (userAgentOs.Contains("Linux")) return "Linux";
                 else return "Unknown";
             }
 
@@ -739,7 +738,15 @@ public class AuthService : IAuthService
             };
         }
     }
-    
+
+
+    /// <summary>
+    /// Reset Password
+    /// </summary>
+    /// <param name="email"></param>
+    /// <param name="token"></param>
+    /// <param name="password"></param>
+    /// <returns></returns>
     public async Task<ResponseDto> ResetPassword(string email, string token, string password)
     {
         // Tìm người dùng theo email
@@ -790,6 +797,277 @@ public class AuthService : IAuthService
                 IsSuccess = false,
                 Message = errors.ToString(),
                 StatusCode = 400
+            };
+        }
+    }
+
+    /// <summary>
+    /// Lock User
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
+    public async Task<ResponseDto> LockUser(string id)
+    {
+        var userId = await _userManager.FindByIdAsync(id);
+        if (userId == null)
+        {
+            return new ResponseDto
+            {
+                IsSuccess = false,
+                Message = "User not found.",
+                StatusCode = 404
+            };
+        }
+
+        var userRole = await _userManager.GetRolesAsync(userId);
+
+        if (userRole.Contains(StaticUserRoles.Admin))
+        {
+            return new ResponseDto()
+            {
+                Message = "You are not an Admin",
+                IsSuccess = false,
+                StatusCode = 400,
+                Result = null
+            };
+        }
+
+        userId.LockoutEnd = DateTimeOffset.MaxValue;
+        var result = await _userManager.UpdateAsync(userId);
+        if (!result.Succeeded)
+        {
+            return new ResponseDto()
+            {
+                Message = "Lock user was failed",
+                IsSuccess = false,
+                StatusCode = 400,
+                Result = null
+            };
+        }
+
+        return new ResponseDto()
+        {
+            Message = "Lock user successfully",
+            IsSuccess = true,
+            StatusCode = 200,
+            Result = null
+        };
+    }
+
+    /// <summary>
+    /// Unlock User
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
+    public async Task<ResponseDto> UnlockUser(string id)
+    {
+        var userId = await _userManager.FindByIdAsync(id);
+        if (userId == null)
+        {
+            return new ResponseDto
+            {
+                IsSuccess = false,
+                Message = "User not found.",
+                StatusCode = 404
+            };
+        }
+
+        var userRole = await _userManager.GetRolesAsync(userId);
+
+        if (userRole.Contains(StaticUserRoles.Admin))
+        {
+            return new ResponseDto()
+            {
+                Message = "You are not an Admin",
+                IsSuccess = false,
+                StatusCode = 400,
+                Result = null
+            };
+        }
+
+        userId.LockoutEnd = null;
+        var result = await _userManager.UpdateAsync(userId);
+        if (!result.Succeeded)
+        {
+            return new ResponseDto()
+            {
+                Message = "Lock user was failed",
+                IsSuccess = false,
+                StatusCode = 400,
+                Result = null
+            };
+        }
+
+        return new ResponseDto()
+        {
+            Message = "Lock user successfully",
+            IsSuccess = true,
+            StatusCode = 200,
+            Result = null
+        };
+    }
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="filterOn"></param>
+    /// <param name="filterQuery"></param>
+    /// <param name="sortBy"></param>
+    /// <param name="pageNumber"></param>
+    /// <param name="pageSize"></param>
+    /// <returns></returns>
+    public async Task<ResponseDto> GetAllUsers(
+        string? filterOn,
+        string? filterQuery,
+        string? sortBy,
+        int pageNumber = 1,
+        int pageSize = 10
+    )
+    {
+        #region MyRegion
+
+        try
+        {
+            var usersQuery = _userManager.Users.AsQueryable();
+
+            // Filtering
+            if (!string.IsNullOrEmpty(filterOn) && !string.IsNullOrEmpty(filterQuery))
+            {
+                switch (filterOn.Trim().ToLower())
+                {
+                    case "fullname":
+                        usersQuery = usersQuery.Where(u => u.FullName.Contains(filterQuery));
+                        break;
+                    case "email":
+                        usersQuery = usersQuery.Where(u => u.Email.Contains(filterQuery));
+                        break;
+                    case "phonenumber":
+                        usersQuery = usersQuery.Where(u => u.PhoneNumber.Contains(filterQuery));
+                        break;
+                    case "address":
+                        usersQuery = usersQuery.Where(u => u.Address.Contains(filterQuery));
+                        break;
+                    case "country":
+                        usersQuery = usersQuery.Where(u => u.Country.Contains(filterQuery));
+                        break;
+                    case "cccd":
+                        usersQuery = usersQuery.Where(u => u.Cccd.Contains(filterQuery));
+                        break;
+                    case "birthdate":
+                        if (DateTime.TryParse(filterQuery, out DateTime birthDate))
+                        {
+                            usersQuery = usersQuery.Where(u => u.BirthDate.Date == birthDate.Date);
+                        }
+
+                        break;
+                    case "username":
+                        usersQuery = usersQuery.Where(u => u.UserName.Contains(filterQuery));
+                        break;
+                    default:
+                        usersQuery = usersQuery.Where(u => u.FullName.Contains(filterQuery));
+                        break;
+                }
+            }
+
+            // Sorting
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                switch (sortBy.Trim().ToLower())
+                {
+                    case "fullname":
+                        usersQuery = usersQuery.OrderBy(u => u.FullName);
+                        break;
+                    case "email":
+                        usersQuery = usersQuery.OrderBy(u => u.Email);
+                        break;
+                    case "phonenumber":
+                        usersQuery = usersQuery.OrderBy(u => u.PhoneNumber);
+                        break;
+                    case "address":
+                        usersQuery = usersQuery.OrderBy(u => u.Address);
+                        break;
+                    case "country":
+                        usersQuery = usersQuery.OrderBy(u => u.Country);
+                        break;
+                    case "cccd":
+                        usersQuery = usersQuery.OrderBy(u => u.Cccd);
+                        break;
+                    case "birthdate":
+                        usersQuery = usersQuery.OrderBy(u => u.BirthDate);
+                        break;
+                    case "username":
+                        usersQuery = usersQuery.OrderBy(u => u.UserName);
+                        break;
+                    default:
+                        usersQuery = usersQuery.OrderBy(u => u.FullName);
+                        break;
+                }
+            }
+
+            // Pagination
+            var totalUsers = await usersQuery.CountAsync(); // Đếm tổng số người dùng
+            var users = await usersQuery
+                .Skip((pageNumber - 1) * pageSize) // Tính số bản ghi cần bỏ qua
+                .Take(pageSize) // Lấy số bản ghi theo kích thước trang
+                .ToListAsync(); // Thực thi truy vấn
+
+            #endregion Query Parameters
+
+            if (users == null || !users.Any())
+            {
+                return new ResponseDto()
+                {
+                    Message = "There are no users",
+                    Result = null,
+                    IsSuccess = false,
+                    StatusCode = 404
+                };
+            }
+
+            var userInfoDtoList = new List<GetUserDto>();
+
+            foreach (var user in users)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+
+                var userInfoDto = new GetUserDto
+                {
+                    
+                    Id = user.Id,
+                    FullName = user.FullName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    Address = user.Address,
+                    Country = user.Country,
+                    Cccd = user.Cccd,
+                    BirthDate = user.BirthDate,
+                    AvatarUrl = user.AvatarUrl, 
+                    UserName = user.UserName,
+                    Roles = roles.ToList()
+                };
+
+                userInfoDtoList.Add(userInfoDto);
+            }
+
+            return new ResponseDto()
+            {
+                Message = "Get all users successfully",
+                Result = userInfoDtoList,
+                IsSuccess = true,
+                StatusCode = 200
+            };
+        }
+        catch (Exception ex)
+        {
+            return new ResponseDto()
+            {
+                Message = ex.Message,
+                Result = null,
+                IsSuccess = false,
+                StatusCode = 500
             };
         }
     }
