@@ -84,6 +84,19 @@ namespace Ticket_Hub.API.Controllers
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        [HttpGet("FetchUserByToken")]
+        public async Task<IActionResult> FetchUserByToken(string token)
+        {
+            var result = await _authService.FetchUserByToken(token);
+            var responseDto = await _authService.FetchUserByToken(token);
+            return StatusCode(responseDto.StatusCode, responseDto);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="avatarUploadDto"></param>
         /// <returns></returns>
         [HttpPost]
@@ -94,13 +107,13 @@ namespace Ticket_Hub.API.Controllers
             var response = await _authService.UploadUserAvatar(avatarUploadDto.File, User);
             return StatusCode(response.StatusCode, response);
         }
-        
+
         /// <summary>
         /// Get User Avatar.
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [Route("user/avatar")] 
+        [Route("user/avatar")]
         //[Authorize]
         public async Task<IActionResult> GetUserAvatar()
         {
@@ -112,7 +125,7 @@ namespace Ticket_Hub.API.Controllers
 
             return File(stream, "image/png");
         }
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -142,7 +155,7 @@ namespace Ticket_Hub.API.Controllers
 
             return StatusCode(responseDto.StatusCode, responseDto);
         }
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -159,7 +172,7 @@ namespace Ticket_Hub.API.Controllers
             var responseDto = await _authService.VerifyEmail(userId, token);
             return StatusCode(responseDto.StatusCode, responseDto);
         }
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -185,7 +198,7 @@ namespace Ticket_Hub.API.Controllers
                 return BadRequest(response.Message);
             }
         }
-        
+
         [HttpGet]
         [Route("ForgotPassword")]
         public async Task<ActionResult<ResponseDto>> ForgotPassword(string email)
@@ -210,7 +223,7 @@ namespace Ticket_Hub.API.Controllers
 
             return StatusCode(responseDto.StatusCode, responseDto);
         }
-        
+
         [HttpPost]
         [Route("forgot-password")]
         public async Task<ActionResult<ResponseDto>> ForgotPassword([FromBody] ForgotPasswordDto forgotPasswordDto)
@@ -218,7 +231,7 @@ namespace Ticket_Hub.API.Controllers
             var result = await _authService.ForgotPassword(forgotPasswordDto);
             return StatusCode(result.StatusCode, result);
         }
-        
+
         [HttpPost("reset-password")]
         public async Task<ActionResult<ResponseDto>> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
         {
