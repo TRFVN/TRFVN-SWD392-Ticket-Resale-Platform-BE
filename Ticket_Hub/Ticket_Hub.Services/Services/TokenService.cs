@@ -28,29 +28,41 @@ public class TokenService : ITokenService
     {
         var userRoles = await _userManager.GetRolesAsync(user);
 
+        // Danh sách các claims
         var authClaims = new List<Claim>
-        {
-            new Claim(ClaimTypes.Name, user.UserName),
-            new Claim(ClaimTypes.NameIdentifier, user.Id)
-        };
+    {
+        new Claim(ClaimTypes.Name, user.UserName),
+        new Claim(ClaimTypes.NameIdentifier, user.Id),
+        new Claim("FullName", user.FullName),
+        new Claim(ClaimTypes.Email, user.Email),
+        new Claim("Address", user.Address),
+        new Claim("Country", user.Country), 
+        new Claim("Cccd", user.Cccd), 
+        new Claim("BirthDate", user.BirthDate.ToString("yyyy-MM-dd")), 
+        new Claim("AvatarUrl", user.AvatarUrl) 
+    };
 
+        // Thêm role của người dùng vào claims
         foreach (var role in userRoles)
         {
             authClaims.Add(new Claim(ClaimTypes.Role, role));
         }
 
+        // Tạo security key và signing credentials
         var authSecret = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"] ?? string.Empty));
         var signingCredentials = new SigningCredentials(authSecret, SecurityAlgorithms.HmacSha256);
 
+        // Tạo đối tượng JWT token
         var tokenObject = new JwtSecurityToken(
             issuer: _configuration["JWT:ValidIssuer"],
             audience: _configuration["JWT:ValidAudience"],
             notBefore: DateTime.Now,
-            expires: DateTime.Now.AddMinutes(60),//Expiration time is 1h
-            claims: authClaims,//list of rights
+            expires: DateTime.Now.AddMinutes(60), // Thời gian hết hạn của token (1 giờ)
+            claims: authClaims, // Danh sách claims
             signingCredentials: signingCredentials
         );
 
+        // Tạo JWT access token
         var accessToken = new JwtSecurityTokenHandler().WriteToken(tokenObject);
 
         return accessToken;

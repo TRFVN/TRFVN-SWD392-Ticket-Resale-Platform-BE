@@ -29,7 +29,7 @@ namespace Ticket_Hub.API
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlServer(
-                    builder.Configuration.GetConnectionString(StaticConnectionString.SqldbDefaultConnection));
+                    builder.Configuration.GetConnectionString(StaticConnectionString.SqldbDefaultConnectionAzure));
             });
 
             // Register AutoMapper

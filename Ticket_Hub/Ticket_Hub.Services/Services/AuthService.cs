@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Web;
@@ -6,6 +7,7 @@ using FirebaseAdmin.Auth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
 using Ticket_Hub.Models.DTO;
 using Ticket_Hub.Models.DTO.Auth;
@@ -25,6 +27,7 @@ public class AuthService : IAuthService
     private readonly IFirebaseService _firebaseService;
     private readonly IEmailService _emailService;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly JwtSecurityTokenHandler _tokenHandler;
 
     private static readonly ConcurrentDictionary<string, (int Count, DateTime LastRequest)> ResetPasswordAttempts =
         new();
@@ -47,6 +50,7 @@ public class AuthService : IAuthService
         _firebaseService = firebaseService;
         _emailService = emailService;
         _httpContextAccessor = httpContextAccessor;
+        _tokenHandler = new JwtSecurityTokenHandler();
     }
 
     /// <summary>
@@ -302,6 +306,76 @@ public class AuthService : IAuthService
         };
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="token"></param>
+    /// <returns></returns>
+    public async Task<ResponseDto> FetchUserByToken(string token)
+    {
+        try
+        {
+            var jwtToken = _tokenHandler.ReadJwtToken(token);
+            var userId = jwtToken.Claims.First(claim => claim.Type == ClaimTypes.NameIdentifier).Value;
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return new ResponseDto()
+                {
+                    Message = "Invalid user",
+                    StatusCode = 400,
+                    IsSuccess = false,
+                    Result = null
+                };
+            }
+
+            // Lấy role từ UserManager
+            var roles = await _userManager.GetRolesAsync(user);
+
+            // Lấy thông tin từ claims
+            var userDto = new GetUserDto
+            {
+                Id = user.Id,
+                FullName = jwtToken.Claims.First(claim => claim.Type == "FullName").Value,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                Address = jwtToken.Claims.First(claim => claim.Type == "Address").Value,
+                Country = jwtToken.Claims.First(claim => claim.Type == "Country").Value,
+                Cccd = jwtToken.Claims.First(claim => claim.Type == "Cccd").Value,
+                BirthDate = DateTime.Parse(jwtToken.Claims.First(claim => claim.Type == "BirthDate").Value),
+                AvatarUrl = jwtToken.Claims.First(claim => claim.Type == "AvatarUrl").Value,
+                UserName = user.UserName,
+                Roles = roles.ToList()
+            };
+
+            return new ResponseDto()
+            {
+                Message = "Get info successfully",
+                StatusCode = 200,
+                IsSuccess = true, // Chỉnh lại giá trị IsSuccess thành true
+                Result = userDto // Trả về userDto
+            };
+        }
+        catch (Exception ex)
+        {
+            return new()
+            {
+                Message = ex.Message,
+                IsSuccess = false,
+                StatusCode = 500,
+                Result = null
+            };
+        }
+    }
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="email"></param>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
     public Task<ResponseDto> CheckEmailExist(string email)
     {
         throw new NotImplementedException();
