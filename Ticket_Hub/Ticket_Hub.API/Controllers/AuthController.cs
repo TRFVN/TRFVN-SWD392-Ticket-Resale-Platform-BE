@@ -29,7 +29,7 @@ namespace Ticket_Hub.API.Controllers
         /// </summary>
         /// <param name="registerDto"></param>
         /// <returns></returns>
-        [HttpPost("users")]
+        [HttpPost("sign-up")]
         public async Task<ActionResult<ResponseDto>> SignUp([FromBody] RegisterDto registerDto)
         {
             if (!ModelState.IsValid)
@@ -79,6 +79,29 @@ namespace Ticket_Hub.API.Controllers
         public async Task<ActionResult<ResponseDto>> SignInByGoogle([FromBody] SignInByGoogleDto signInByGoogleDto)
         {
             var responseDto = await _authService.SignInByGoogle(signInByGoogleDto);
+            return StatusCode(responseDto.StatusCode, responseDto);
+        }
+
+
+        /// <summary>
+        /// RefreshToken
+        /// </summary>
+        /// <param name="refreshTokenDto"></param>
+        /// <returns></returns>
+        [HttpPost("refresh-token")]
+        public async Task<ActionResult<ResponseDto>> RefreshToken([FromBody] RefreshTokenDto refreshTokenDto)
+        {
+            if (string.IsNullOrEmpty(refreshTokenDto.RefreshToken))
+            {
+                return BadRequest(new ResponseDto
+                {
+                    IsSuccess = false,
+                    Message = "Refresh token is required.",
+                    StatusCode = 400
+                });
+            }
+
+            var responseDto = await _authService.RefreshToken(refreshTokenDto);
             return StatusCode(responseDto.StatusCode, responseDto);
         }
 
@@ -199,36 +222,6 @@ namespace Ticket_Hub.API.Controllers
             {
                 return BadRequest(responseDto.Message);
             }
-        }
-        
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="email"></param>
-        /// <returns></returns>
-        [HttpGet]
-        [Route("ForgotPassword")]
-        public async Task<ActionResult<ResponseDto>> ForgotPassword(string email)
-        {
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user is null)
-            {
-                return new ResponseDto()
-                {
-                    IsSuccess = false,
-                    Message = "Email is not exist",
-                    StatusCode = 404
-                };
-            }
-
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-
-            var confirmationLink =
-                $"{Request.Scheme}://{Request.Host}/user/sign-in/reset-password?userId={Uri.EscapeDataString(user.Id)}&token={Uri.EscapeDataString(token)}";
-
-            var responseDto = await _authService.SendVerifyEmail(user.Email, confirmationLink);
-
-            return StatusCode(responseDto.StatusCode, responseDto);
         }
         
         /// <summary>

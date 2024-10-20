@@ -55,9 +55,9 @@ public class EmailService : IEmailService
         return await SendEmailFromTemplate(toMail, "SendVerifyEmail", confirmationLink);
     }
 
-        public async Task<bool> SendEmailResetAsync(string toEmail, string subject, ApplicationUser user,
-        string currentDate, string resetLink,
-        string operatingSystem, string browser, string ip, string region, string city, string country)
+    public async Task<bool> SendEmailResetAsync(string toEmail, string subject, ApplicationUser user,
+    string currentDate, string resetLink,
+    string operatingSystem, string browser, string ip, string region, string city, string country)
     {
         // Lấy thông tin cấu hình email từ file appsettings.json
         try
@@ -181,13 +181,17 @@ public class EmailService : IEmailService
         string subject = template.SubjectLine;
         string body = $@"
     <html>
-    <body>
-        <h1>{template.SubjectLine}</h1>
-        <h2>{template.PreHeaderText}</h2>
-        <p>{template.BodyContent}</p>
-        <p><a href='{replacementValue}' style='padding: 20px 20px; color: white; background-color: #007BFF; text-decoration: none;'>{template.CallToAction.Replace("{Login}", replacementValue)}</a></p>
-        {template.FooterContent}
-    </body>
+        <body>
+            <h1>{template.SubjectLine}</h1>
+            <h2>{template.PreHeaderText}</h2>
+            <p>{template.BodyContent}</p>
+            <p style='text-align: center;'>
+                <a href='{replacementValue}' style='padding: 10px 20px; color: white; background-color: #007BFF; text-decoration: none; border-radius: 5px;'>
+                    {template.CallToAction.Replace("{Login}", "Login")}
+                </a>
+            </p>
+            {template.FooterContent}
+        </body>
     </html>";
 
         return await SendEmailToClientAsync(toMail, subject, body);

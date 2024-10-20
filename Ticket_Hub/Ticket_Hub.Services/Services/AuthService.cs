@@ -8,6 +8,7 @@ using FirebaseAdmin.Auth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
 using Ticket_Hub.Models.DTO;
 using Ticket_Hub.Models.DTO.Auth;
@@ -38,7 +39,8 @@ public class AuthService : IAuthService
         UserManager<ApplicationUser> userManager,
         ITokenService tokenService,
         IFirebaseService firebaseService,
-        IEmailService emailService
+        IEmailService emailService,
+        IHttpContextAccessor httpContextAccessor
     )
 
 
@@ -50,6 +52,7 @@ public class AuthService : IAuthService
         _firebaseService = firebaseService;
         _emailService = emailService;
         _tokenHandler = new JwtSecurityTokenHandler();
+        _httpContextAccessor = httpContextAccessor;
     }
 
     /// <summary>
@@ -306,6 +309,71 @@ public class AuthService : IAuthService
     }
 
     /// <summary>
+    /// Refresh token
+    /// </summary>
+    /// <param name="refreshToken"></param>
+    /// <returns></returns>
+    public async Task<ResponseDto> RefreshToken(RefreshTokenDto refreshTokenDto)
+    {
+        var principal = await _tokenService.GetPrincipalFromToken(refreshTokenDto.RefreshToken);
+        if (principal == null)
+        {
+            return new ResponseDto
+            {
+                IsSuccess = false,
+                Message = "Invalid refresh token",
+                StatusCode = 401
+            };
+        }
+
+        var userId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
+        var storedRefreshToken = await _tokenService.RetrieveRefreshToken(userId);
+
+        if (storedRefreshToken.Trim() != refreshTokenDto.RefreshToken.Trim())
+        {
+            return new ResponseDto
+            {
+                IsSuccess = false,
+                Message = "Invalid refresh token",
+                StatusCode = 401
+            };
+        }
+
+        // Kiểm tra thời gian hết hạn của refresh token
+        var refreshTokenEntity = await _unitOfWork.RefreshTokens.GetTokenByUserIdAsync(userId);
+
+        // Tạo access token mới
+        var userToUpdate = await _userManager.FindByIdAsync(userId);
+        var newAccessToken = await _tokenService.GenerateJwtAccessTokenAsync(userToUpdate);
+
+        if (refreshTokenEntity == null || refreshTokenEntity.Expires < DateTime.Now)
+        {
+            // Nếu refresh token đã hết hạn, tạo refresh token mới
+            var newRefreshToken = await _tokenService.GenerateJwtRefreshTokenAsync(userToUpdate);
+
+            return new ResponseDto
+            {
+                IsSuccess = true,
+                Message = "Token refreshed successfully, new refresh token created",
+                StatusCode = 200,
+                Result = new { AccessToken = newAccessToken, RefreshToken = newRefreshToken }
+            };
+        }
+        else
+        {
+            // Nếu refresh token vẫn còn hiệu lực, không cần tạo token mới
+            return new ResponseDto
+            {
+                IsSuccess = true,
+                Message = "Token refreshed successfully, using existing refresh token",
+                StatusCode = 200,
+                Result = new { AccessToken = newAccessToken, RefreshToken = refreshTokenDto.RefreshToken } // Trả refresh token cũ
+            };
+        }
+    }
+
+
+    /// <summary>
     /// Get infor user
     /// </summary>
     /// <param name="token"></param>
@@ -314,10 +382,22 @@ public class AuthService : IAuthService
     {
         try
         {
-            var jwtToken = _tokenHandler.ReadJwtToken(token);
-            var userId = jwtToken.Claims.First(claim => claim.Type == ClaimTypes.NameIdentifier).Value;
+            // Sử dụng GetPrincipalFromToken để lấy ClaimsPrincipal từ token
+            var principal = await _tokenService.GetPrincipalFromToken(token);
+            if (principal == null)
+            {
+                return new ResponseDto()
+                {
+                    Message = "Invalid token",
+                    StatusCode = 401, // Unauthorized
+                    IsSuccess = false,
+                    Result = null
+                };
+            }
 
+            var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var user = await _userManager.FindByIdAsync(userId);
+
             if (user == null)
             {
                 return new ResponseDto()
@@ -332,19 +412,19 @@ public class AuthService : IAuthService
             // Lấy role từ UserManager
             var roles = await _userManager.GetRolesAsync(user);
 
-            // Lấy thông tin từ claims
+            // Tạo GetUserDto từ claims
             var userDto = new GetUserDto
             {
                 Id = user.Id,
-                FullName = jwtToken.Claims.First(claim => claim.Type == "FullName").Value,
-                Email = user.Email!,
-                PhoneNumber = user.PhoneNumber!,
-                Address = jwtToken.Claims.First(claim => claim.Type == "Address").Value,
-                Country = jwtToken.Claims.First(claim => claim.Type == "Country").Value,
-                Cccd = jwtToken.Claims.First(claim => claim.Type == "Cccd").Value,
-                BirthDate = DateTime.Parse(jwtToken.Claims.First(claim => claim.Type == "BirthDate").Value),
-                AvatarUrl = jwtToken.Claims.First(claim => claim.Type == "AvatarUrl").Value,
-                UserName = user.UserName!,
+                FullName = principal.FindFirst("FullName")?.Value,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                Address = principal.FindFirst("Address")?.Value,
+                Country = principal.FindFirst("Country")?.Value,
+                Cccd = principal.FindFirst("Cccd")?.Value,
+                BirthDate = DateTime.Parse(principal.FindFirst("BirthDate")?.Value),
+                AvatarUrl = principal.FindFirst("AvatarUrl")?.Value,
+                UserName = user.UserName,
                 Roles = roles.ToList()
             };
 
@@ -352,13 +432,13 @@ public class AuthService : IAuthService
             {
                 Message = "Get info successfully",
                 StatusCode = 200,
-                IsSuccess = true, // Chỉnh lại giá trị IsSuccess thành true
-                Result = userDto // Trả về userDto
+                IsSuccess = true,
+                Result = userDto
             };
         }
         catch (Exception ex)
         {
-            return new()
+            return new ResponseDto()
             {
                 Message = ex.Message,
                 IsSuccess = false,
@@ -594,11 +674,11 @@ public class AuthService : IAuthService
         try
         {
             // Tìm người dùng theo Email/Số điện thoại
-            var user = await _userManager.FindByEmailAsync(forgotPasswordDto.EmailOrPhone);
+            var user = await _userManager.FindByEmailAsync(forgotPasswordDto.Email);
             if (user == null)
             {
                 user = await _userManager.Users.FirstOrDefaultAsync(
-                    u => u.PhoneNumber == forgotPasswordDto.EmailOrPhone);
+                    u => u.PhoneNumber == forgotPasswordDto.Email);
             }
 
             if (user == null || !user.EmailConfirmed)
@@ -615,18 +695,18 @@ public class AuthService : IAuthService
             var email = user.Email;
             var now = DateTime.Now;
 
-            if (ResetPasswordAttempts.TryGetValue(email!, out var attempts))
+            if (ResetPasswordAttempts.TryGetValue(email, out var attempts))
             {
                 // Kiểm tra xem đã quá 1 ngày kể từ lần thử cuối cùng chưa
                 if (now - attempts.LastRequest >= TimeSpan.FromSeconds(1))
                 {
                     // Reset số lần thử về 0 và cập nhật thời gian thử cuối cùng
-                    ResetPasswordAttempts[email!] = (1, now);
+                    ResetPasswordAttempts[email] = (1, now);
                 }
                 else if (attempts.Count >= MaxAttemptsPerDay)
                 {
                     // Quá số lần reset cho phép trong vòng 1 ngày, gửi thông báo 
-                    await _emailService.SendEmailAsync(user.Email!,
+                    await _emailService.SendEmailAsync(user.Email,
                         "Password Reset Request Limit Exceeded",
                         $"You have exceeded the daily limit for password reset requests. Please try again after 24 hours."
                     );
@@ -643,13 +723,13 @@ public class AuthService : IAuthService
                 else
                 {
                     // Chưa vượt quá số lần thử và thời gian chờ, tăng số lần thử và cập nhật thời gian
-                    ResetPasswordAttempts[email!] = (attempts.Count + 1, now);
+                    ResetPasswordAttempts[email] = (attempts.Count + 1, now);
                 }
             }
             else
             {
                 // Email chưa có trong danh sách, thêm mới với số lần thử là 1 và thời gian hiện tại
-                ResetPasswordAttempts.AddOrUpdate(email!, (1, now), (key, old) => (old.Count + 1, now));
+                ResetPasswordAttempts.AddOrUpdate(email, (1, now), (key, old) => (old.Count + 1, now));
             }
 
             // Tạo mã token
@@ -665,10 +745,10 @@ public class AuthService : IAuthService
             var userAgent = _httpContextAccessor.HttpContext?.Request.Headers["User-Agent"];
 
             // Lấy tên hệ điều hành
-            var operatingSystem = GetUserAgentOperatingSystem(userAgent!);
+            var operatingSystem = GetUserAgentOperatingSystem(userAgent);
 
             // Lấy tên trình duyệt
-            var browser = GetUserAgentBrowser(userAgent!);
+            var browser = GetUserAgentBrowser(userAgent);
 
             // Lấy location
             var url = "https://ipinfo.io/14.169.10.115/json?token=823e5c403c980f";
@@ -680,10 +760,10 @@ public class AuthService : IAuthService
                     string jsonContent = await response.Content.ReadAsStringAsync();
                     JObject data = JObject.Parse(jsonContent);
 
-                    this._ip = data["ip"]!.ToString();
-                    this._city = data["city"]!.ToString();
-                    this._region = data["region"]!.ToString();
-                    this._country = data["country"]!.ToString();
+                    this._ip = data["ip"].ToString();
+                    this._city = data["city"].ToString();
+                    this._region = data["region"].ToString();
+                    this._country = data["country"].ToString();
                 }
                 else
                 {
@@ -697,17 +777,17 @@ public class AuthService : IAuthService
             }
 
             // Gửi email chứa đường link đặt lại mật khẩu
-            await _emailService.SendEmailResetAsync(user.Email!, "Reset password for your Cursus account", user,
+            await _emailService.SendEmailResetAsync(user.Email, "Reset password for your Cursus account", user,
                 currentDate, resetLink, operatingSystem, browser, _ip, _region, _city, _country);
 
             // Helper functions (you might need to refine these based on your User-Agent parsing logic)
-            string GetUserAgentOperatingSystem(string userAgentOs)
+            string GetUserAgentOperatingSystem(string userAgent)
             {
                 // ... Logic to extract the operating system from the user-agent string
                 // Example:
-                if (userAgentOs.Contains("Windows")) return "Windows";
-                else if (userAgentOs.Contains("Mac")) return "macOS";
-                else if (userAgentOs.Contains("Linux")) return "Linux";
+                if (userAgent.Contains("Windows")) return "Windows";
+                else if (userAgent.Contains("Mac")) return "macOS";
+                else if (userAgent.Contains("Linux")) return "Linux";
                 else return "Unknown";
             }
 
@@ -1035,7 +1115,7 @@ public class AuthService : IAuthService
 
                 var userInfoDto = new GetUserDto
                 {
-                    
+
                     Id = user.Id,
                     FullName = user.FullName,
                     Email = user.Email,
@@ -1044,7 +1124,7 @@ public class AuthService : IAuthService
                     Country = user.Country,
                     Cccd = user.Cccd,
                     BirthDate = user.BirthDate,
-                    AvatarUrl = user.AvatarUrl, 
+                    AvatarUrl = user.AvatarUrl,
                     UserName = user.UserName,
                     Roles = roles.ToList()
                 };

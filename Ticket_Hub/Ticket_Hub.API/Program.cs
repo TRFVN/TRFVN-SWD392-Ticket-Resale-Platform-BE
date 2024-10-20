@@ -25,6 +25,11 @@ namespace Ticket_Hub.API
 
             builder.Services.AddControllers();
 
+            //HttpContextAccessor
+            builder.Services.AddHttpContextAccessor();
+
+            builder.Services.AddHttpClient();
+
             // Configure DbContext with SQL Server
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             {
@@ -40,6 +45,8 @@ namespace Ticket_Hub.API
 
             // Register Firebase Service
             builder.Services.AddFirebaseService();
+
+
 
             // Configure Identity
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -97,6 +104,17 @@ namespace Ticket_Hub.API
                         },
                         new List<string>()
                     }
+                });
+            });
+
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowSpecificOrigin", policyBuilder =>
+                {
+                    policyBuilder.WithOrigins("https://localhost:5173")
+                                 .AllowAnyHeader()
+                                 .AllowAnyMethod();
                 });
             });
 
