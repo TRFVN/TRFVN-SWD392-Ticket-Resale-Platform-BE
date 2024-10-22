@@ -360,4 +360,58 @@ public class TicketService : ITicketService
         var image = await _firebaseService.GetImage(ticket.TicketImage);
         return image;
     }
+
+    public async Task<ResponseDto> AcceptTicket(ClaimsPrincipal user, Guid ticketId)
+    {
+        var ticket = await _unitOfWork.TicketRepository.GetAsync(t => t.TicketId == ticketId);
+        if (ticket == null)
+        {
+            return new ResponseDto()
+            {
+                Message = "Ticket not found",
+                Result = null,
+                IsSuccess = false,
+                StatusCode = 404
+            };
+        }
+
+        ticket.Status = TicketStatus.Success;
+        _unitOfWork.TicketRepository.Update(ticket);
+        await _unitOfWork.SaveAsync();
+
+        return new ResponseDto()
+        {
+            Message = "Ticket Accepted successfully",
+            Result = null,
+            IsSuccess = true,
+            StatusCode = 200
+        };
+    }
+
+    public async Task<ResponseDto> RejectTicket(ClaimsPrincipal user, Guid ticketId)
+    {
+        var ticket = await _unitOfWork.TicketRepository.GetAsync(t => t.TicketId == ticketId);
+        if (ticket == null)
+        {
+            return new ResponseDto()
+            {
+                Message = "Ticket not found",
+                Result = null,
+                IsSuccess = false,
+                StatusCode = 404
+            };
+        }
+
+        ticket.Status = TicketStatus.Rejected;
+        _unitOfWork.TicketRepository.Update(ticket);
+        await _unitOfWork.SaveAsync();
+
+        return new ResponseDto()
+        {
+            Message = "Ticket Rejected successfully",
+            Result = null,
+            IsSuccess = true,
+            StatusCode = 200
+        };
+    }
 }

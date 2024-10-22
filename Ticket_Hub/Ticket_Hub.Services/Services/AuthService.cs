@@ -8,7 +8,7 @@ using FirebaseAdmin.Auth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Ticket_Hub.Models.DTO;
 using Ticket_Hub.Models.DTO.Auth;
@@ -207,10 +207,9 @@ public class AuthService : IAuthService
             };
         }
 
-
         var accessToken = await _tokenService.GenerateJwtAccessTokenAsync(user);
         var refreshToken = await _tokenService.GenerateJwtRefreshTokenAsync(user);
-        //await _tokenService.StoreRefreshToken(user.Id, refreshToken);
+        await _tokenService.StoreRefreshToken(user.Id, refreshToken);
 
         return new ResponseDto()
         {
@@ -232,12 +231,27 @@ public class AuthService : IAuthService
     /// <returns></returns>
     public async Task<ResponseDto> SignInByGoogle(SignInByGoogleDto signInByGoogleDto)
     {
-        // Lấy thông tin từ Google
-        FirebaseToken googleTokenS = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(signInByGoogleDto.Token);
-        string userId = googleTokenS.Uid;
-        string email = googleTokenS.Claims["email"].ToString();
-        string name = googleTokenS.Claims["name"].ToString();
-        string avatarUrl = googleTokenS.Claims["picture"].ToString();
+        // Gọi API của Google để lấy thông tin từ Access Token
+        var httpClient = new HttpClient();
+        var response =
+            await httpClient.GetStringAsync(
+                $"https://www.googleapis.com/oauth2/v3/tokeninfo?access_token={signInByGoogleDto.Token}");
+
+        // Parse response từ Google
+        var googleUser = JsonConvert.DeserializeObject<GoogleUserInfo>(response);
+        if (googleUser == null || googleUser.email == null)
+        {
+            return new ResponseDto()
+            {
+                Message = "Invalid Google Access Token",
+                IsSuccess = false,
+                StatusCode = 401
+            };
+        }
+
+        string email = googleUser.email;
+        string name = googleUser.name;
+        string avatarUrl = googleUser.picture;
 
         // Tìm kiếm người dùng trong database
         var user = await _userManager.FindByEmailAsync(email);
@@ -287,7 +301,8 @@ public class AuthService : IAuthService
             };
 
             await _userManager.CreateAsync(user);
-            await _userManager.AddLoginAsync(user, new UserLoginInfo(StaticLoginProvider.Google, userId, "GOOGLE"));
+            await _userManager.AddLoginAsync(user,
+                new UserLoginInfo(StaticLoginProvider.Google, googleUser.sub, "GOOGLE"));
         }
 
         var accessToken = await _tokenService.GenerateJwtAccessTokenAsync(user!);
@@ -329,7 +344,7 @@ public class AuthService : IAuthService
         var userId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
         var storedRefreshToken = await _tokenService.RetrieveRefreshToken(userId);
 
-        if (storedRefreshToken.Trim() != refreshTokenDto.RefreshToken.Trim())
+        if (storedRefreshToken == null || storedRefreshToken.Trim() != refreshTokenDto.RefreshToken.Trim())
         {
             return new ResponseDto
             {
@@ -342,34 +357,39 @@ public class AuthService : IAuthService
         // Kiểm tra thời gian hết hạn của refresh token
         var refreshTokenEntity = await _unitOfWork.RefreshTokens.GetTokenByUserIdAsync(userId);
 
+        if (refreshTokenEntity == null || refreshTokenEntity.Expires < DateTime.Now)
+        {
+            // Nếu refresh token đã hết hạn, xóa refresh token và yêu cầu người dùng đăng nhập lại
+            if (refreshTokenEntity != null)
+            {
+                await _unitOfWork.RefreshTokens.RemoveTokenAsync(refreshTokenEntity);
+                await _unitOfWork.SaveAsync();
+            }
+
+            return new ResponseDto
+            {
+                IsSuccess = false,
+                Message = "Refresh token expired, please login again",
+                StatusCode = 401
+            };
+        }
+
         // Tạo access token mới
         var userToUpdate = await _userManager.FindByIdAsync(userId);
         var newAccessToken = await _tokenService.GenerateJwtAccessTokenAsync(userToUpdate);
 
-        if (refreshTokenEntity == null || refreshTokenEntity.Expires < DateTime.Now)
+        // Trả về access token mới cùng với refresh token cũ
+        return new ResponseDto
         {
-            // Nếu refresh token đã hết hạn, tạo refresh token mới
-            var newRefreshToken = await _tokenService.GenerateJwtRefreshTokenAsync(userToUpdate);
-
-            return new ResponseDto
+            IsSuccess = true,
+            Message = "Token refreshed successfully",
+            StatusCode = 200,
+            Result = new
             {
-                IsSuccess = true,
-                Message = "Token refreshed successfully, new refresh token created",
-                StatusCode = 200,
-                Result = new { AccessToken = newAccessToken, RefreshToken = newRefreshToken }
-            };
-        }
-        else
-        {
-            // Nếu refresh token vẫn còn hiệu lực, không cần tạo token mới
-            return new ResponseDto
-            {
-                IsSuccess = true,
-                Message = "Token refreshed successfully, using existing refresh token",
-                StatusCode = 200,
-                Result = new { AccessToken = newAccessToken, RefreshToken = refreshTokenDto.RefreshToken } // Trả refresh token cũ
-            };
-        }
+                AccessToken = newAccessToken,
+                RefreshToken = refreshTokenDto.RefreshToken // Trả lại refresh token cũ
+            }
+        };
     }
 
 
@@ -550,9 +570,10 @@ public class AuthService : IAuthService
     /// <param name="email"></param>
     /// <param name="confirmationLink"></param>
     /// <returns></returns>
-    public async Task<ResponseDto> SendVerifyEmail(string email, string confirmationLink)
+    public async Task<ResponseDto> SendVerifyEmail(string email, string userId, string token)
     {
-        await _emailService.SendVerifyEmail(email, confirmationLink);
+        // Gọi EmailService để gửi email xác nhận
+        await _emailService.SendVerifyEmail(email, userId, token);
         return new()
         {
             Message = "Send verify email successfully",
@@ -584,7 +605,7 @@ public class AuthService : IAuthService
             };
         }
 
-        string decodedToken = HttpUtility.UrlDecode(token);
+        string decodedToken = Uri.UnescapeDataString(token);
 
         var confirmResult = await _userManager.ConfirmEmailAsync(user, decodedToken);
 
@@ -632,14 +653,14 @@ public class AuthService : IAuthService
         if (newPassword != confirmNewPassword)
         {
             return new ResponseDto
-            { IsSuccess = false, Message = "New password and confirm new password not match." };
+                { IsSuccess = false, Message = "New password and confirm new password not match." };
         }
 
         // Không cho phép thay đổi mật khẩu cũ
         if (newPassword == oldPassword)
         {
             return new ResponseDto
-            { IsSuccess = false, Message = "New password cannot be the same as the old password." };
+                { IsSuccess = false, Message = "New password cannot be the same as the old password." };
         }
 
         // Thực hiện thay đổi mật khẩu
@@ -1115,7 +1136,6 @@ public class AuthService : IAuthService
 
                 var userInfoDto = new GetUserDto
                 {
-
                     Id = user.Id,
                     FullName = user.FullName,
                     Email = user.Email,

@@ -23,4 +23,6 @@ public interface ITicketService
     Task<ResponseDto> DeleteTicket(ClaimsPrincipal user, Guid ticketId);
     Task<ResponseDto> UploadTicketImage(ClaimsPrincipal user, Guid ticketId, UploadTicketImgDto uploadTicketImgDto);
     Task<MemoryStream> GetTicketImage(ClaimsPrincipal user, Guid ticketId);
+    Task<ResponseDto> AcceptTicket(ClaimsPrincipal user, Guid ticketId);
+    Task<ResponseDto> RejectTicket(ClaimsPrincipal user, Guid ticketId);
 }

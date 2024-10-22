@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Ticket_Hub.Models.DTO;
 using Ticket_Hub.Models.DTO.Ticket;
 using Ticket_Hub.Services.IServices;
+using Ticket_Hub.Utility.Constants;
 
 namespace Ticket_Hub.API.Controllers
 {
@@ -109,6 +111,12 @@ namespace Ticket_Hub.API.Controllers
             return StatusCode(responseDto.StatusCode, responseDto);
         }
         
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ticketId"></param>
+        /// <param name="uploadTicketImgDto"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route("{ticketId}/upload-image")]
         public async Task<ActionResult<ResponseDto>> UploadTicketImage
@@ -126,6 +134,12 @@ namespace Ticket_Hub.API.Controllers
                 );
             return StatusCode(responseDto.StatusCode, responseDto);
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ticketId"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("{ticketId}/display-image")]
         public async Task<ActionResult> DisplayTicketImage
@@ -141,6 +155,34 @@ namespace Ticket_Hub.API.Controllers
 
             return File(responseDto, "image/png");
         }
+
+        /// <summary>
+        /// Accept a ticket
+        /// </summary>
+        /// <param name="ticketId"></param>
+        /// <returns></returns>
+        [HttpPost("{ticketId}/accept")]
+        [Authorize(Roles = StaticUserRoles.Admin)]
+        public async Task<ActionResult<ResponseDto>> AcceptTicket([FromRoute] Guid ticketId)
+        {
+            var responseDto = await _ticketService.AcceptTicket(User, ticketId);
+            return StatusCode(responseDto.StatusCode, responseDto);
+        }
+
+        /// <summary>
+        /// Reject a ticket
+        /// </summary>
+        /// <param name="ticketId"></param>
+        /// <returns></returns>
+        [HttpPost("{ticketId}/reject")]
+        [Authorize(Roles = StaticUserRoles.Admin)]
+        public async Task<ActionResult<ResponseDto>> RejectTicket([FromRoute] Guid ticketId)
+        {
+            var responseDto = await _ticketService.RejectTicket(User, ticketId);
+            return StatusCode(responseDto.StatusCode, responseDto);
+        }
+
+
 
     }
 }
