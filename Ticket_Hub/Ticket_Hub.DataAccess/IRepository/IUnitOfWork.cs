@@ -13,5 +13,7 @@ public interface IUnitOfWork
     IFeedbackRepository FeedbackRepository { get; }
     IFavouriteRepository FavoriteRepository { get; }
     IMessageRepository MessageRepository { get; }
+    ICartHeaderRepository CartHeaderRepository { get; }
+    ICartDetailRepository CartDetailRepository { get; }
     Task<int> SaveAsync();
 }
