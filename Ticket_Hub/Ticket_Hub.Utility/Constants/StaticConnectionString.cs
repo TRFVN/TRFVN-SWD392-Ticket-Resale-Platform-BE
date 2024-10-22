@@ -3,4 +3,5 @@
 public class StaticConnectionString
 {
     public const string SqldbDefaultConnection = "DefaultConnection";
+    public const string SqldbDefaultConnectionAzure = "DefaultConnectionAzure";
 }

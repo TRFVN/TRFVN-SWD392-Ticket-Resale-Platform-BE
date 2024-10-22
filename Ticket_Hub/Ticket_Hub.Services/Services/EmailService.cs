@@ -50,12 +50,17 @@ public class EmailService : IEmailService
         }
     }
 
-    public async Task<bool> SendVerifyEmail(string toMail, string confirmationLink)
+    public async Task<bool> SendVerifyEmail(string toMail, string userId, string token)
     {
-        return await SendEmailFromTemplate(toMail, "SendVerifyEmail", confirmationLink);
+        // Tạo confirmationLink với domain của frontend
+        string frontendDomain = "http://localhost:5173";
+        string confirmationLink = $"{frontendDomain}/verifyemail?token={token}&userId={userId}";
+
+        // Gọi SendEmailFromTemplate và truyền các tham số userId và token
+        return await SendEmailFromTemplate(toMail, "SendVerifyEmail", userId, confirmationLink);
     }
 
-        public async Task<bool> SendEmailResetAsync(string toEmail, string subject, ApplicationUser user,
+    public async Task<bool> SendEmailResetAsync(string toEmail, string subject, ApplicationUser user,
         string currentDate, string resetLink,
         string operatingSystem, string browser, string ip, string region, string city, string country)
     {
@@ -166,30 +171,267 @@ public class EmailService : IEmailService
         }
     }
 
-    private async Task<bool> SendEmailFromTemplate(string toMail, string templateName, string replacementValue)
+    private async Task<bool> SendEmailFromTemplate(string toMail, string templateName, string userId, string token)
     {
-        // Truy vấn cơ sở dữ liệu để lấy template
         var template = await _unitOfWork.EmailTemplateRepository.GetAsync(t => t.TemplateName == templateName);
-
         if (template == null)
         {
-            // Xử lý khi template không tồn tại
             throw new Exception("Email template not found");
         }
 
-        // Sử dụng thông tin từ template để tạo email
+        string callToAction = template.CallToAction
+            .Replace("{{UserId}}", Uri.EscapeDataString(userId))
+            .Replace("{{Token}}", Uri.EscapeDataString(token));
         string subject = template.SubjectLine;
         string body = $@"
-    <html>
-    <body>
-        <h1>{template.SubjectLine}</h1>
-        <h2>{template.PreHeaderText}</h2>
-        <p>{template.BodyContent}</p>
-        <p><a href='{replacementValue}' style='padding: 20px 20px; color: white; background-color: #007BFF; text-decoration: none;'>{template.CallToAction.Replace("{Login}", replacementValue)}</a></p>
-        {template.FooterContent}
-    </body>
-    </html>";
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>{subject}</title>
+    <!--[if mso]>
+    <noscript>
+        <xml>
+            <o:OfficeDocumentSettings>
+                <o:PixelsPerInch>96</o:PixelsPerInch>
+            </o:OfficeDocumentSettings>
+        </xml>
+    </noscript>
+    <![endif]-->
+    <style>
+        /* Reset CSS */
+        body, table, td, p, a, li, blockquote {{
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+            margin: 0;
+            padding: 0;
+        }}
+        
+        /* Base Styles */
+        body {{
+            margin: 0 !important;
+            padding: 0 !important;
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            width: 100% !important;
+            -webkit-font-smoothing: antialiased;
+        }}
 
+        /* Main Container */
+        .email-container {{
+            max-width: 600px !important;
+            margin: 0 auto;
+            padding: 20px;
+        }}
+
+        /* Card Container */
+        .card {{
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 20px 0;
+            overflow: hidden;
+        }}
+
+        /* Header Styles */
+        .header {{
+            background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+            padding: 40px 20px;
+            text-align: center;
+        }}
+
+        .header img {{
+            width: 180px;
+            height: auto;
+            margin-bottom: 20px;
+        }}
+
+        .header h1 {{
+            color: #ffffff;
+            font-size: 28px;
+            font-weight: 600;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }}
+
+        /* Content Styles */
+        .content {{
+            padding: 40px 30px;
+            background: #ffffff;
+        }}
+
+        .welcome-text {{
+            font-size: 18px;
+            color: #1f2937;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }}
+
+        /* Button Styles */
+        .button-container {{
+            text-align: center;
+            margin: 35px 0;
+        }}
+
+        .button {{
+            background: #f97316;
+            color: #ffffff !important;
+            padding: 16px 32px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            display: inline-block;
+            box-shadow: 0 4px 6px rgba(249, 115, 22, 0.2);
+            transition: all 0.3s ease;
+        }}
+
+        .button:hover {{
+            background: #fb923c;
+            box-shadow: 0 6px 8px rgba(249, 115, 22, 0.3);
+        }}
+
+        /* Information Box */
+        .info-box {{
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+            border-left: 4px solid #f97316;
+        }}
+
+        .info-box p {{
+            margin: 0;
+            color: #64748b;
+            font-size: 14px;
+        }}
+
+        /* Footer Styles */
+        .footer {{
+            background: #f8fafc;
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #e2e8f0;
+        }}
+
+        .social-links {{
+            margin-bottom: 20px;
+        }}
+
+        .social-link {{
+            display: inline-block;
+            margin: 0 10px;
+        }}
+
+        .footer-text {{
+            color: #64748b;
+            font-size: 14px;
+            margin: 10px 0;
+        }}
+
+        .footer-links {{
+            margin-top: 15px;
+        }}
+
+        .footer-link {{
+            color: #f97316;
+            text-decoration: none;
+            margin: 0 10px;
+            font-size: 14px;
+        }}
+
+        /* Responsive Design */
+        @media screen and (max-width: 600px) {{
+            .email-container {{
+                width: 100% !important;
+                padding: 10px !important;
+            }}
+
+            .content {{
+                padding: 30px 20px !important;
+            }}
+
+            .header h1 {{
+                font-size: 24px !important;
+            }}
+
+            .button {{
+                padding: 14px 28px !important;
+                font-size: 15px !important;
+            }}
+        }}
+    </style>
+</head>
+<body>
+    <div class='email-container'>
+        <div class='card'>
+            <!-- Header -->
+            <div class='header'>
+                <img src='https://yourwebsite.com/logo.png' alt='Ticket Hub Logo' />
+                <h1>Verify Your Email Address</h1>
+            </div>
+
+            <!-- Content -->
+            <div class='content'>
+                <p class='welcome-text'>
+                    Welcome to Ticket Hub! We're excited to have you on board. To get started, please verify your email address by clicking the button below.
+                </p>
+
+                <!-- Call to Action Button -->
+                <div class='button-container'>
+                    {callToAction}
+                </div>
+
+                <!-- Information Box -->
+                <div class='info-box'>
+                    <p>🔒 This verification link will expire in 24 hours for security reasons.</p>
+                    <p>If you didn't create a Ticket Hub account, you can safely ignore this email.</p>
+                </div>
+
+                <!-- Additional Information -->
+                <p style='color: #64748b; font-size: 14px; margin-top: 25px;'>
+                    If you're having trouble clicking the button, copy and paste this URL into your browser:
+                    <br>
+                    <a href='https://localhost:5173/verifyemail?userId={Uri.EscapeDataString(userId)}&token={Uri.EscapeDataString(token)}' style='color: #f97316; word-break: break-all;'>
+                        https://localhost:5173/verifyemail?userId={Uri.EscapeDataString(userId)}&token={Uri.EscapeDataString(token)}
+                    </a>
+                </p>
+            </div>
+
+            <!-- Footer -->
+            <div class='footer'>
+                <div class='social-links'>
+                    <a href='#' class='social-link'><img src='https://yourwebsite.com/facebook-icon.png' alt='Facebook' width='32' height='32'></a>
+                    <a href='#' class='social-link'><img src='https://yourwebsite.com/twitter-icon.png' alt='Twitter' width='32' height='32'></a>
+                    <a href='#' class='social-link'><img src='https://yourwebsite.com/instagram-icon.png' alt='Instagram' width='32' height='32'></a>
+                </div>
+                
+                <p class='footer-text'>
+                    This email was sent to you because you signed up for a Ticket Hub account.
+                    <br>
+                    © 2024 Ticket Hub. All rights reserved.
+                </p>
+
+                <div class='footer-links'>
+                    <a href='#' class='footer-link'>Privacy Policy</a>
+                    <a href='#' class='footer-link'>Terms of Service</a>
+                    <a href='#' class='footer-link'>Contact Support</a>
+                </div>
+
+                <p class='footer-text' style='margin-top: 20px;'>
+                    Ticket Hub, Inc.<br>
+                    123 Ticket Street, Suite 100<br>
+                    San Francisco, CA 94105
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>";
         return await SendEmailToClientAsync(toMail, subject, body);
     }
 

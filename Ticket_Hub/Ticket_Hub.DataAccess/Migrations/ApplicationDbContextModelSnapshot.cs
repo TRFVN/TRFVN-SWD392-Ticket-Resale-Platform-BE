@@ -286,7 +286,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                             AvatarUrl = "https://example.com/avatar.png",
                             BirthDate = new DateTime(1990, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Cccd = "123456789123",
-                            ConcurrencyStamp = "7633f93a-5a4d-4727-b98a-9b32d016e3fc",
+                            ConcurrencyStamp = "2ee7554c-2774-48d1-8832-141caa4fb7b8",
                             Country = "Country",
                             Email = "admin@gmail.com",
                             EmailConfirmed = true,
@@ -294,10 +294,10 @@ namespace Ticket_Hub.DataAccess.Migrations
                             LockoutEnabled = true,
                             NormalizedEmail = "ADMIN@GMAIL.COM",
                             NormalizedUserName = "ADMIN@GMAIL.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEGITy3BjfwlKWK1BpN149eNnHBi3Dz1s748ilUwCzt1n0v2CD2riNuCpBpZ+tkvXyQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEGTx8gx26/54lNZ0pPwLBSIhp3OdvnjGQMF+yX352nCmt1XsPUMADzuRq8TdHd0ShA==",
                             PhoneNumber = "1234567890",
                             PhoneNumberConfirmed = true,
-                            SecurityStamp = "1b745f70-d3be-474d-b5fd-475a6536fc55",
+                            SecurityStamp = "b454a122-8d0c-426d-a05f-a7831a2ae7a0",
                             TwoFactorEnabled = false,
                             UserName = "admin@gmail.com"
                         });
@@ -479,7 +479,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("55c31e0d-1a8a-4eb3-a501-c146bc584c55"),
+                            Id = new Guid("8803389c-725e-4c0d-b2f0-9f1f12398436"),
                             BodyContent = "Dear [UserFullName],<br><br>Welcome to Ticket Hub!  We are thrilled to have you as part of our community dedicated to providing the best ticket-buying and reselling experience.",
                             CallToAction = "<a href=\"{{VerificationLink}}\">Verify Your Email</a>",
                             Category = "Welcome",
@@ -496,7 +496,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                         },
                         new
                         {
-                            Id = new Guid("d7f02bbd-b60b-4f5b-a2ee-ddb70da6527a"),
+                            Id = new Guid("f5f626cd-604b-4ab7-aa44-136aaf73d27c"),
                             BodyContent = "Hi [UserFullName],<br><br>We received a request to reset your password. Click the link below to reset your password.",
                             CallToAction = "https://cursuslms.xyz/sign-in/verify-email?userId=user.Id&token=Uri.EscapeDataString(token)",
                             Category = "Security",
@@ -513,9 +513,9 @@ namespace Ticket_Hub.DataAccess.Migrations
                         },
                         new
                         {
-                            Id = new Guid("c6e93f17-db5c-4fe7-aa3e-37da28327e1a"),
-                            BodyContent = "<p>Thank you for registering your Ticket Hub account. Click here to go back the page</p>",
-                            CallToAction = "<a href=\"{{Login}}\">Login now</a>",
+                            Id = new Guid("177b607a-68a9-4a1f-87ce-12034654b9d0"),
+                            BodyContent = "<p>Thank you for registering your Ticket Hub account. Click here to verify your email.</p>",
+                            CallToAction = "<a href=\"https://localhost:5173/verifyemail?userId={UserId}&token={Token}\" class='button'>Verify Email</a>",
                             Category = "Verify",
                             FooterContent = "<p>Contact us at tickethub4@gmail.com</p>",
                             Language = "English",
@@ -580,8 +580,23 @@ namespace Ticket_Hub.DataAccess.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("CreatedTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
                     b.Property<Guid>("TicketId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedTime")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -823,6 +838,9 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.Property<Guid>("EventId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("IsVisible")
+                        .HasColumnType("bit");
+
                     b.Property<string>("SerialNumber")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -835,6 +853,10 @@ namespace Ticket_Hub.DataAccess.Migrations
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("TicketImage")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("TicketName")
                         .IsRequired()
@@ -861,30 +883,6 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Tickets");
-                });
-
-            modelBuilder.Entity("Ticket_Hub.Models.Models.TicketDetail", b =>
-                {
-                    b.Property<Guid>("TicketDetailId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("PurchaseDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("TicketId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("TicketImageUrl")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.HasKey("TicketDetailId");
-
-                    b.HasIndex("TicketId");
-
-                    b.ToTable("TicketDetails");
                 });
 
             modelBuilder.Entity("Ticket_Hub.Models.Models.Transactions", b =>
@@ -1158,17 +1156,6 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.Navigation("Category");
 
                     b.Navigation("Event");
-                });
-
-            modelBuilder.Entity("Ticket_Hub.Models.Models.TicketDetail", b =>
-                {
-                    b.HasOne("Ticket_Hub.Models.Models.Ticket", "Ticket")
-                        .WithMany()
-                        .HasForeignKey("TicketId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Ticket");
                 });
 
             modelBuilder.Entity("Ticket_Hub.Models.Models.Transactions", b =>

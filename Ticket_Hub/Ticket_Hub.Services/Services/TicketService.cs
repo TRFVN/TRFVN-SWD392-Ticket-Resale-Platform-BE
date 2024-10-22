@@ -1,10 +1,13 @@
 ﻿using System.Security.Claims;
 using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
 using Ticket_Hub.Models.DTO;
 using Ticket_Hub.Models.DTO.Ticket;
 using Ticket_Hub.Models.Models;
 using Ticket_Hub.Services.IServices;
+using Ticket_Hub.Utility.Constants;
 
 namespace Ticket_Hub.Services.Services;
 
@@ -12,13 +15,14 @@ public class TicketService : ITicketService
 {
     private readonly IUnitOfWork _unitOfWork;
     private IMapper _mapper;
-    private UserManager<ApplicationUser> _userManager;
+    private readonly IFirebaseService _firebaseService;
 
-    public TicketService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<ApplicationUser> userManager)
+
+    public TicketService(IUnitOfWork unitOfWork, IMapper mapper, IFirebaseService firebaseService)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
-        _userManager = userManager;
+        _firebaseService = firebaseService;
     }
 
     public async Task<ResponseDto> GetTickets
@@ -128,7 +132,8 @@ public class TicketService : ITicketService
             TicketQuantity = ticket.TicketQuantity,
             TicketDescription = ticket.TicketDescription,
             SerialNumber = ticket.SerialNumber,
-            Status = ticket.Status
+            Status = ticket.Status,
+            IsVisible = ticket.IsVisible
         }).ToList();
 
         return new ResponseDto()
@@ -191,7 +196,8 @@ public class TicketService : ITicketService
             TicketQuantity = createTicketDto.TicketQuantity,
             TicketDescription = createTicketDto.TicketDescription,
             SerialNumber = createTicketDto.SerialNumber,
-            Status = createTicketDto.Status
+            Status = TicketStatus.Processing,
+            IsVisible = true
         };
 
         await _unitOfWork.TicketRepository.AddAsync(ticket);
@@ -230,7 +236,8 @@ public class TicketService : ITicketService
         ticketId.SerialNumber = updateTicketDto.SerialNumber;
         ticketId.EventId = updateTicketDto.EventId;
         ticketId.CategoryId = updateTicketDto.CategoryId;
-        ticketId.Status = 1;
+        ticketId.Status = TicketStatus.Processing;
+        ticketId.IsVisible = true;
 
 
         // thay đổi dữ liệu
@@ -273,9 +280,7 @@ public class TicketService : ITicketService
             };
         }
 
-        tId.Status = 1;
-        //ticketID.UpdatedBy = User.Identity.Name;
-        //ticketID.UpdatedTime = DateTime.Now;
+        tId.IsVisible = false;
 
         _unitOfWork.TicketRepository.Update(tId);
         await _unitOfWork.SaveAsync();
@@ -286,6 +291,127 @@ public class TicketService : ITicketService
             Result = tId,
             IsSuccess = true,
             StatusCode = 201
+        };
+    }
+
+    public async Task<ResponseDto> UploadTicketImage
+    (
+        ClaimsPrincipal user,
+        Guid ticketId,
+        UploadTicketImgDto uploadTicketImgDto
+    )
+    {
+        if (uploadTicketImgDto.File == null)
+        {
+            return new ResponseDto()
+            {
+                IsSuccess = false,
+                StatusCode = 400,
+                Message = "No file uploaded."
+            };
+        }
+
+        var ticket = await _unitOfWork.TicketRepository.GetAsync(t => t.TicketId == ticketId);
+        if (ticket == null)
+        {
+            return new ResponseDto()
+            {
+                Message = "Ticket not found",
+                Result = null,
+                IsSuccess = false,
+                StatusCode = 404 // Not Found
+            };
+        }
+
+        //var filePath = $"Ticket/{ticketId}/Images";
+        var responseDto = await _firebaseService.UploadImage(uploadTicketImgDto.File, StaticFirebaseFolders.TicketImages);
+        if (!responseDto.IsSuccess)
+        {
+            return new ResponseDto()
+            {
+                Message = "Image upload failed!",
+                Result = null,
+                IsSuccess = false,
+                StatusCode = 400 // Bad Request
+            };
+        }
+
+        ticket.TicketImage = responseDto.Result?.ToString();
+        _unitOfWork.TicketRepository.Update(ticket);
+        await _unitOfWork.SaveAsync();
+
+        return new ResponseDto()
+        {
+            Message = "Upload ticket image successfully!",
+            Result = null,
+            IsSuccess = true,
+            StatusCode = 200 // OK
+        };
+    }
+
+    public async Task<MemoryStream> GetTicketImage(ClaimsPrincipal user, Guid ticketId)
+    {
+        var ticket = await _unitOfWork.TicketRepository.GetAsync(t => t.TicketId == ticketId);
+        if (ticket != null && ticket.TicketImage.IsNullOrEmpty())
+        {
+            return null;
+        }
+
+        var image = await _firebaseService.GetImage(ticket.TicketImage);
+        return image;
+    }
+
+    public async Task<ResponseDto> AcceptTicket(ClaimsPrincipal user, Guid ticketId)
+    {
+        var ticket = await _unitOfWork.TicketRepository.GetAsync(t => t.TicketId == ticketId);
+        if (ticket == null)
+        {
+            return new ResponseDto()
+            {
+                Message = "Ticket not found",
+                Result = null,
+                IsSuccess = false,
+                StatusCode = 404
+            };
+        }
+
+        ticket.Status = TicketStatus.Success;
+        _unitOfWork.TicketRepository.Update(ticket);
+        await _unitOfWork.SaveAsync();
+
+        return new ResponseDto()
+        {
+            Message = "Ticket Accepted successfully",
+            Result = null,
+            IsSuccess = true,
+            StatusCode = 200
+        };
+    }
+
+    public async Task<ResponseDto> RejectTicket(ClaimsPrincipal user, Guid ticketId)
+    {
+        var ticket = await _unitOfWork.TicketRepository.GetAsync(t => t.TicketId == ticketId);
+        if (ticket == null)
+        {
+            return new ResponseDto()
+            {
+                Message = "Ticket not found",
+                Result = null,
+                IsSuccess = false,
+                StatusCode = 404
+            };
+        }
+
+        ticket.Status = TicketStatus.Rejected;
+        _unitOfWork.TicketRepository.Update(ticket);
+        await _unitOfWork.SaveAsync();
+
+        return new ResponseDto()
+        {
+            Message = "Ticket Rejected successfully",
+            Result = null,
+            IsSuccess = true,
+            StatusCode = 200
         };
     }
 }

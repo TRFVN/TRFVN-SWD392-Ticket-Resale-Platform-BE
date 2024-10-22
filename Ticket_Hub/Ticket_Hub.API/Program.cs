@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Ticket_Hub.DataAccess.Context;
@@ -7,10 +7,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Ticket_Hub.API.Extension;
-using Ticket_Hub.API.Middleware;
 using Ticket_Hub.Models.Models;
 using Ticket_Hub.Services.Mappings;
-using Ticket_Hub.Services.Services;
+using Ticket_Hub.Models.DTO.Hubs;
 
 namespace Ticket_Hub.API
 {
@@ -24,11 +23,16 @@ namespace Ticket_Hub.API
 
             builder.Services.AddControllers();
 
+            //HttpContextAccessor
+            builder.Services.AddHttpContextAccessor();
+
+            builder.Services.AddHttpClient();
+
             // Configure DbContext with SQL Server
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlServer(
-                    builder.Configuration.GetConnectionString(StaticConnectionString.SqldbDefaultConnection));
+                    builder.Configuration.GetConnectionString(StaticConnectionString.SqldbDefaultConnectionAzure));
             });
 
             // Register AutoMapper
@@ -39,6 +43,8 @@ namespace Ticket_Hub.API
 
             // Register Firebase Service
             builder.Services.AddFirebaseService();
+
+
 
             // Configure Identity
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -67,6 +73,8 @@ namespace Ticket_Hub.API
 
             builder.Services.AddAuthorization();
 
+            // Thêm dịch vụ SignalR
+            builder.Services.AddSignalR();
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(options =>
@@ -97,12 +105,29 @@ namespace Ticket_Hub.API
                 });
             });
 
+
+            // Configure CORS
+            var corsOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy", builder =>
+                {
+                    builder
+                        .WithOrigins("https://localhost:5173", "https://localhost:7027")
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials()
+                        .SetIsOriginAllowed(_ => true); // Cẩn thận với cài đặt này trong môi trường production
+                });
+            });
+
+
             var app = builder.Build();
 
-            app.UseMiddleware<ErrorHandlerMiddleware>();
+            //app.UseMiddleware<ErrorHandlerMiddleware>();
 
             // Apply database migrations
-            ApplyMigration(app);
+            //ApplyMigration(app);
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -111,10 +136,49 @@ namespace Ticket_Hub.API
                 app.UseSwaggerUI();
             }
 
+            app.UseSwagger();
+            app.UseSwaggerUI();
+
+            // Middleware để xử lý CORS
+            app.Use(async (context, next) =>
+            {
+                var loggerFactory = context.RequestServices.GetRequiredService<ILoggerFactory>();
+                var logger = loggerFactory.CreateLogger("CORSMiddleware");
+
+                logger.LogInformation($"Request from origin: {context.Request.Headers["Origin"]}");
+                logger.LogInformation($"Request method: {context.Request.Method}");
+                logger.LogInformation($"Request path: {context.Request.Path}");
+
+                if (context.Request.Method == "OPTIONS")
+                {
+                    context.Response.Headers.Add("Access-Control-Allow-Origin", context.Request.Headers["Origin"]);
+                    context.Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type, Accept, Authorization");
+                    context.Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+                    context.Response.Headers.Add("Access-Control-Allow-Credentials", "true");
+                    context.Response.StatusCode = 200;
+                    await context.Response.CompleteAsync();
+                }
+                else
+                {
+                    await next();
+                }
+
+                if (context.Response.Headers.ContainsKey("Access-Control-Allow-Origin"))
+                {
+                    logger.LogInformation($"Response Access-Control-Allow-Origin: {context.Response.Headers["Access-Control-Allow-Origin"]}");
+                }
+            });
+
+            // Đặt UseCors ngay sau middleware này
+            app.UseCors("CorsPolicy");
+
+
             app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseAuthorization();
 
+            // Thêm cấu hình SignalR endpoint
+            app.MapHub<NotificationHub>("/notificationHub");
 
             app.MapControllers();
 

@@ -1,12 +1,13 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Ticket_Hub.Models.DTO;
 using Ticket_Hub.Models.DTO.Auth;
 using Ticket_Hub.Models.Models;
 using Ticket_Hub.Services.IServices;
+using Ticket_Hub.Services.Services;
+using Ticket_Hub.Utility.Constants;
 
 namespace Ticket_Hub.API.Controllers
 {
@@ -16,11 +17,13 @@ namespace Ticket_Hub.API.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IAuthService _authService;
+        private readonly IEmailService _emailService;
 
-        public AuthController(UserManager<ApplicationUser> userManager, IAuthService authService)
+        public AuthController(UserManager<ApplicationUser> userManager, IAuthService authService, IEmailService emailService)
         {
             _userManager = userManager;
             _authService = authService;
+            _emailService = emailService;
         }
 
         /// <summary>
@@ -28,7 +31,7 @@ namespace Ticket_Hub.API.Controllers
         /// </summary>
         /// <param name="registerDto"></param>
         /// <returns></returns>
-        [HttpPost("users")]
+        [HttpPost("sign-up")]
         public async Task<ActionResult<ResponseDto>> SignUp([FromBody] RegisterDto registerDto)
         {
             if (!ModelState.IsValid)
@@ -81,6 +84,42 @@ namespace Ticket_Hub.API.Controllers
             return StatusCode(responseDto.StatusCode, responseDto);
         }
 
+
+        /// <summary>
+        /// RefreshToken
+        /// </summary>
+        /// <param name="refreshTokenDto"></param>
+        /// <returns></returns>
+        [HttpPost("refresh-token")]
+        public async Task<ActionResult<ResponseDto>> RefreshToken([FromBody] RefreshTokenDto refreshTokenDto)
+        {
+            if (string.IsNullOrEmpty(refreshTokenDto.RefreshToken))
+            {
+                return BadRequest(new ResponseDto
+                {
+                    IsSuccess = false,
+                    Message = "Refresh token is required.",
+                    StatusCode = 400
+                });
+            }
+
+            var responseDto = await _authService.RefreshToken(refreshTokenDto);
+            return StatusCode(responseDto.StatusCode, responseDto);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        [HttpGet("FetchUserByToken")]
+        public async Task<IActionResult> FetchUserByToken(string token)
+        {
+            var result = await _authService.FetchUserByToken(token);
+            var responseDto = await _authService.FetchUserByToken(token);
+            return StatusCode(responseDto.StatusCode, responseDto);
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -91,16 +130,16 @@ namespace Ticket_Hub.API.Controllers
         //[Authorize]
         public async Task<ActionResult<ResponseDto>> UploadUserAvatar(AvatarUploadDto avatarUploadDto)
         {
-            var response = await _authService.UploadUserAvatar(avatarUploadDto.File, User);
-            return StatusCode(response.StatusCode, response);
+            var responseDto = await _authService.UploadUserAvatar(avatarUploadDto.File, User);
+            return StatusCode(responseDto.StatusCode, responseDto);
         }
-        
+
         /// <summary>
         /// Get User Avatar.
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [Route("user/avatar")] 
+        [Route("user/avatar")]
         //[Authorize]
         public async Task<IActionResult> GetUserAvatar()
         {
@@ -112,7 +151,7 @@ namespace Ticket_Hub.API.Controllers
 
             return File(stream, "image/png");
         }
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -120,29 +159,45 @@ namespace Ticket_Hub.API.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("send-verify-email")]
-        public async Task<ActionResult<ResponseDto>> SendVerifyEmail([FromBody] SendVerifyEmailDto email)
+        public async Task<ActionResult<ResponseDto>> SendVerifyEmail([FromBody] SendVerifyEmailDto emailDto)
         {
-            var user = await _userManager.FindByEmailAsync(email.Email);
+            var user = await _userManager.FindByEmailAsync(emailDto.Email);
+            if (user == null)
+            {
+                return NotFound(new ResponseDto
+                {
+                    IsSuccess = false,
+                    Message = "User not found",
+                    StatusCode = 404,
+                    Result = null
+                });
+            }
+
             if (user.EmailConfirmed)
             {
-                return new ResponseDto()
+                return new ResponseDto
                 {
                     IsSuccess = true,
-                    Message = "Your email has been confirmed",
+                    Message = "Your email has already been confirmed",
                     StatusCode = 200,
-                    Result = email
+                    Result = null
                 };
             }
+
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
-            var confirmationLink =
-                $"{Request.Scheme}://{Request.Host}/user/sign-in/verify-email?userId={Uri.EscapeDataString(user.Id)}&token={Uri.EscapeDataString(token)}";
+            // Gọi service để gửi email xác nhận
+            await _authService.SendVerifyEmail(user.Email, user.Id, token);
 
-            var responseDto = await _authService.SendVerifyEmail(user.Email, confirmationLink);
-
-            return StatusCode(responseDto.StatusCode, responseDto);
+            return new ResponseDto
+            {
+                IsSuccess = true,
+                Message = "Verification email sent successfully.",
+                StatusCode = 200,
+                Result = null
+            };
         }
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -159,7 +214,7 @@ namespace Ticket_Hub.API.Controllers
             var responseDto = await _authService.VerifyEmail(userId, token);
             return StatusCode(responseDto.StatusCode, responseDto);
         }
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -173,58 +228,83 @@ namespace Ticket_Hub.API.Controllers
             // Lấy Id người dùng hiện tại.
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var response = await _authService.ChangePassword(userId, changePasswordDto.OldPassword,
+            var responseDto = await _authService.ChangePassword(userId, changePasswordDto.OldPassword,
                 changePasswordDto.NewPassword, changePasswordDto.ConfirmNewPassword);
 
-            if (response.IsSuccess)
+            if (responseDto.IsSuccess)
             {
-                return Ok(response.Message);
+                return Ok(responseDto.Message);
             }
             else
             {
-                return BadRequest(response.Message);
+                return BadRequest(responseDto.Message);
             }
         }
         
-        [HttpGet]
-        [Route("ForgotPassword")]
-        public async Task<ActionResult<ResponseDto>> ForgotPassword(string email)
-        {
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user is null)
-            {
-                return new ResponseDto()
-                {
-                    IsSuccess = false,
-                    Message = "Email is not exist",
-                    StatusCode = 404
-                };
-            }
-
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-
-            var confirmationLink =
-                $"{Request.Scheme}://{Request.Host}/user/sign-in/reset-password?userId={Uri.EscapeDataString(user.Id)}&token={Uri.EscapeDataString(token)}";
-
-            var responseDto = await _authService.SendVerifyEmail(user.Email, confirmationLink);
-
-            return StatusCode(responseDto.StatusCode, responseDto);
-        }
-        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="forgotPasswordDto"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route("forgot-password")]
         public async Task<ActionResult<ResponseDto>> ForgotPassword([FromBody] ForgotPasswordDto forgotPasswordDto)
         {
-            var result = await _authService.ForgotPassword(forgotPasswordDto);
-            return StatusCode(result.StatusCode, result);
+            var responseDto = await _authService.ForgotPassword(forgotPasswordDto);
+            return StatusCode(responseDto.StatusCode, responseDto);
         }
         
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="resetPasswordDto"></param>
+        /// <returns></returns>
         [HttpPost("reset-password")]
         public async Task<ActionResult<ResponseDto>> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
         {
-            var result = await _authService.ResetPassword(resetPasswordDto.Email, resetPasswordDto.Token,
+            var responseDto = await _authService.ResetPassword(resetPasswordDto.Email, resetPasswordDto.Token,
                 resetPasswordDto.Password);
-            return StatusCode(result.StatusCode, result);
+            return StatusCode(responseDto.StatusCode, responseDto);
+        }
+        
+        /// <summary>
+        /// Lock User.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPost("lock-user")]
+        [Authorize(Roles = StaticUserRoles.Admin)]
+        public async Task<ActionResult<ResponseDto>> LockUser(string id)
+        {
+            var responseDto = await _authService.LockUser(id);
+            return StatusCode(responseDto.StatusCode, responseDto);
+        }
+        
+        /// <summary>
+        /// Unlock User.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPost("unlock-user")]
+        [Authorize(Roles = StaticUserRoles.Admin)]
+        public async Task<ActionResult<ResponseDto>> UnlockUser(string id)
+        {
+            var responseDto = await _authService.UnlockUser(id);
+            return StatusCode(responseDto.StatusCode, responseDto);
+        }
+        
+        [HttpGet]
+        [Authorize(Roles = StaticUserRoles.Admin)]
+        public async Task<ActionResult<ResponseDto>> GetAllUsers(
+            [FromQuery] string? filterOn,
+            [FromQuery] string? filterQuery,
+            [FromQuery] string? sortBy,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10
+        )
+        {
+            var responseDto = await _authService.GetAllUsers(filterOn, filterQuery, sortBy, pageNumber, pageSize);
+            return StatusCode(responseDto.StatusCode, responseDto);
         }
     }
 }

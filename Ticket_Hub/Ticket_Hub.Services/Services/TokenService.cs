@@ -28,29 +28,41 @@ public class TokenService : ITokenService
     {
         var userRoles = await _userManager.GetRolesAsync(user);
 
+        // Danh sách các claims
         var authClaims = new List<Claim>
-        {
-            new Claim(ClaimTypes.Name, user.UserName),
-            new Claim(ClaimTypes.NameIdentifier, user.Id)
-        };
+    {
+        new Claim(ClaimTypes.Name, user.UserName),
+        new Claim(ClaimTypes.NameIdentifier, user.Id),
+        new Claim("FullName", user.FullName),
+        new Claim(ClaimTypes.Email, user.Email),
+        new Claim("Address", user.Address),
+        new Claim("Country", user.Country), 
+        new Claim("Cccd", user.Cccd), 
+        new Claim("BirthDate", user.BirthDate.ToString("yyyy-MM-dd")), 
+        new Claim("AvatarUrl", user.AvatarUrl) 
+    };
 
+        // Thêm role của người dùng vào claims
         foreach (var role in userRoles)
         {
             authClaims.Add(new Claim(ClaimTypes.Role, role));
         }
 
+        // Tạo security key và signing credentials
         var authSecret = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"] ?? string.Empty));
         var signingCredentials = new SigningCredentials(authSecret, SecurityAlgorithms.HmacSha256);
 
+        // Tạo đối tượng JWT token
         var tokenObject = new JwtSecurityToken(
             issuer: _configuration["JWT:ValidIssuer"],
             audience: _configuration["JWT:ValidAudience"],
             notBefore: DateTime.Now,
-            expires: DateTime.Now.AddMinutes(60),//Expiration time is 1h
-            claims: authClaims,//list of rights
+            expires: DateTime.Now.AddMinutes(1), // Thời gian hết hạn của token
+            claims: authClaims, // Danh sách claims
             signingCredentials: signingCredentials
         );
 
+        // Tạo JWT access token
         var accessToken = new JwtSecurityTokenHandler().WriteToken(tokenObject);
 
         return accessToken;
@@ -75,7 +87,8 @@ public class TokenService : ITokenService
             issuer: _configuration["JWT:ValidIssuer"],
             audience: _configuration["JWT:ValidAudience"],
             notBefore: DateTime.Now,
-            expires: DateTime.Now.AddDays(3), //Expiration time is 3 days
+            //expires: DateTime.Now.AddDays(1), //Expiration time is 1 day
+            expires: DateTime.Now.AddMinutes(3), //Expiration time is 1 days
             claims: authClaims,
             signingCredentials: signingCredentials
         );
@@ -83,16 +96,13 @@ public class TokenService : ITokenService
         // Token generation successful
         var refreshToken = new JwtSecurityTokenHandler().WriteToken(tokenObject);
 
-        // Create expiration time
-        var expires = DateTime.Now.AddDays(3);
-
         // Create object to save in database
         var tokenEntity = new RefreshTokens
         {
             RefreshTokensId = Guid.NewGuid(),
             UserId = user.Id,
             RefreshToken = refreshToken,
-            Expires = expires,
+            Expires = tokenObject.ValidTo,
             CreatedBy = user.UserName,
             CreatedTime = DateTime.Now,
             UpdatedBy = user.UserName,
@@ -144,7 +154,7 @@ public class TokenService : ITokenService
         {
             UserId = userId,
             RefreshToken = refreshToken,
-            Expires = DateTime.Now.AddDays(3), 
+            Expires = DateTime.Now.AddDays(1), 
             CreatedBy = userId,
             CreatedTime = DateTime.Now,
             UpdatedBy = userId,
@@ -170,7 +180,8 @@ public class TokenService : ITokenService
         await _unitOfWork.RefreshTokens.RemoveTokenAsync(existingToken);
         await _unitOfWork.SaveAsync();
         return true;
-
-        return false;
     }
+    
+    
+    
 }
