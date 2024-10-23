@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Ticket_Hub.DataAccess.Context;
 
@@ -11,9 +12,11 @@ using Ticket_Hub.DataAccess.Context;
 namespace Ticket_Hub.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241022043718_ModifyDB_Template")]
+    partial class ModifyDB_Template
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -194,6 +197,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Address")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
@@ -206,6 +210,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Cccd")
+                        .IsRequired()
                         .HasMaxLength(12)
                         .HasColumnType("nvarchar(12)");
 
@@ -284,7 +289,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                             AvatarUrl = "https://example.com/avatar.png",
                             BirthDate = new DateTime(1990, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Cccd = "123456789123",
-                            ConcurrencyStamp = "1ace81d4-3f02-4738-8158-3b06b36b8b36",
+                            ConcurrencyStamp = "2ee7554c-2774-48d1-8832-141caa4fb7b8",
                             Country = "Country",
                             Email = "admin@gmail.com",
                             EmailConfirmed = true,
@@ -292,10 +297,10 @@ namespace Ticket_Hub.DataAccess.Migrations
                             LockoutEnabled = true,
                             NormalizedEmail = "ADMIN@GMAIL.COM",
                             NormalizedUserName = "ADMIN@GMAIL.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEMcys4LKojcfZcdobK151m8b5IJJH6Efi63XnqWMQ4xNlLaxtLPTy5XLqPdb6StfGQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEGTx8gx26/54lNZ0pPwLBSIhp3OdvnjGQMF+yX352nCmt1XsPUMADzuRq8TdHd0ShA==",
                             PhoneNumber = "1234567890",
                             PhoneNumberConfirmed = true,
-                            SecurityStamp = "90deb4d6-74d4-4e61-a5b8-35868c9e9382",
+                            SecurityStamp = "b454a122-8d0c-426d-a05f-a7831a2ae7a0",
                             TwoFactorEnabled = false,
                             UserName = "admin@gmail.com"
                         });
@@ -477,7 +482,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("2f9038f0-d583-4557-bbb1-02fc7d840c40"),
+                            Id = new Guid("8803389c-725e-4c0d-b2f0-9f1f12398436"),
                             BodyContent = "Dear [UserFullName],<br><br>Welcome to Ticket Hub!  We are thrilled to have you as part of our community dedicated to providing the best ticket-buying and reselling experience.",
                             CallToAction = "<a href=\"{{VerificationLink}}\">Verify Your Email</a>",
                             Category = "Welcome",
@@ -494,7 +499,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                         },
                         new
                         {
-                            Id = new Guid("bbed2216-2ef9-4e9b-8ae7-4c14b6598a47"),
+                            Id = new Guid("f5f626cd-604b-4ab7-aa44-136aaf73d27c"),
                             BodyContent = "Hi [UserFullName],<br><br>We received a request to reset your password. Click the link below to reset your password.",
                             CallToAction = "https://cursuslms.xyz/sign-in/verify-email?userId=user.Id&token=Uri.EscapeDataString(token)",
                             Category = "Security",
@@ -511,9 +516,9 @@ namespace Ticket_Hub.DataAccess.Migrations
                         },
                         new
                         {
-                            Id = new Guid("7d4e2ced-632d-4f15-aa46-fc57f0f866b8"),
+                            Id = new Guid("177b607a-68a9-4a1f-87ce-12034654b9d0"),
                             BodyContent = "<p>Thank you for registering your Ticket Hub account. Click here to verify your email.</p>",
-                            CallToAction = "<a href=\"https://localhost:5173/verifyemail?userId={{UserId}}&token={{Token}}\" class='button'>Verify Email</a>",
+                            CallToAction = "<a href=\"https://localhost:5173/verifyemail?userId={UserId}&token={Token}\" class='button'>Verify Email</a>",
                             Category = "Verify",
                             FooterContent = "<p>Contact us at tickethub4@gmail.com</p>",
                             Language = "English",
@@ -863,6 +868,9 @@ namespace Ticket_Hub.DataAccess.Migrations
 
                     b.Property<double>("TicketPrice")
                         .HasColumnType("float");
+
+                    b.Property<int>("TicketQuantity")
+                        .HasColumnType("int");
 
                     b.Property<string>("UserId")
                         .IsRequired()

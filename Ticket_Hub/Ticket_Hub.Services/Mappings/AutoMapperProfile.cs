@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Ticket_Hub.Models.DTO.CartDetail;
+using Ticket_Hub.Models.DTO.CartHeader;
 using Ticket_Hub.Models.DTO.Category;
 using Ticket_Hub.Models.DTO.Event;
 using Ticket_Hub.Models.DTO.Favourite;
@@ -25,5 +27,7 @@ public class AutoMapperProfile : Profile
         CreateMap<Feedback, GetFeedbackDto>().ReverseMap();
         CreateMap<Favourite, GetFavouriteDto>().ReverseMap();
         CreateMap<Message, GetMessageDto>().ReverseMap();
+        CreateMap<CartHeader, GetCartHeaderDto>().ReverseMap();
+        CreateMap<CartDetail, GetCartDetailDto>().ReverseMap();
     }
 }

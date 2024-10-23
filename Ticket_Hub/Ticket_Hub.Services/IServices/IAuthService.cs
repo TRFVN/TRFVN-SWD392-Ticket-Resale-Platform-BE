@@ -10,10 +10,11 @@ public interface IAuthService
     Task<ResponseDto> SignUp(RegisterDto registerDto);
     Task<ResponseDto> SignIn(SignDto signDto);
     Task<ResponseDto> SignInByGoogle(SignInByGoogleDto signInByGoogleDto);
+    Task<ResponseDto> RefreshToken(RefreshTokenDto refreshTokenDto);
     Task<ResponseDto> FetchUserByToken(string token);
     Task<ResponseDto> UploadUserAvatar(IFormFile file, ClaimsPrincipal user);
     Task<MemoryStream> GetUserAvatar(ClaimsPrincipal user);
-    Task<ResponseDto> SendVerifyEmail(string email, string confirmationLink);
+    Task<ResponseDto> SendVerifyEmail(string email, string userId, string token);
     Task<ResponseDto> VerifyEmail(string userId, string token);
     Task<ResponseDto> ChangePassword(string userId, string oldPassword, string newPassword, string confirmNewPassword);
     Task<ResponseDto> ForgotPassword(ForgotPasswordDto forgotPasswordDto);

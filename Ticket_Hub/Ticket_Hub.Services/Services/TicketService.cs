@@ -31,12 +31,12 @@ public class TicketService : ITicketService
         string? filterOn,
         string? filterQuery,
         string? sortBy,
-        int pageNumber = 0,
-        int pageSize = 0
+        int pageNumber = 1,
+        int pageSize = 10
     )
     {
         // Lấy tất cả các vé có trong database
-        var tickets = await _unitOfWork.TicketRepository.GetAllAsync();
+        var tickets = await _unitOfWork.TicketRepository.GetAllWithEventAndLocationAsync();
 
         // Kiểm tra nếu danh sách tickets là null hoặc rỗng
         if (!tickets.Any())
@@ -66,14 +66,6 @@ public class TicketService : ITicketService
                     if (double.TryParse(filterQuery, out double price))
                     {
                         listTickets = listTickets.Where(x => x.TicketPrice == price).ToList();
-                    }
-
-                    break;
-
-                case "ticketquantity":
-                    if (int.TryParse(filterQuery, out int quantity))
-                    {
-                        listTickets = listTickets.Where(x => x.TicketQuantity == quantity).ToList();
                     }
 
                     break;
@@ -125,15 +117,21 @@ public class TicketService : ITicketService
         {
             TicketId = ticket.TicketId,
             TicketName = ticket.TicketName,
+            TicketImage = ticket.TicketImage,
             EventId = ticket.EventId,
             UserId = ticket.UserId,
             CategoryId = ticket.CategoryId,
             TicketPrice = ticket.TicketPrice,
-            TicketQuantity = ticket.TicketQuantity,
             TicketDescription = ticket.TicketDescription,
             SerialNumber = ticket.SerialNumber,
             Status = ticket.Status,
-            IsVisible = ticket.IsVisible
+            IsVisible = ticket.IsVisible,
+            //bảng event
+            EventDate = ticket.Event.EventDate,
+            //bảng location
+            City = ticket.Event.Location.City,
+            District = ticket.Event.Location.District,
+            Street = ticket.Event.Location.Street
         }).ToList();
 
         return new ResponseDto()
@@ -185,6 +183,18 @@ public class TicketService : ITicketService
             };
         }
 
+        var serinumber = await _unitOfWork.TicketRepository.GetAsync(s => s.SerialNumber == createTicketDto.SerialNumber);
+        if (serinumber != null)
+        {
+            return new ResponseDto
+            {
+                Message = "Serial number already exists",
+                Result = null,
+                IsSuccess = false,
+                StatusCode = 400
+            };
+        }
+
         Ticket ticket = new Ticket()
         {
             TicketId = Guid.NewGuid(),
@@ -193,7 +203,7 @@ public class TicketService : ITicketService
             UserId = userId,
             CategoryId = createTicketDto.CategoryId,
             TicketPrice = createTicketDto.TicketPrice,
-            TicketQuantity = createTicketDto.TicketQuantity,
+            TicketImage = createTicketDto.TicketImage,
             TicketDescription = createTicketDto.TicketDescription,
             SerialNumber = createTicketDto.SerialNumber,
             Status = TicketStatus.Processing,
@@ -232,7 +242,7 @@ public class TicketService : ITicketService
         ticketId.TicketName = updateTicketDto.TicketName;
         ticketId.TicketDescription = updateTicketDto.TicketDescription;
         ticketId.TicketPrice = updateTicketDto.TicketPrice;
-        ticketId.TicketQuantity = updateTicketDto.TicketQuantity;
+        ticketId.TicketImage = updateTicketDto.TicketImage;
         ticketId.SerialNumber = updateTicketDto.SerialNumber;
         ticketId.EventId = updateTicketDto.EventId;
         ticketId.CategoryId = updateTicketDto.CategoryId;
@@ -294,12 +304,10 @@ public class TicketService : ITicketService
         };
     }
 
-    public async Task<ResponseDto> UploadTicketImage
-    (
-        ClaimsPrincipal user,
-        Guid ticketId,
-        UploadTicketImgDto uploadTicketImgDto
-    )
+    public async Task<ResponseDto> UploadTicketImage(
+    ClaimsPrincipal user,
+    UploadTicketImgDto uploadTicketImgDto
+)
     {
         if (uploadTicketImgDto.File == null)
         {
@@ -311,20 +319,9 @@ public class TicketService : ITicketService
             };
         }
 
-        var ticket = await _unitOfWork.TicketRepository.GetAsync(t => t.TicketId == ticketId);
-        if (ticket == null)
-        {
-            return new ResponseDto()
-            {
-                Message = "Ticket not found",
-                Result = null,
-                IsSuccess = false,
-                StatusCode = 404 // Not Found
-            };
-        }
+        // Upload image lên Firebase và nhận URL công khai
+        var responseDto = await _firebaseService.UploadImageTicket(uploadTicketImgDto.File, StaticFirebaseFolders.TicketImages);
 
-        //var filePath = $"Ticket/{ticketId}/Images";
-        var responseDto = await _firebaseService.UploadImage(uploadTicketImgDto.File, StaticFirebaseFolders.TicketImages);
         if (!responseDto.IsSuccess)
         {
             return new ResponseDto()
@@ -336,28 +333,67 @@ public class TicketService : ITicketService
             };
         }
 
-        ticket.TicketImage = responseDto.Result?.ToString();
-        _unitOfWork.TicketRepository.Update(ticket);
-        await _unitOfWork.SaveAsync();
-
+        // Trả về link công khai của hình ảnh
         return new ResponseDto()
         {
             Message = "Upload ticket image successfully!",
-            Result = null,
+            Result = responseDto.Result, // Đảm bảo đây là URL công khai của ảnh đã upload
             IsSuccess = true,
             StatusCode = 200 // OK
         };
     }
 
-    public async Task<MemoryStream> GetTicketImage(ClaimsPrincipal user, Guid ticketId)
+    public async Task<ResponseDto> AcceptTicket(ClaimsPrincipal user, Guid ticketId)
     {
         var ticket = await _unitOfWork.TicketRepository.GetAsync(t => t.TicketId == ticketId);
-        if (ticket != null && ticket.TicketImage.IsNullOrEmpty())
+        if (ticket == null)
         {
-            return null;
+            return new ResponseDto()
+            {
+                Message = "Ticket not found",
+                Result = null,
+                IsSuccess = false,
+                StatusCode = 404
+            };
         }
 
-        var image = await _firebaseService.GetImage(ticket.TicketImage);
-        return image;
+        ticket.Status = TicketStatus.Success;
+        _unitOfWork.TicketRepository.Update(ticket);
+        await _unitOfWork.SaveAsync();
+
+        return new ResponseDto()
+        {
+            Message = "Ticket Accepted successfully",
+            Result = null,
+            IsSuccess = true,
+            StatusCode = 200
+        };
+    }
+
+    public async Task<ResponseDto> RejectTicket(ClaimsPrincipal user, Guid ticketId)
+    {
+        var ticket = await _unitOfWork.TicketRepository.GetAsync(t => t.TicketId == ticketId);
+        if (ticket == null)
+        {
+            return new ResponseDto()
+            {
+                Message = "Ticket not found",
+                Result = null,
+                IsSuccess = false,
+                StatusCode = 404
+            };
+        }
+
+        ticket.Status = TicketStatus.Rejected;
+        _unitOfWork.TicketRepository.Update(ticket);
+        await _unitOfWork.SaveAsync();
+
+        return new ResponseDto()
+        {
+            Message = "Ticket Rejected successfully",
+            Result = null,
+            IsSuccess = true,
+            StatusCode = 200
+        };
     }
 }

@@ -12,6 +12,7 @@ namespace Ticket_Hub.DataAccess.IRepository
         void Update(Ticket ticket);
         void UpdateRange(IEnumerable<Ticket> tickets);
         Task<Ticket> GeTicketById(Guid ticketId);
+        Task<IEnumerable<Ticket>> GetAllWithEventAndLocationAsync();
         Task<int> SaveAsync();
     }
 }

@@ -8,12 +8,14 @@ using FirebaseAdmin.Auth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Ticket_Hub.Models.DTO;
 using Ticket_Hub.Models.DTO.Auth;
 using Ticket_Hub.Models.Models;
 using Ticket_Hub.Services.IServices;
 using Ticket_Hub.Utility.Constants;
+using Ticket_Hub.Utility.ValidationAttribute;
 
 namespace Ticket_Hub.Services.Services;
 
@@ -38,7 +40,8 @@ public class AuthService : IAuthService
         UserManager<ApplicationUser> userManager,
         ITokenService tokenService,
         IFirebaseService firebaseService,
-        IEmailService emailService
+        IEmailService emailService,
+        IHttpContextAccessor httpContextAccessor
     )
 
 
@@ -50,6 +53,7 @@ public class AuthService : IAuthService
         _firebaseService = firebaseService;
         _emailService = emailService;
         _tokenHandler = new JwtSecurityTokenHandler();
+        _httpContextAccessor = httpContextAccessor;
     }
 
     /// <summary>
@@ -204,10 +208,9 @@ public class AuthService : IAuthService
             };
         }
 
-
         var accessToken = await _tokenService.GenerateJwtAccessTokenAsync(user);
         var refreshToken = await _tokenService.GenerateJwtRefreshTokenAsync(user);
-        //await _tokenService.StoreRefreshToken(user.Id, refreshToken);
+        await _tokenService.StoreRefreshToken(user.Id, refreshToken);
 
         return new ResponseDto()
         {
@@ -229,12 +232,27 @@ public class AuthService : IAuthService
     /// <returns></returns>
     public async Task<ResponseDto> SignInByGoogle(SignInByGoogleDto signInByGoogleDto)
     {
-        // Lấy thông tin từ Google
-        FirebaseToken googleTokenS = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(signInByGoogleDto.Token);
-        string userId = googleTokenS.Uid;
-        string email = googleTokenS.Claims["email"].ToString();
-        string name = googleTokenS.Claims["name"].ToString();
-        string avatarUrl = googleTokenS.Claims["picture"].ToString();
+        // Gọi API của Google để lấy thông tin từ Access Token
+        var httpClient = new HttpClient();
+        var response =
+            await httpClient.GetStringAsync(
+                $"https://www.googleapis.com/oauth2/v3/tokeninfo?access_token={signInByGoogleDto.Token}");
+
+        // Parse response từ Google
+        var googleUser = JsonConvert.DeserializeObject<GoogleUserInfo>(response);
+        if (googleUser == null || googleUser.email == null)
+        {
+            return new ResponseDto()
+            {
+                Message = "Invalid Google Access Token",
+                IsSuccess = false,
+                StatusCode = 401
+            };
+        }
+
+        string email = googleUser.email;
+        string name = googleUser.name;
+        string avatarUrl = googleUser.picture;
 
         // Tìm kiếm người dùng trong database
         var user = await _userManager.FindByEmailAsync(email);
@@ -284,7 +302,8 @@ public class AuthService : IAuthService
             };
 
             await _userManager.CreateAsync(user);
-            await _userManager.AddLoginAsync(user, new UserLoginInfo(StaticLoginProvider.Google, userId, "GOOGLE"));
+            await _userManager.AddLoginAsync(user,
+                new UserLoginInfo(StaticLoginProvider.Google, googleUser.sub, "GOOGLE"));
         }
 
         var accessToken = await _tokenService.GenerateJwtAccessTokenAsync(user!);
@@ -306,6 +325,76 @@ public class AuthService : IAuthService
     }
 
     /// <summary>
+    /// Refresh token
+    /// </summary>
+    /// <param name="refreshToken"></param>
+    /// <returns></returns>
+    public async Task<ResponseDto> RefreshToken(RefreshTokenDto refreshTokenDto)
+    {
+        var principal = await _tokenService.GetPrincipalFromToken(refreshTokenDto.RefreshToken);
+        if (principal == null)
+        {
+            return new ResponseDto
+            {
+                IsSuccess = false,
+                Message = "Invalid refresh token",
+                StatusCode = 401
+            };
+        }
+
+        var userId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
+        var storedRefreshToken = await _tokenService.RetrieveRefreshToken(userId);
+
+        if (storedRefreshToken == null || storedRefreshToken.Trim() != refreshTokenDto.RefreshToken.Trim())
+        {
+            return new ResponseDto
+            {
+                IsSuccess = false,
+                Message = "Invalid refresh token",
+                StatusCode = 401
+            };
+        }
+
+        // Kiểm tra thời gian hết hạn của refresh token
+        var refreshTokenEntity = await _unitOfWork.RefreshTokens.GetTokenByUserIdAsync(userId);
+
+        if (refreshTokenEntity == null || refreshTokenEntity.Expires < DateTime.Now)
+        {
+            // Nếu refresh token đã hết hạn, xóa refresh token và yêu cầu người dùng đăng nhập lại
+            if (refreshTokenEntity != null)
+            {
+                await _unitOfWork.RefreshTokens.RemoveTokenAsync(refreshTokenEntity);
+                await _unitOfWork.SaveAsync();
+            }
+
+            return new ResponseDto
+            {
+                IsSuccess = false,
+                Message = "Refresh token expired, please login again",
+                StatusCode = 401
+            };
+        }
+
+        // Tạo access token mới
+        var userToUpdate = await _userManager.FindByIdAsync(userId);
+        var newAccessToken = await _tokenService.GenerateJwtAccessTokenAsync(userToUpdate);
+
+        // Trả về access token mới cùng với refresh token cũ
+        return new ResponseDto
+        {
+            IsSuccess = true,
+            Message = "Token refreshed successfully",
+            StatusCode = 200,
+            Result = new
+            {
+                AccessToken = newAccessToken,
+                RefreshToken = refreshTokenDto.RefreshToken // Trả lại refresh token cũ
+            }
+        };
+    }
+
+
+    /// <summary>
     /// Get infor user
     /// </summary>
     /// <param name="token"></param>
@@ -314,10 +403,22 @@ public class AuthService : IAuthService
     {
         try
         {
-            var jwtToken = _tokenHandler.ReadJwtToken(token);
-            var userId = jwtToken.Claims.First(claim => claim.Type == ClaimTypes.NameIdentifier).Value;
+            // Sử dụng GetPrincipalFromToken để lấy ClaimsPrincipal từ token
+            var principal = await _tokenService.GetPrincipalFromToken(token);
+            if (principal == null)
+            {
+                return new ResponseDto()
+                {
+                    Message = "Invalid token",
+                    StatusCode = 401, // Unauthorized
+                    IsSuccess = false,
+                    Result = null
+                };
+            }
 
+            var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var user = await _userManager.FindByIdAsync(userId);
+
             if (user == null)
             {
                 return new ResponseDto()
@@ -332,19 +433,19 @@ public class AuthService : IAuthService
             // Lấy role từ UserManager
             var roles = await _userManager.GetRolesAsync(user);
 
-            // Lấy thông tin từ claims
+            // Tạo GetUserDto từ claims
             var userDto = new GetUserDto
             {
                 Id = user.Id,
-                FullName = jwtToken.Claims.First(claim => claim.Type == "FullName").Value,
-                Email = user.Email!,
-                PhoneNumber = user.PhoneNumber!,
-                Address = jwtToken.Claims.First(claim => claim.Type == "Address").Value,
-                Country = jwtToken.Claims.First(claim => claim.Type == "Country").Value,
-                Cccd = jwtToken.Claims.First(claim => claim.Type == "Cccd").Value,
-                BirthDate = DateTime.Parse(jwtToken.Claims.First(claim => claim.Type == "BirthDate").Value),
-                AvatarUrl = jwtToken.Claims.First(claim => claim.Type == "AvatarUrl").Value,
-                UserName = user.UserName!,
+                FullName = principal.FindFirst("FullName")?.Value,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                Address = principal.FindFirst("Address")?.Value,
+                Country = principal.FindFirst("Country")?.Value,
+                Cccd = principal.FindFirst("Cccd")?.Value,
+                BirthDate = DateTime.Parse(principal.FindFirst("BirthDate")?.Value),
+                AvatarUrl = principal.FindFirst("AvatarUrl")?.Value,
+                UserName = user.UserName,
                 Roles = roles.ToList()
             };
 
@@ -352,13 +453,13 @@ public class AuthService : IAuthService
             {
                 Message = "Get info successfully",
                 StatusCode = 200,
-                IsSuccess = true, // Chỉnh lại giá trị IsSuccess thành true
-                Result = userDto // Trả về userDto
+                IsSuccess = true,
+                Result = userDto
             };
         }
         catch (Exception ex)
         {
-            return new()
+            return new ResponseDto()
             {
                 Message = ex.Message,
                 IsSuccess = false,
@@ -408,7 +509,7 @@ public class AuthService : IAuthService
         }
 
         // Gọi service Firebase để upload ảnh
-        var responseDto = await _firebaseService.UploadImage(file, StaticFirebaseFolders.UserAvatars);
+        var responseDto = await _firebaseService.UploadImageUser(file, StaticFirebaseFolders.UserAvatars);
 
         // Kiểm tra kết quả upload
         if (!responseDto.IsSuccess)
@@ -470,9 +571,10 @@ public class AuthService : IAuthService
     /// <param name="email"></param>
     /// <param name="confirmationLink"></param>
     /// <returns></returns>
-    public async Task<ResponseDto> SendVerifyEmail(string email, string confirmationLink)
+    public async Task<ResponseDto> SendVerifyEmail(string email, string userId, string token)
     {
-        await _emailService.SendVerifyEmail(email, confirmationLink);
+        // Gọi EmailService để gửi email xác nhận
+        await _emailService.SendVerifyEmail(email, userId, token);
         return new()
         {
             Message = "Send verify email successfully",
@@ -504,7 +606,7 @@ public class AuthService : IAuthService
             };
         }
 
-        string decodedToken = HttpUtility.UrlDecode(token);
+        string decodedToken = Uri.UnescapeDataString(token);
 
         var confirmResult = await _userManager.ConfirmEmailAsync(user, decodedToken);
 
@@ -552,14 +654,14 @@ public class AuthService : IAuthService
         if (newPassword != confirmNewPassword)
         {
             return new ResponseDto
-            { IsSuccess = false, Message = "New password and confirm new password not match." };
+                { IsSuccess = false, Message = "New password and confirm new password not match." };
         }
 
         // Không cho phép thay đổi mật khẩu cũ
         if (newPassword == oldPassword)
         {
             return new ResponseDto
-            { IsSuccess = false, Message = "New password cannot be the same as the old password." };
+                { IsSuccess = false, Message = "New password cannot be the same as the old password." };
         }
 
         // Thực hiện thay đổi mật khẩu
@@ -594,11 +696,11 @@ public class AuthService : IAuthService
         try
         {
             // Tìm người dùng theo Email/Số điện thoại
-            var user = await _userManager.FindByEmailAsync(forgotPasswordDto.EmailOrPhone);
+            var user = await _userManager.FindByEmailAsync(forgotPasswordDto.Email);
             if (user == null)
             {
                 user = await _userManager.Users.FirstOrDefaultAsync(
-                    u => u.PhoneNumber == forgotPasswordDto.EmailOrPhone);
+                    u => u.PhoneNumber == forgotPasswordDto.Email);
             }
 
             if (user == null || !user.EmailConfirmed)
@@ -615,18 +717,18 @@ public class AuthService : IAuthService
             var email = user.Email;
             var now = DateTime.Now;
 
-            if (ResetPasswordAttempts.TryGetValue(email!, out var attempts))
+            if (ResetPasswordAttempts.TryGetValue(email, out var attempts))
             {
                 // Kiểm tra xem đã quá 1 ngày kể từ lần thử cuối cùng chưa
                 if (now - attempts.LastRequest >= TimeSpan.FromSeconds(1))
                 {
                     // Reset số lần thử về 0 và cập nhật thời gian thử cuối cùng
-                    ResetPasswordAttempts[email!] = (1, now);
+                    ResetPasswordAttempts[email] = (1, now);
                 }
                 else if (attempts.Count >= MaxAttemptsPerDay)
                 {
                     // Quá số lần reset cho phép trong vòng 1 ngày, gửi thông báo 
-                    await _emailService.SendEmailAsync(user.Email!,
+                    await _emailService.SendEmailAsync(user.Email,
                         "Password Reset Request Limit Exceeded",
                         $"You have exceeded the daily limit for password reset requests. Please try again after 24 hours."
                     );
@@ -643,13 +745,13 @@ public class AuthService : IAuthService
                 else
                 {
                     // Chưa vượt quá số lần thử và thời gian chờ, tăng số lần thử và cập nhật thời gian
-                    ResetPasswordAttempts[email!] = (attempts.Count + 1, now);
+                    ResetPasswordAttempts[email] = (attempts.Count + 1, now);
                 }
             }
             else
             {
                 // Email chưa có trong danh sách, thêm mới với số lần thử là 1 và thời gian hiện tại
-                ResetPasswordAttempts.AddOrUpdate(email!, (1, now), (key, old) => (old.Count + 1, now));
+                ResetPasswordAttempts.AddOrUpdate(email, (1, now), (key, old) => (old.Count + 1, now));
             }
 
             // Tạo mã token
@@ -665,10 +767,10 @@ public class AuthService : IAuthService
             var userAgent = _httpContextAccessor.HttpContext?.Request.Headers["User-Agent"];
 
             // Lấy tên hệ điều hành
-            var operatingSystem = GetUserAgentOperatingSystem(userAgent!);
+            var operatingSystem = GetUserAgentOperatingSystem(userAgent);
 
             // Lấy tên trình duyệt
-            var browser = GetUserAgentBrowser(userAgent!);
+            var browser = GetUserAgentBrowser(userAgent);
 
             // Lấy location
             var url = "https://ipinfo.io/14.169.10.115/json?token=823e5c403c980f";
@@ -680,10 +782,10 @@ public class AuthService : IAuthService
                     string jsonContent = await response.Content.ReadAsStringAsync();
                     JObject data = JObject.Parse(jsonContent);
 
-                    this._ip = data["ip"]!.ToString();
-                    this._city = data["city"]!.ToString();
-                    this._region = data["region"]!.ToString();
-                    this._country = data["country"]!.ToString();
+                    this._ip = data["ip"].ToString();
+                    this._city = data["city"].ToString();
+                    this._region = data["region"].ToString();
+                    this._country = data["country"].ToString();
                 }
                 else
                 {
@@ -697,17 +799,17 @@ public class AuthService : IAuthService
             }
 
             // Gửi email chứa đường link đặt lại mật khẩu
-            await _emailService.SendEmailResetAsync(user.Email!, "Reset password for your Cursus account", user,
+            await _emailService.SendEmailResetAsync(user.Email, "Reset password for your Cursus account", user,
                 currentDate, resetLink, operatingSystem, browser, _ip, _region, _city, _country);
 
             // Helper functions (you might need to refine these based on your User-Agent parsing logic)
-            string GetUserAgentOperatingSystem(string userAgentOs)
+            string GetUserAgentOperatingSystem(string userAgent)
             {
                 // ... Logic to extract the operating system from the user-agent string
                 // Example:
-                if (userAgentOs.Contains("Windows")) return "Windows";
-                else if (userAgentOs.Contains("Mac")) return "macOS";
-                else if (userAgentOs.Contains("Linux")) return "Linux";
+                if (userAgent.Contains("Windows")) return "Windows";
+                else if (userAgent.Contains("Mac")) return "macOS";
+                else if (userAgent.Contains("Linux")) return "Linux";
                 else return "Unknown";
             }
 
@@ -1035,7 +1137,6 @@ public class AuthService : IAuthService
 
                 var userInfoDto = new GetUserDto
                 {
-                    
                     Id = user.Id,
                     FullName = user.FullName,
                     Email = user.Email,
@@ -1044,7 +1145,7 @@ public class AuthService : IAuthService
                     Country = user.Country,
                     Cccd = user.Cccd,
                     BirthDate = user.BirthDate,
-                    AvatarUrl = user.AvatarUrl, 
+                    AvatarUrl = user.AvatarUrl,
                     UserName = user.UserName,
                     Roles = roles.ToList()
                 };

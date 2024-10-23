@@ -4,6 +4,6 @@ namespace Ticket_Hub.Models.DTO.Auth;
 
 public class ForgotPasswordDto
 {
-    [Required(ErrorMessage = "Please enter email or phone number.")]
-    public string EmailOrPhone { get; set; } = null!;
+    [Required(ErrorMessage = "Please enter email. ")]
+    public string Email { get; set; } = null!;
 }

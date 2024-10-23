@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Ticket_Hub.Models.DTO;
 using Ticket_Hub.Models.DTO.Ticket;
 using Ticket_Hub.Services.IServices;
+using Ticket_Hub.Utility.Constants;
 
 namespace Ticket_Hub.API.Controllers
 {
@@ -16,7 +18,7 @@ namespace Ticket_Hub.API.Controllers
         {
             _ticketService = ticketService;
         }
-        
+
         /// <summary>
         /// Get all tickets
         /// </summary>
@@ -47,7 +49,7 @@ namespace Ticket_Hub.API.Controllers
             );
             return StatusCode(responseDto.StatusCode, responseDto);
         }
-        
+
         /// <summary>
         /// Get ticket by ticketId
         /// </summary>
@@ -63,7 +65,7 @@ namespace Ticket_Hub.API.Controllers
             var responseDto = await _ticketService.GetTicket(User, ticketId);
             return StatusCode(responseDto.StatusCode, responseDto);
         }
-        
+
         /// <summary>
         /// Create a new ticket
         /// </summary>
@@ -78,7 +80,7 @@ namespace Ticket_Hub.API.Controllers
             var responseDto = await _ticketService.CreateTicket(User, createLevelDto);
             return StatusCode(responseDto.StatusCode, responseDto);
         }
-        
+
         /// <summary>
         /// Update ticket
         /// </summary>
@@ -93,7 +95,7 @@ namespace Ticket_Hub.API.Controllers
             var responseDto = await _ticketService.UpdateTicket(User, updateLevelDto);
             return StatusCode(responseDto.StatusCode, responseDto);
         }
-        
+
         /// <summary>
         /// Delete ticket
         /// </summary>
@@ -108,12 +110,17 @@ namespace Ticket_Hub.API.Controllers
             var responseDto = await _ticketService.DeleteTicket(User, ticketId);
             return StatusCode(responseDto.StatusCode, responseDto);
         }
-        
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ticketId"></param>
+        /// <param name="uploadTicketImgDto"></param>
+        /// <returns></returns>
         [HttpPost]
-        [Route("{ticketId}/upload-image")]
+        [Route("/upload-image")]
         public async Task<ActionResult<ResponseDto>> UploadTicketImage
         (
-            [FromRoute] Guid ticketId,
             UploadTicketImgDto uploadTicketImgDto
         )
         {
@@ -121,26 +128,35 @@ namespace Ticket_Hub.API.Controllers
                 await _ticketService.UploadTicketImage
                 (
                     User,
-                    ticketId,
                     uploadTicketImgDto
                 );
             return StatusCode(responseDto.StatusCode, responseDto);
         }
-        [HttpGet]
-        [Route("{ticketId}/display-image")]
-        public async Task<ActionResult> DisplayTicketImage
-        (
-            [FromRoute] Guid ticketId
-        )
-        {
-            var responseDto = await _ticketService.GetTicketImage(User, ticketId);
-            if (responseDto is null)
-            {
-                return null;
-            }
 
-            return File(responseDto, "image/png");
+        /// <summary>
+        /// Accept a ticket
+        /// </summary>
+        /// <param name="ticketId"></param>
+        /// <returns></returns>
+        [HttpPost("{ticketId}/accept")]
+        [Authorize(Roles = StaticUserRoles.Admin)]
+        public async Task<ActionResult<ResponseDto>> AcceptTicket([FromRoute] Guid ticketId)
+        {
+            var responseDto = await _ticketService.AcceptTicket(User, ticketId);
+            return StatusCode(responseDto.StatusCode, responseDto);
         }
 
+        /// <summary>
+        /// Reject a ticket
+        /// </summary>
+        /// <param name="ticketId"></param>
+        /// <returns></returns>
+        [HttpPost("{ticketId}/reject")]
+        [Authorize(Roles = StaticUserRoles.Admin)]
+        public async Task<ActionResult<ResponseDto>> RejectTicket([FromRoute] Guid ticketId)
+        {
+            var responseDto = await _ticketService.RejectTicket(User, ticketId);
+            return StatusCode(responseDto.StatusCode, responseDto);
+        }
     }
 }

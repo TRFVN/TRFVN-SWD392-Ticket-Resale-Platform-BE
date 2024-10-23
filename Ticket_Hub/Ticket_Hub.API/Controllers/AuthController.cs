@@ -1,12 +1,12 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Ticket_Hub.Models.DTO;
 using Ticket_Hub.Models.DTO.Auth;
 using Ticket_Hub.Models.Models;
 using Ticket_Hub.Services.IServices;
+using Ticket_Hub.Services.Services;
 using Ticket_Hub.Utility.Constants;
 
 namespace Ticket_Hub.API.Controllers
@@ -17,11 +17,13 @@ namespace Ticket_Hub.API.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IAuthService _authService;
+        private readonly IEmailService _emailService;
 
-        public AuthController(UserManager<ApplicationUser> userManager, IAuthService authService)
+        public AuthController(UserManager<ApplicationUser> userManager, IAuthService authService, IEmailService emailService)
         {
             _userManager = userManager;
             _authService = authService;
+            _emailService = emailService;
         }
 
         /// <summary>
@@ -29,7 +31,7 @@ namespace Ticket_Hub.API.Controllers
         /// </summary>
         /// <param name="registerDto"></param>
         /// <returns></returns>
-        [HttpPost("users")]
+        [HttpPost("sign-up")]
         public async Task<ActionResult<ResponseDto>> SignUp([FromBody] RegisterDto registerDto)
         {
             if (!ModelState.IsValid)
@@ -79,6 +81,29 @@ namespace Ticket_Hub.API.Controllers
         public async Task<ActionResult<ResponseDto>> SignInByGoogle([FromBody] SignInByGoogleDto signInByGoogleDto)
         {
             var responseDto = await _authService.SignInByGoogle(signInByGoogleDto);
+            return StatusCode(responseDto.StatusCode, responseDto);
+        }
+
+
+        /// <summary>
+        /// RefreshToken
+        /// </summary>
+        /// <param name="refreshTokenDto"></param>
+        /// <returns></returns>
+        [HttpPost("refresh-token")]
+        public async Task<ActionResult<ResponseDto>> RefreshToken([FromBody] RefreshTokenDto refreshTokenDto)
+        {
+            if (string.IsNullOrEmpty(refreshTokenDto.RefreshToken))
+            {
+                return BadRequest(new ResponseDto
+                {
+                    IsSuccess = false,
+                    Message = "Refresh token is required.",
+                    StatusCode = 400
+                });
+            }
+
+            var responseDto = await _authService.RefreshToken(refreshTokenDto);
             return StatusCode(responseDto.StatusCode, responseDto);
         }
 
@@ -134,28 +159,43 @@ namespace Ticket_Hub.API.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("send-verify-email")]
-        public async Task<ActionResult<ResponseDto>> SendVerifyEmail([FromBody] SendVerifyEmailDto email)
+        public async Task<ActionResult<ResponseDto>> SendVerifyEmail([FromBody] SendVerifyEmailDto emailDto)
         {
-            var user = await _userManager.FindByEmailAsync(email.Email);
+            var user = await _userManager.FindByEmailAsync(emailDto.Email);
+            if (user == null)
+            {
+                return NotFound(new ResponseDto
+                {
+                    IsSuccess = false,
+                    Message = "User not found",
+                    StatusCode = 404,
+                    Result = null
+                });
+            }
+
             if (user.EmailConfirmed)
             {
-                return new ResponseDto()
+                return new ResponseDto
                 {
                     IsSuccess = true,
-                    Message = "Your email has been confirmed",
+                    Message = "Your email has already been confirmed",
                     StatusCode = 200,
-                    Result = email
+                    Result = null
                 };
             }
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
-            var confirmationLink =
-                $"{Request.Scheme}://{Request.Host}/user/sign-in/verify-email?userId={Uri.EscapeDataString(user.Id)}&token={Uri.EscapeDataString(token)}";
+            // Gọi service để gửi email xác nhận
+            await _authService.SendVerifyEmail(user.Email, user.Id, token);
 
-            var responseDto = await _authService.SendVerifyEmail(user.Email, confirmationLink);
-
-            return StatusCode(responseDto.StatusCode, responseDto);
+            return new ResponseDto
+            {
+                IsSuccess = true,
+                Message = "Verification email sent successfully.",
+                StatusCode = 200,
+                Result = null
+            };
         }
 
         /// <summary>
@@ -199,36 +239,6 @@ namespace Ticket_Hub.API.Controllers
             {
                 return BadRequest(responseDto.Message);
             }
-        }
-        
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="email"></param>
-        /// <returns></returns>
-        [HttpGet]
-        [Route("ForgotPassword")]
-        public async Task<ActionResult<ResponseDto>> ForgotPassword(string email)
-        {
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user is null)
-            {
-                return new ResponseDto()
-                {
-                    IsSuccess = false,
-                    Message = "Email is not exist",
-                    StatusCode = 404
-                };
-            }
-
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-
-            var confirmationLink =
-                $"{Request.Scheme}://{Request.Host}/user/sign-in/reset-password?userId={Uri.EscapeDataString(user.Id)}&token={Uri.EscapeDataString(token)}";
-
-            var responseDto = await _authService.SendVerifyEmail(user.Email, confirmationLink);
-
-            return StatusCode(responseDto.StatusCode, responseDto);
         }
         
         /// <summary>
