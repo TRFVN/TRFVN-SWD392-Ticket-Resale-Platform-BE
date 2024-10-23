@@ -18,7 +18,7 @@ namespace Ticket_Hub.API.Controllers
         {
             _ticketService = ticketService;
         }
-        
+
         /// <summary>
         /// Get all tickets
         /// </summary>
@@ -49,7 +49,7 @@ namespace Ticket_Hub.API.Controllers
             );
             return StatusCode(responseDto.StatusCode, responseDto);
         }
-        
+
         /// <summary>
         /// Get ticket by ticketId
         /// </summary>
@@ -65,7 +65,7 @@ namespace Ticket_Hub.API.Controllers
             var responseDto = await _ticketService.GetTicket(User, ticketId);
             return StatusCode(responseDto.StatusCode, responseDto);
         }
-        
+
         /// <summary>
         /// Create a new ticket
         /// </summary>
@@ -80,7 +80,7 @@ namespace Ticket_Hub.API.Controllers
             var responseDto = await _ticketService.CreateTicket(User, createLevelDto);
             return StatusCode(responseDto.StatusCode, responseDto);
         }
-        
+
         /// <summary>
         /// Update ticket
         /// </summary>
@@ -95,7 +95,7 @@ namespace Ticket_Hub.API.Controllers
             var responseDto = await _ticketService.UpdateTicket(User, updateLevelDto);
             return StatusCode(responseDto.StatusCode, responseDto);
         }
-        
+
         /// <summary>
         /// Delete ticket
         /// </summary>
@@ -110,7 +110,7 @@ namespace Ticket_Hub.API.Controllers
             var responseDto = await _ticketService.DeleteTicket(User, ticketId);
             return StatusCode(responseDto.StatusCode, responseDto);
         }
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -118,10 +118,9 @@ namespace Ticket_Hub.API.Controllers
         /// <param name="uploadTicketImgDto"></param>
         /// <returns></returns>
         [HttpPost]
-        [Route("{ticketId}/upload-image")]
+        [Route("/upload-image")]
         public async Task<ActionResult<ResponseDto>> UploadTicketImage
         (
-            [FromRoute] Guid ticketId,
             UploadTicketImgDto uploadTicketImgDto
         )
         {
@@ -129,31 +128,9 @@ namespace Ticket_Hub.API.Controllers
                 await _ticketService.UploadTicketImage
                 (
                     User,
-                    ticketId,
                     uploadTicketImgDto
                 );
             return StatusCode(responseDto.StatusCode, responseDto);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="ticketId"></param>
-        /// <returns></returns>
-        [HttpGet]
-        [Route("{ticketId}/display-image")]
-        public async Task<ActionResult> DisplayTicketImage
-        (
-            [FromRoute] Guid ticketId
-        )
-        {
-            var responseDto = await _ticketService.GetTicketImage(User, ticketId);
-            if (responseDto is null)
-            {
-                return null;
-            }
-
-            return File(responseDto, "image/png");
         }
 
         /// <summary>
@@ -181,8 +158,5 @@ namespace Ticket_Hub.API.Controllers
             var responseDto = await _ticketService.RejectTicket(User, ticketId);
             return StatusCode(responseDto.StatusCode, responseDto);
         }
-
-
-
     }
 }

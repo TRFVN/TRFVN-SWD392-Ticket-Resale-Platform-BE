@@ -67,7 +67,7 @@ public class ApplicationDbContextSeed
                 PersonalizationTags = "{FirstName}, {LinkLogin}",
                 BodyContent = "<p>Thank you for registering your Ticket Hub account. Click here to verify your email.</p>",
                 FooterContent = "<p>Contact us at tickethub4@gmail.com</p>",
-                CallToAction= "<a href=\"https://localhost:5173/verifyemail?userId={UserId}&token={Token}\" class='button'>Verify Email</a>",
+                CallToAction= "<a href=\"https://localhost:5173/verifyemail?userId={{UserId}}&token={{Token}}\" class='button'>Verify Email</a>",
                 Language = "English",
                 RecipientType = "Customer",
                 CreateBy = "System",

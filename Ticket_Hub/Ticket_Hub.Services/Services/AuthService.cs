@@ -15,6 +15,7 @@ using Ticket_Hub.Models.DTO.Auth;
 using Ticket_Hub.Models.Models;
 using Ticket_Hub.Services.IServices;
 using Ticket_Hub.Utility.Constants;
+using Ticket_Hub.Utility.ValidationAttribute;
 
 namespace Ticket_Hub.Services.Services;
 
@@ -508,7 +509,7 @@ public class AuthService : IAuthService
         }
 
         // Gọi service Firebase để upload ảnh
-        var responseDto = await _firebaseService.UploadImage(file, StaticFirebaseFolders.UserAvatars);
+        var responseDto = await _firebaseService.UploadImageUser(file, StaticFirebaseFolders.UserAvatars);
 
         // Kiểm tra kết quả upload
         if (!responseDto.IsSuccess)

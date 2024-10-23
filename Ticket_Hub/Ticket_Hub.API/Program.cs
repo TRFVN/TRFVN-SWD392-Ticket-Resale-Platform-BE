@@ -10,6 +10,7 @@ using Ticket_Hub.API.Extension;
 using Ticket_Hub.Models.Models;
 using Ticket_Hub.Services.Mappings;
 using Ticket_Hub.Models.DTO.Hubs;
+using Net.payOS;
 
 namespace Ticket_Hub.API
 {
@@ -119,6 +120,18 @@ namespace Ticket_Hub.API
                         .AllowCredentials()
                         .SetIsOriginAllowed(_ => true); // Cẩn thận với cài đặt này trong môi trường production
                 });
+            });
+
+
+            // Đăng ký dịch vụ PayOS với cấu hình từ appsettings
+            builder.Services.AddSingleton(sp =>
+            {
+                var configuration = sp.GetRequiredService<IConfiguration>();
+                string clientId = configuration["PayOS:ClientId"];
+                string apiKey = configuration["PayOS:ApiKey"];
+                string checksumKey = configuration["PayOS:ChecksumKey"];
+
+                return new PayOS(clientId, apiKey, checksumKey);
             });
 
 

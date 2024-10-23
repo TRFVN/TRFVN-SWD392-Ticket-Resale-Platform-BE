@@ -391,15 +391,6 @@ public class EmailService : IEmailService
                     <p>🔒 This verification link will expire in 24 hours for security reasons.</p>
                     <p>If you didn't create a Ticket Hub account, you can safely ignore this email.</p>
                 </div>
-
-                <!-- Additional Information -->
-                <p style='color: #64748b; font-size: 14px; margin-top: 25px;'>
-                    If you're having trouble clicking the button, copy and paste this URL into your browser:
-                    <br>
-                    <a href='https://localhost:5173/verifyemail?userId={Uri.EscapeDataString(userId)}&token={Uri.EscapeDataString(token)}' style='color: #f97316; word-break: break-all;'>
-                        https://localhost:5173/verifyemail?userId={Uri.EscapeDataString(userId)}&token={Uri.EscapeDataString(token)}
-                    </a>
-                </p>
             </div>
 
             <!-- Footer -->

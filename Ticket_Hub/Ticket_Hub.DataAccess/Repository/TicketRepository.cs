@@ -13,12 +13,12 @@ namespace Ticket_Hub.DataAccess.Repository
     public class TicketRepository : Repository<Ticket>, ITicketRepository
     {
         private readonly ApplicationDbContext _context;
-        
+
         public TicketRepository(ApplicationDbContext context) : base(context)
         {
             _context = context;
         }
-        
+
         public async Task<Ticket> GeTicketById(Guid ticketId)
         {
             return await _context.Tickets.FirstOrDefaultAsync(x => x.TicketId == ticketId);
@@ -33,7 +33,15 @@ namespace Ticket_Hub.DataAccess.Repository
         {
             _context.Tickets.UpdateRange(tickets);
         }
-        
+
+        public async Task<IEnumerable<Ticket>> GetAllWithEventAndLocationAsync()
+        {
+            return await _context.Tickets
+                .Include(t => t.Event)
+                .ThenInclude(e => e.Location)
+                .ToListAsync();
+        }
+
         public async Task<int> SaveAsync()
         {
             return await _context.SaveChangesAsync();

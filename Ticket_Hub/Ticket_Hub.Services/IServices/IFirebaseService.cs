@@ -5,6 +5,7 @@ namespace Ticket_Hub.Services.IServices;
 
 public interface IFirebaseService
 {
-    Task<ResponseDto> UploadImage(IFormFile file, string folder);
+    Task<ResponseDto> UploadImageTicket(IFormFile file, string folder);
+    Task<ResponseDto> UploadImageUser(IFormFile file, string folder);
     Task<MemoryStream> GetImage(string filePath);
 }
