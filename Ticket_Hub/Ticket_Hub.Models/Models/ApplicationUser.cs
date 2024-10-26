@@ -7,7 +7,8 @@ namespace Ticket_Hub.Models.Models
     {
         [StringLength(30)] public string FullName { get; set; } = null!;
         public DateTime BirthDate { get; set; } 
-        [StringLength(100)] public string AvatarUrl { get; set; } = null!;
+        //[StringLength(300)] 
+        public string AvatarUrl { get; set; } = null!;
         [StringLength(50)] public string Country { get; set; } = null!;
         [StringLength(12)] public string? Cccd { get; set; }
         [StringLength(100)] public string? Address { get; set; }
