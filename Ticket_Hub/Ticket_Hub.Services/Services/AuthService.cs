@@ -482,75 +482,56 @@ public class AuthService : IAuthService
     /// <returns></returns>
     public async Task<ResponseDto> UploadUserAvatar(IFormFile file, ClaimsPrincipal User)
     {
-        // Lấy userId từ token
-        var userId = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+        try
+        {
+            var userId = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
 
-        // Kiểm tra nếu người dùng chưa xác thực
-        if (string.IsNullOrEmpty(userId))
+            if (userId is null)
+            {
+                throw new Exception("Not authentication!");
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user is null)
+            {
+                throw new Exception("User does not exist");
+            }
+
+            var responseDto = await _firebaseService.UploadImageUser(file, StaticFirebaseFolders.UserAvatars);
+
+            if (!responseDto.IsSuccess)
+            {
+                throw new Exception("Image upload fail!");
+            }
+
+            /*user.AvatarUrl = responseDto.Result?.ToString();
+
+            var updateResult = await _userManager.UpdateAsync(user);*//*
+
+            if (!updateResult.Succeeded)
+            {
+                throw new Exception("Update user avatar fail!");
+            }*/
+
+            return new ResponseDto()
+            {
+                Message = "Upload user avatar successfully!",
+                Result = responseDto.Result,
+                IsSuccess = true,
+                StatusCode = 200
+            };
+        }
+        catch (Exception e)
         {
             return new ResponseDto()
             {
-                Message = "Not authenticated!",
+                Message = e.Message,
                 Result = null,
                 IsSuccess = false,
-                StatusCode = 401 // Unauthorized
+                StatusCode = 500
             };
         }
-
-        // Tìm user theo userId
-        var user = await _userManager.FindByIdAsync(userId);
-
-        // Kiểm tra nếu user không tồn tại
-        if (user == null)
-        {
-            return new ResponseDto()
-            {
-                Message = "User does not exist",
-                Result = null,
-                IsSuccess = false,
-                StatusCode = 404 // Not Found
-            };
-        }
-
-        // Gọi service Firebase để upload ảnh
-        var responseDto = await _firebaseService.UploadImageUser(file, StaticFirebaseFolders.UserAvatars);
-
-        // Kiểm tra kết quả upload
-        if (!responseDto.IsSuccess)
-        {
-            return new ResponseDto()
-            {
-                Message = "Image upload failed!",
-                Result = null,
-                IsSuccess = false,
-                StatusCode = 400 // Bad Request
-            };
-        }
-
-        // Cập nhật AvatarUrl của user
-        user.AvatarUrl = responseDto.Result?.ToString()!;
-        var updateResult = await _userManager.UpdateAsync(user);
-
-        // Kiểm tra kết quả cập nhật
-        if (!updateResult.Succeeded)
-        {
-            return new ResponseDto()
-            {
-                Message = "Update user avatar failed!",
-                Result = null,
-                IsSuccess = false,
-                StatusCode = 500 // Internal Server Error
-            };
-        }
-
-        // Trả về kết quả thành công
-        return new ResponseDto()
-        {
-            Message = "Upload user avatar successfully!",
-            Result = null,
-            IsSuccess = true,
-            StatusCode = 200 // OK
-        };
     }
 
     /// <summary>
