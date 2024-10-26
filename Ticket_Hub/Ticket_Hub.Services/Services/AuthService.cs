@@ -3,8 +3,6 @@ using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using System.Web;
-using FirebaseAdmin.Auth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +13,6 @@ using Ticket_Hub.Models.DTO.Auth;
 using Ticket_Hub.Models.Models;
 using Ticket_Hub.Services.IServices;
 using Ticket_Hub.Utility.Constants;
-using Ticket_Hub.Utility.ValidationAttribute;
 
 namespace Ticket_Hub.Services.Services;
 
@@ -208,6 +205,14 @@ public class AuthService : IAuthService
             };
         }
 
+        // Xóa refresh token cũ nếu có
+        var existingRefreshToken = await _tokenService.RetrieveRefreshToken(user.Id);
+        if (existingRefreshToken != null)
+        {
+            await _tokenService.DeleteRefreshToken(user.Id);
+        }
+
+        //Tạo access token và refresh token mới
         var accessToken = await _tokenService.GenerateJwtAccessTokenAsync(user);
         var refreshToken = await _tokenService.GenerateJwtRefreshTokenAsync(user);
         await _tokenService.StoreRefreshToken(user.Id, refreshToken);
@@ -303,7 +308,7 @@ public class AuthService : IAuthService
 
             await _userManager.CreateAsync(user);
             await _userManager.AddLoginAsync(user,
-                new UserLoginInfo(StaticLoginProvider.Google, googleUser.sub, "GOOGLE"));
+            new UserLoginInfo(StaticLoginProvider.Google, googleUser.sub, "GOOGLE"));
         }
 
         var accessToken = await _tokenService.GenerateJwtAccessTokenAsync(user!);
@@ -360,7 +365,7 @@ public class AuthService : IAuthService
 
         if (refreshTokenEntity == null || refreshTokenEntity.Expires < DateTime.Now)
         {
-            // Nếu refresh token đã hết hạn, xóa refresh token và yêu cầu người dùng đăng nhập lại
+            // Nếu refresh token đã hết hạn, yêu cầu người dùng đăng nhập lại
             if (refreshTokenEntity != null)
             {
                 await _unitOfWork.RefreshTokens.RemoveTokenAsync(refreshTokenEntity);
@@ -375,11 +380,10 @@ public class AuthService : IAuthService
             };
         }
 
-        // Tạo access token mới
+        // Nếu token chưa hết hạn, tạo access token mới và giữ lại refresh token cũ
         var userToUpdate = await _userManager.FindByIdAsync(userId);
         var newAccessToken = await _tokenService.GenerateJwtAccessTokenAsync(userToUpdate);
 
-        // Trả về access token mới cùng với refresh token cũ
         return new ResponseDto
         {
             IsSuccess = true,
@@ -388,7 +392,7 @@ public class AuthService : IAuthService
             Result = new
             {
                 AccessToken = newAccessToken,
-                RefreshToken = refreshTokenDto.RefreshToken // Trả lại refresh token cũ
+                RefreshToken = refreshTokenDto.RefreshToken // Giữ lại refresh token cũ
             }
         };
     }
@@ -654,14 +658,14 @@ public class AuthService : IAuthService
         if (newPassword != confirmNewPassword)
         {
             return new ResponseDto
-                { IsSuccess = false, Message = "New password and confirm new password not match." };
+            { IsSuccess = false, Message = "New password and confirm new password not match." };
         }
 
         // Không cho phép thay đổi mật khẩu cũ
         if (newPassword == oldPassword)
         {
             return new ResponseDto
-                { IsSuccess = false, Message = "New password cannot be the same as the old password." };
+            { IsSuccess = false, Message = "New password cannot be the same as the old password." };
         }
 
         // Thực hiện thay đổi mật khẩu

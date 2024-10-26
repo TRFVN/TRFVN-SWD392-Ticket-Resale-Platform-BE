@@ -33,7 +33,7 @@ namespace Ticket_Hub.API
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlServer(
-                    builder.Configuration.GetConnectionString(StaticConnectionString.SqldbDefaultConnectionAzure));
+                    builder.Configuration.GetConnectionString(StaticConnectionString.SqldbDefaultConnection));
             });
 
             // Register AutoMapper
@@ -140,7 +140,7 @@ namespace Ticket_Hub.API
             //app.UseMiddleware<ErrorHandlerMiddleware>();
 
             // Apply database migrations
-            //ApplyMigration(app);
+            ApplyMigration(app);
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
