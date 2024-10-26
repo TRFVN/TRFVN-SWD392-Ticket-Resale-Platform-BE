@@ -147,14 +147,12 @@ public class TokenService : ITokenService
     //Store RefreshToken
     public async Task<bool> StoreRefreshToken(string userId, string refreshToken)
     {
-        var existingToken = await _unitOfWork.RefreshTokens.GetTokenByUserIdAsync(userId);
-        await _unitOfWork.RefreshTokens.RemoveTokenAsync(existingToken);
 
         var tokenEntity = new RefreshTokens
         {
             UserId = userId,
             RefreshToken = refreshToken,
-            Expires = DateTime.Now.AddDays(1), 
+            Expires = DateTime.Now.AddMinutes(3), 
             CreatedBy = userId,
             CreatedTime = DateTime.Now,
             UpdatedBy = userId,
