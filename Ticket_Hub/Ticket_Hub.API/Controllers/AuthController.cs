@@ -127,7 +127,6 @@ namespace Ticket_Hub.API.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("user/avatar")]
-        //[Authorize]
         public async Task<ActionResult<ResponseDto>> UploadUserAvatar(AvatarUploadDto avatarUploadDto)
         {
             var responseDto = await _authService.UploadUserAvatar(avatarUploadDto.File, User);
