@@ -12,5 +12,6 @@ namespace Ticket_Hub.Models.DTO.Message
         public string MessageContent { get; set; } = null!;
         public string UserId { get; set; } = null!;
         public DateTime CreateTime { get; set; }
+        public Guid? ChatRoomId { get; set; }
     }
 }

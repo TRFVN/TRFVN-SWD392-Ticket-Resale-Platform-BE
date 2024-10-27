@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.SignalR;
 using Ticket_Hub.Models.DTO.Message;
 using Ticket_Hub.Models.DTO;
+using Ticket_Hub.Models.DTO.ChatRoom;
 using Ticket_Hub.Services.IServices;
 using Ticket_Hub.Models.DTO.Hubs;
 
@@ -39,23 +40,6 @@ namespace Ticket_Hub.API.Controllers
         {
             var responseDto = await _messageService.CreateMessage(User, createMessageDto);
             return StatusCode(responseDto.StatusCode, responseDto);
-        }
-
-        [HttpPost("send-all-client")]
-        public async Task<IActionResult> SendMessage([FromBody] CreateMessageDto messageDto)
-        {
-            await _hubContext.Clients.All.SendAsync("ReceiveMessage", messageDto.UserId, messageDto.MessageContent);
-
-            return Ok(new { Message = "Message sent successfully" });
-        }
-        
-        [HttpPost("send-private-client")]
-        public async Task<IActionResult> SendPrivateMessage([FromBody] CreateMessageDto messageDto)
-        {
-            var receiverConnectionId = NotificationHub.GetConnectionId(messageDto.UserId);
-            await _hubContext.Clients.Client(receiverConnectionId).SendAsync("ReceiveMessage", messageDto.UserId, messageDto.MessageContent);
-
-            return Ok(new { Message = "Message sent successfully" });
         }
 
         [HttpPut]

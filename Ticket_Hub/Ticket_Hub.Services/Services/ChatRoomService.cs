@@ -139,7 +139,7 @@ public class ChatRoomService : IChatRoomService
     {
         ChatRoom newChatRoom = new ChatRoom()
         {
-            ChatRoomId = createChatRoomDto.ChatRoomId,
+            ChatRoomId = new Guid(),
             NameRoom = createChatRoomDto.NameRoom,
             CreateTime = createChatRoomDto.CreateTime,
             UpdateTime = createChatRoomDto.UpdateTime,
