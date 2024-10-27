@@ -8,7 +8,7 @@ namespace Ticket_Hub.Models.DTO.Message
 {
     public class CreateMessageDto
     {
-        public string MessageContent { get; set; } = null!;
         public string UserId { get; set; } = null!;
+        public string MessageContent { get; set; } = null!;
     }
 }

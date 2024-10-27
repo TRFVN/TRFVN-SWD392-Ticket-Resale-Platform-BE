@@ -7,12 +7,12 @@ using Ticket_Hub.Models.DTO.Hubs;
 
 namespace Ticket_Hub.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/message")]
     [ApiController]
     public class MessageController : ControllerBase
     {
         private readonly IMessageService _messageService;
-        private readonly IHubContext<NotificationHub> _hubContext; // SignalR Hub for notifications
+        private readonly IHubContext<NotificationHub> _hubContext; 
 
         public MessageController(IMessageService messageService, IHubContext<NotificationHub> hubContext)
         {
@@ -21,86 +21,54 @@ namespace Ticket_Hub.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<ResponseDto>> GetMessages
-    (
-        [FromQuery] string? filterOn,
-        [FromQuery] string? filterQuery,
-        [FromQuery] string? sortBy,
-        [FromQuery] int pageNumber = 1,
-        [FromQuery] int pageSize = 10
-    )
+        public async Task<ActionResult<ResponseDto>> GetMessages([FromQuery] string? filterOn, [FromQuery] string? filterQuery, [FromQuery] string? sortBy, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             var responseDto = await _messageService.GetMessages(User, filterOn, filterQuery, sortBy, pageNumber, pageSize);
             return StatusCode(responseDto.StatusCode, responseDto);
         }
 
         [HttpGet("{messageId}")]
-        public async Task<ActionResult<ResponseDto>> GetMessage
-        (
-            [FromRoute] Guid messageId
-        )
+        public async Task<ActionResult<ResponseDto>> GetMessage([FromRoute] Guid messageId)
         {
             var responseDto = await _messageService.GetMessage(User, messageId);
             return StatusCode(responseDto.StatusCode, responseDto);
         }
 
         [HttpPost]
-        public async Task<ActionResult<ResponseDto>> CreateMessage
-        (
-            [FromBody] CreateMessageDto createMessageDto
-        )
+        public async Task<ActionResult<ResponseDto>> CreateMessage([FromBody] CreateMessageDto createMessageDto)
         {
             var responseDto = await _messageService.CreateMessage(User, createMessageDto);
-
-            if (responseDto.IsSuccess)
-            {
-                // Send a real-time notification to all connected clients
-                await _hubContext.Clients.All.SendAsync("ReceiveNotification", "A new message was created");
-            }
-
             return StatusCode(responseDto.StatusCode, responseDto);
         }
 
-        [HttpPost("send")]
+        [HttpPost("send-all-client")]
         public async Task<IActionResult> SendMessage([FromBody] CreateMessageDto messageDto)
         {
-            // Gửi tin nhắn tới tất cả các client kết nối
             await _hubContext.Clients.All.SendAsync("ReceiveMessage", messageDto.UserId, messageDto.MessageContent);
+
+            return Ok(new { Message = "Message sent successfully" });
+        }
+        
+        [HttpPost("send-private-client")]
+        public async Task<IActionResult> SendPrivateMessage([FromBody] CreateMessageDto messageDto)
+        {
+            var receiverConnectionId = NotificationHub.GetConnectionId(messageDto.UserId);
+            await _hubContext.Clients.Client(receiverConnectionId).SendAsync("ReceiveMessage", messageDto.UserId, messageDto.MessageContent);
 
             return Ok(new { Message = "Message sent successfully" });
         }
 
         [HttpPut]
-        public async Task<ActionResult<ResponseDto>> UpdateMessage
-        (
-            [FromBody] UpdateMessageDto updateMessageDto
-        )
+        public async Task<ActionResult<ResponseDto>> UpdateMessage([FromBody] UpdateMessageDto updateMessageDto)
         {
             var responseDto = await _messageService.UpdateMessage(User, updateMessageDto);
-
-            if (responseDto.IsSuccess)
-            {
-                // Send a real-time notification to all connected clients
-                await _hubContext.Clients.All.SendAsync("ReceiveNotification", "A message was updated");
-            }
-
             return StatusCode(responseDto.StatusCode, responseDto);
         }
 
         [HttpDelete("{messageId}")]
-        public async Task<ActionResult<ResponseDto>> DeleteMessage
-    (
-        [FromRoute] Guid messageId
-    )
+        public async Task<ActionResult<ResponseDto>> DeleteMessage([FromRoute] Guid messageId)
         {
             var responseDto = await _messageService.DeleteMessage(User, messageId);
-
-            if (responseDto.IsSuccess)
-            {
-                // Send a real-time notification to all connected clients
-                await _hubContext.Clients.All.SendAsync("ReceiveNotification", "A message was deleted");
-            }
-
             return StatusCode(responseDto.StatusCode, responseDto);
         }
     }

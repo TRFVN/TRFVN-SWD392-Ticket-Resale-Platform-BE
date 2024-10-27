@@ -114,7 +114,7 @@ namespace Ticket_Hub.API
                 options.AddPolicy("CorsPolicy", builder =>
                 {
                     builder
-                        .WithOrigins("https://localhost:5173", "https://localhost:7027")
+                        .WithOrigins("https://localhost:5173", "https://localhost:7027", "https://nostran.w3spaces.com")
                         .AllowAnyMethod()
                         .AllowAnyHeader()
                         .AllowCredentials()
