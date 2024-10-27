@@ -18,7 +18,7 @@ namespace Ticket_Hub.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<ResponseDto>> GetEvents
+        public async Task<ActionResult<ResponseDto>> GetSubCategories
         (
             [FromQuery] string? filterOn,
             [FromQuery] string? filterQuery,
@@ -33,7 +33,7 @@ namespace Ticket_Hub.API.Controllers
         }
 
         [HttpGet("{subCategoryId}")]
-        public async Task<ActionResult<ResponseDto>> GetEvent
+        public async Task<ActionResult<ResponseDto>> GetSubCategory
         (
             [FromRoute] Guid subCategoryId
         )

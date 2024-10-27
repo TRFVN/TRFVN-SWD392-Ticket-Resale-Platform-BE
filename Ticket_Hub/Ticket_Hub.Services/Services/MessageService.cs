@@ -28,9 +28,11 @@ namespace Ticket_Hub.Services.Services
         {
             Message newMessage = new Message()
             {
+                MessageId = new Guid(),
                 MessageContent = createMessageDto.MessageContent,
                 UserId = createMessageDto.UserId,
-                CreateTime = DateTime.UtcNow
+                CreateTime = DateTime.UtcNow,
+                ChatRoomId = createMessageDto.ChatRoomId
             };
 
             await _unitOfWork.MessageRepository.AddAsync(newMessage);
@@ -114,9 +116,9 @@ namespace Ticket_Hub.Services.Services
             {
                 switch (filterOn.Trim().ToLower())
                 {
-                    case "userid":
+                    case "MessageContent":
                         listMessages = listMessages
-                            .Where(x => x.UserId.Contains(filterQuery, StringComparison.CurrentCultureIgnoreCase))
+                            .Where(x => x.MessageContent.Contains(filterQuery, StringComparison.CurrentCultureIgnoreCase))
                             .ToList();
                         break;
                     default:
@@ -175,9 +177,12 @@ namespace Ticket_Hub.Services.Services
                     StatusCode = 404
                 };
             }
-
+            
+            message.MessageId = updateMessageDto.MessageId;
             message.MessageContent = updateMessageDto.MessageContent;
+            message.UserId = updateMessageDto.UserId;
             message.CreateTime = DateTime.UtcNow;
+            message.ChatRoomId = updateMessageDto.ChatRoomId;
 
             _unitOfWork.MessageRepository.Update(message);
             await _unitOfWork.SaveAsync();
