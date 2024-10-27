@@ -12,4 +12,7 @@ public class Message
     [StringLength(450)] public string UserId { get; set; } = null!;
     [ForeignKey("UserId")] public ApplicationUser User { get; set; } = null!;
     public DateTime CreateTime { get; set; }
+    public Guid? ChatRoomId { get; set; }
+    [ForeignKey("ChatRoomId")] 
+    public virtual ChatRoom ChatRoom { get; set; }
 }

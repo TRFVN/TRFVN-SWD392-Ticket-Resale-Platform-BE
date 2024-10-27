@@ -25,6 +25,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IFavouriteService, FavouriteService>();
         services.AddScoped<IMessageService, MessageService>();
         services.AddScoped<IPaymentService, PaymentService>();
+        services.AddScoped<IChatRoomService, ChatRoomService>();
         return services;
     }
 }
