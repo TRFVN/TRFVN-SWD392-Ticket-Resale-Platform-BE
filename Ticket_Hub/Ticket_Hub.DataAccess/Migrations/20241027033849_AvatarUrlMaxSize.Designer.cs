@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Ticket_Hub.DataAccess.Context;
 
@@ -11,9 +12,11 @@ using Ticket_Hub.DataAccess.Context;
 namespace Ticket_Hub.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241027033849_AvatarUrlMaxSize")]
+    partial class AvatarUrlMaxSize
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -197,8 +200,11 @@ namespace Ticket_Hub.DataAccess.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("AvatarUrl");
-                    
+                    b.Property<string>("AvatarUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<DateTime>("BirthDate")
                         .HasColumnType("datetime2");
 
@@ -211,6 +217,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Country")
+                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
@@ -222,6 +229,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("FullName")
+                        .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
@@ -279,6 +287,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                             AvatarUrl = "https://example.com/avatar.png",
                             BirthDate = new DateTime(1990, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Cccd = "123456789123",
+                            ConcurrencyStamp = "17bf58aa-5725-4a20-85cc-0871ac5cc41f",
                             Country = "Country",
                             Email = "admin@gmail.com",
                             EmailConfirmed = true,
@@ -286,6 +295,10 @@ namespace Ticket_Hub.DataAccess.Migrations
                             LockoutEnabled = true,
                             NormalizedEmail = "ADMIN@GMAIL.COM",
                             NormalizedUserName = "ADMIN@GMAIL.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAECA2Eyb/b6i1hhYHwAFPmyop5QDNXmcLTillwTA+SPN+mWQaP4guC4kwW6egs/mGOg==",
+                            PhoneNumber = "1234567890",
+                            PhoneNumberConfirmed = true,
+                            SecurityStamp = "cc85c067-caeb-4604-a742-7e16f9e0f87d",
                             TwoFactorEnabled = false,
                             UserName = "admin@gmail.com"
                         });
@@ -398,28 +411,6 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("Ticket_Hub.Models.Models.ChatRoom", b =>
-                {
-                    b.Property<Guid>("ChatRoomId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("NameRoom")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<DateTime>("UpdateTime")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("ChatRoomId");
-
-                    b.ToTable("ChatRooms");
-                });
-
             modelBuilder.Entity("Ticket_Hub.Models.Models.EmailTemplate", b =>
                 {
                     b.Property<Guid>("Id")
@@ -489,6 +480,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.HasData(
                         new
                         {
+                            Id = new Guid("5b0fb601-40fd-487f-9c22-fba37f8997ff"),
                             BodyContent = "Dear [UserFullName],<br><br>Welcome to Ticket Hub!  We are thrilled to have you as part of our community dedicated to providing the best ticket-buying and reselling experience.",
                             CallToAction = "<a href=\"{{VerificationLink}}\">Verify Your Email</a>",
                             Category = "Welcome",
@@ -505,6 +497,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                         },
                         new
                         {
+                            Id = new Guid("562029a8-430f-43f6-90e6-342afcc28710"),
                             BodyContent = "Hi [UserFullName],<br><br>We received a request to reset your password. Click the link below to reset your password.",
                             CallToAction = "https://cursuslms.xyz/sign-in/verify-email?userId=user.Id&token=Uri.EscapeDataString(token)",
                             Category = "Security",
@@ -521,6 +514,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                         },
                         new
                         {
+                            Id = new Guid("37917612-8f3f-494d-906a-275e1dbf661f"),
                             BodyContent = "<p>Thank you for registering your Ticket Hub account. Click here to verify your email.</p>",
                             CallToAction = "<a href=\"https://localhost:5173/verifyemail?userId={{UserId}}&token={{Token}}\" class='button'>Verify Email</a>",
                             Category = "Verify",
@@ -737,9 +731,6 @@ namespace Ticket_Hub.DataAccess.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("ChatRoomId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime>("CreateTime")
                         .HasColumnType("datetime2");
 
@@ -754,8 +745,6 @@ namespace Ticket_Hub.DataAccess.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("MessageId");
-
-                    b.HasIndex("ChatRoomId");
 
                     b.HasIndex("UserId");
 
@@ -1109,17 +1098,11 @@ namespace Ticket_Hub.DataAccess.Migrations
 
             modelBuilder.Entity("Ticket_Hub.Models.Models.Message", b =>
                 {
-                    b.HasOne("Ticket_Hub.Models.Models.ChatRoom", "ChatRoom")
-                        .WithMany("Messages")
-                        .HasForeignKey("ChatRoomId");
-
                     b.HasOne("Ticket_Hub.Models.Models.ApplicationUser", "User")
                         .WithMany("Messages")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("ChatRoom");
 
                     b.Navigation("User");
                 });
@@ -1227,11 +1210,6 @@ namespace Ticket_Hub.DataAccess.Migrations
             modelBuilder.Entity("Ticket_Hub.Models.Models.Category", b =>
                 {
                     b.Navigation("SubCategories");
-                });
-
-            modelBuilder.Entity("Ticket_Hub.Models.Models.ChatRoom", b =>
-                {
-                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("Ticket_Hub.Models.Models.Event", b =>
