@@ -15,5 +15,6 @@ public interface IUnitOfWork
     IMessageRepository MessageRepository { get; }
     ICartHeaderRepository CartHeaderRepository { get; }
     ICartDetailRepository CartDetailRepository { get; }
+    IChatRoomRepository ChatRoomRepository { get; }
     Task<int> SaveAsync();
 }

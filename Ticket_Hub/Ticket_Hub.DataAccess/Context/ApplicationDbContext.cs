@@ -30,6 +30,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Wallet> Wallets { get; set; }
     public DbSet<EmailTemplate> EmailTemplates { get; set; }
     public DbSet<RefreshTokens> RefreshTokens { get; set; }
+    public DbSet<ChatRoom> ChatRooms { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
