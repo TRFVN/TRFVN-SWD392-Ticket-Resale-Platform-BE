@@ -5,11 +5,11 @@ namespace Ticket_Hub.Models.Models
 {
     public class ApplicationUser : IdentityUser
     {
-        [StringLength(30)] public string FullName { get; set; } = null!;
+        [StringLength(30)] public string? FullName { get; set; }
         public DateTime BirthDate { get; set; } 
-        //[StringLength(300)] 
-        public string AvatarUrl { get; set; } = null!;
-        [StringLength(50)] public string Country { get; set; } = null!;
+        [StringLength(500)] 
+        public string? AvatarUrl { get; set; } 
+        [StringLength(50)] public string? Country { get; set; }
         [StringLength(12)] public string? Cccd { get; set; }
         [StringLength(100)] public string? Address { get; set; }
 

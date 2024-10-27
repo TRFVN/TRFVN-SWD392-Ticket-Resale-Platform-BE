@@ -505,14 +505,14 @@ public class AuthService : IAuthService
                 throw new Exception("Image upload fail!");
             }
 
-            /*user.AvatarUrl = responseDto.Result?.ToString();
+            user.AvatarUrl = responseDto.Result?.ToString();
 
-            var updateResult = await _userManager.UpdateAsync(user);*//*
+            var updateResult = await _userManager.UpdateAsync(user);
 
             if (!updateResult.Succeeded)
             {
                 throw new Exception("Update user avatar fail!");
-            }*/
+            }
 
             return new ResponseDto()
             {
