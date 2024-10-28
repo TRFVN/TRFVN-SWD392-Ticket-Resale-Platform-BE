@@ -10,6 +10,7 @@ public interface IAuthService
     Task<ResponseDto> SignUp(RegisterDto registerDto);
     Task<ResponseDto> SignIn(SignDto signDto);
     Task<ResponseDto> SignInByGoogle(SignInByGoogleDto signInByGoogleDto);
+    Task<ResponseDto> UpdateUserProfile(string userId, UpdateUserProfileDto updateUserProfileDto);
     Task<ResponseDto> RefreshToken(RefreshTokenDto refreshTokenDto);
     Task<ResponseDto> FetchUserByToken(string token);
     Task<ResponseDto> UploadUserAvatar(IFormFile file, ClaimsPrincipal user);

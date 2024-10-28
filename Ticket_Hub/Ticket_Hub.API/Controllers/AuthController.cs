@@ -84,6 +84,29 @@ namespace Ticket_Hub.API.Controllers
             return StatusCode(responseDto.StatusCode, responseDto);
         }
 
+        /// <summary>
+        /// Update profile after login by Google.
+        /// </summary>
+        /// <param name="updateUserProfileDto"></param>
+        /// <returns></returns>
+        [HttpPut("update-profile")]
+        public async Task<ActionResult<ResponseDto>> UpdateUserProfile([FromBody] UpdateUserProfileDto updateUserProfileDto)
+        {
+            // Lấy thông tin UserId từ Token sau khi đã xác thực
+            var userId = _userManager.GetUserId(User);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(new ResponseDto
+                {
+                    IsSuccess = false,
+                    Message = "User not authenticated"
+                });
+            }
+
+            var result = await _authService.UpdateUserProfile(userId, updateUserProfileDto);
+            return StatusCode(result.StatusCode, result);
+        }
 
         /// <summary>
         /// RefreshToken

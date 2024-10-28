@@ -256,8 +256,6 @@ public class AuthService : IAuthService
         }
 
         string email = googleUser.email;
-        string name = googleUser.name;
-        string avatarUrl = googleUser.picture;
 
         // Tìm kiếm người dùng trong database
         var user = await _userManager.FindByEmailAsync(email);
@@ -294,40 +292,169 @@ public class AuthService : IAuthService
             };
         }
 
-        if (userLoginInfo is null && user is null)
+        // Nếu user chưa tồn tại, tạo user mới và thêm role "Member"
+        if (user is null)
         {
-            // Tạo user mới nếu chưa có trong database
             user = new ApplicationUser
             {
                 Email = email,
-                FullName = name,
+                FullName = "",
                 UserName = email,
-                AvatarUrl = avatarUrl,
+                AvatarUrl = "",
+                Country = "",
+                Cccd = "",
+                Address = "",
                 EmailConfirmed = true
             };
 
-            await _userManager.CreateAsync(user);
-            await _userManager.AddLoginAsync(user,
-            new UserLoginInfo(StaticLoginProvider.Google, googleUser.sub, "GOOGLE"));
+            // Tạo user mới trong database
+            var createUserResult = await _userManager.CreateAsync(user);
+            if (!createUserResult.Succeeded)
+            {
+                return new ResponseDto()
+                {
+                    Message = "Error creating user",
+                    IsSuccess = false,
+                    StatusCode = 400
+                };
+            }
+
+            // Thêm thông tin đăng nhập Google vào tài khoản
+            await _userManager.AddLoginAsync(user, new UserLoginInfo(StaticLoginProvider.Google, googleUser.sub, "GOOGLE"));
+
+            // Kiểm tra và tạo role "Member" nếu chưa có
+            var isRoleExist = await _roleManager.RoleExistsAsync(StaticUserRoles.Member);
+            if (!isRoleExist)
+            {
+                await _roleManager.CreateAsync(new IdentityRole(StaticUserRoles.Member));
+            }
+
+            // Thêm role "Member" cho người dùng mới
+            var isRoleAdded = await _userManager.AddToRoleAsync(user, StaticUserRoles.Member);
+            if (!isRoleAdded.Succeeded)
+            {
+                return new ResponseDto()
+                {
+                    Message = "Error adding role",
+                    IsSuccess = false,
+                    StatusCode = 500
+                };
+            }
         }
 
+        // Cập nhật thông tin người dùng
+        await _userManager.UpdateAsync(user);
+
+        // Kiểm tra thông tin bắt buộc đã được cập nhật chưa
+        bool isProfileComplete =
+            !string.IsNullOrEmpty(user.FullName) &&
+            !string.IsNullOrEmpty(user.Address) &&
+            !string.IsNullOrEmpty(user.AvatarUrl) &&
+            !string.IsNullOrEmpty(user.Country) &&
+            !string.IsNullOrEmpty(user.Cccd);
+
+        // Tạo Access Token và Refresh Token cho user
         var accessToken = await _tokenService.GenerateJwtAccessTokenAsync(user!);
         var refreshToken = await _tokenService.GenerateJwtRefreshTokenAsync(user!);
         await _tokenService.StoreRefreshToken(user!.Id, refreshToken);
-        await _userManager.UpdateAsync(user);
 
+        // Nếu hồ sơ chưa hoàn chỉnh, trả về cảnh báo
+        if (!isProfileComplete)
+        {
+            return new ResponseDto()
+            {
+                Result = new SignByGoogleResponseDto()
+                {
+                    AccessToken = accessToken,
+                    RefreshToken = refreshToken,
+                    IsProfileComplete = false // Thông báo nếu cần cập nhật thông tin
+                },
+                Message = "Your profile is incomplete. Please update your profile information.",
+                IsSuccess = true, // Vẫn trả về thành công để cấp quyền truy cập
+                StatusCode = 200
+            };
+        }
+
+        // Nếu thông tin đầy đủ
         return new ResponseDto()
         {
-            Result = new SignResponseDto()
+            Result = new SignByGoogleResponseDto()
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
+                IsProfileComplete = true
             },
             Message = "Sign in successfully",
             IsSuccess = true,
             StatusCode = 200
         };
     }
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="updateUserProfileDto"></param>
+    /// <returns></returns>
+    public async Task<ResponseDto> UpdateUserProfile(string userId, UpdateUserProfileDto updateUserProfileDto)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return new ResponseDto
+            {
+                Message = "User not found",
+                IsSuccess = false,
+                StatusCode = 404
+            };
+        }
+
+        // Cập nhật các trường thông tin
+        user.FullName = updateUserProfileDto.FullName;
+        user.AvatarUrl = updateUserProfileDto.AvatarUrl;
+        user.Country = updateUserProfileDto.Country;
+        user.Cccd = updateUserProfileDto.Cccd;
+        user.Address = updateUserProfileDto.Address;
+
+        var updateResult = await _userManager.UpdateAsync(user);
+
+        if (!updateResult.Succeeded)
+        {
+            return new ResponseDto
+            {
+                Message = "Failed to update user profile",
+                IsSuccess = false,
+                StatusCode = 400,
+                Result = updateResult.Errors
+            };
+        }
+
+
+        // Xóa refresh token cũ nếu có
+        var existingRefreshToken = await _tokenService.RetrieveRefreshToken(user.Id);
+        if (existingRefreshToken != null)
+        {
+            await _tokenService.DeleteRefreshToken(user.Id);
+        }
+        // Tạo Access Token và Refresh Token cho user
+        var accessToken = await _tokenService.GenerateJwtAccessTokenAsync(user!);
+        var refreshToken = await _tokenService.GenerateJwtRefreshTokenAsync(user!);
+        await _tokenService.StoreRefreshToken(user!.Id, refreshToken);
+
+        return new ResponseDto
+        {
+            Result = new SignResponseDto()
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshToken,
+            },
+            Message = "User profile updated successfully",
+            IsSuccess = true,
+            StatusCode = 200
+        };
+    }
+
 
     /// <summary>
     /// Refresh token
@@ -514,10 +641,27 @@ public class AuthService : IAuthService
                 throw new Exception("Update user avatar fail!");
             }
 
+            // Xóa refresh token cũ nếu có
+            var existingRefreshToken = await _tokenService.RetrieveRefreshToken(user.Id);
+            if (existingRefreshToken != null)
+            {
+                await _tokenService.DeleteRefreshToken(user.Id);
+            }
+
+            //Tạo access token và refresh token mới
+            var accessToken = await _tokenService.GenerateJwtAccessTokenAsync(user);
+            var refreshToken = await _tokenService.GenerateJwtRefreshTokenAsync(user);
+            await _tokenService.StoreRefreshToken(user.Id, refreshToken);
+
             return new ResponseDto()
             {
                 Message = "Upload user avatar successfully!",
-                Result = responseDto.Result,
+                Result = new AvatarTokenDto()
+                {
+                    AccessToken = accessToken,
+                    RefreshToken = refreshToken,
+                    AvatarUrl = responseDto.Result?.ToString()
+                },
                 IsSuccess = true,
                 StatusCode = 200
             };
