@@ -30,13 +30,13 @@ namespace Ticket_Hub.API.Controllers
             return StatusCode(responseDto.StatusCode, responseDto);
         }
         
-        [HttpGet("{chatRoomId}")]
+        [HttpGet("{userId}")]
         public async Task<ActionResult<ResponseDto>> ChatRoom
         (
-            [FromRoute] Guid chatRoomId
+            [FromRoute] Guid userId
         )
         {
-            var responseDto = await _chatRoomService.GetChatRoom(User, chatRoomId);
+            var responseDto = await _chatRoomService.GetChatRoom(User, userId);
             return StatusCode(responseDto.StatusCode, responseDto);
         }
         
