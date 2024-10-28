@@ -16,7 +16,7 @@ public interface IChatRoomService
         int pageSize = 0
     );
 
-    Task<ResponseDto> GetChatRoom(ClaimsPrincipal user, Guid chatRoomId);
+    Task<ResponseDto> GetChatRoom(ClaimsPrincipal user, Guid userId);
     Task<ResponseDto> CreateChatRoom(ClaimsPrincipal user, CreateChatRoomDto createChatRoomDto);
     Task<ResponseDto> UpdateChatRoom(ClaimsPrincipal user, UpdateChatRoomDto updateChatRoomDto);
     Task<ResponseDto> DeleteChatRoom(ClaimsPrincipal user, Guid chatRoomId);

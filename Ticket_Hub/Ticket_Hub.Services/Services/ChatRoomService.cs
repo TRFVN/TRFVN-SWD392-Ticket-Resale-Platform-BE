@@ -110,10 +110,33 @@ public class ChatRoomService : IChatRoomService
         };
     }
 
-    public async Task<ResponseDto> GetChatRoom(ClaimsPrincipal user, Guid chatRoomId)
+    public async Task<ResponseDto> GetChatRoom(ClaimsPrincipal user, Guid userId)
     {
-        var chatRoomIds = await _unitOfWork.ChatRoomRepository.GetById(chatRoomId);
-        if (chatRoomIds == null)
+        var messages = await _unitOfWork.MessageRepository.GetAsync(m => m.UserId == userId.ToString());
+        if (messages == null)
+        {
+            return new ResponseDto
+            {
+                Message = "No messages found for the user",
+                Result = null,
+                IsSuccess = false,
+                StatusCode = 404
+            };
+        }
+        var chatRoomId = messages.ChatRoomId;
+        if (chatRoomId == null)
+        {
+            return new ResponseDto
+            {
+                Message = "Chat room id is null",
+                Result = null,
+                IsSuccess = false,
+                StatusCode = 404
+            };
+        }
+        
+        var chatRoom = await _unitOfWork.ChatRoomRepository.GetById(chatRoomId.Value);
+        if (chatRoom == null)
         {
             return new ResponseDto
             {
@@ -124,7 +147,7 @@ public class ChatRoomService : IChatRoomService
             };
         }
 
-        var chatRoomDto = _mapper.Map<GetChatRoomDto>(chatRoomIds);
+        var chatRoomDto = _mapper.Map<GetChatRoomDto>(chatRoom);
 
         return new ResponseDto
         {
