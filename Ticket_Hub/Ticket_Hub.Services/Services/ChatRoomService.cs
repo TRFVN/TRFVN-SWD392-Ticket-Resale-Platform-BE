@@ -112,8 +112,8 @@ public class ChatRoomService : IChatRoomService
 
     public async Task<ResponseDto> GetChatRoom(ClaimsPrincipal user, Guid userId)
     {
-        var messages = await _unitOfWork.MessageRepository.GetAsync(m => m.UserId == userId.ToString());
-        if (messages == null)
+        var messages = await _unitOfWork.MessageRepository.GetAllAsync(x => x.UserId == userId.ToString());
+        if (messages == null || !messages.Any())
         {
             return new ResponseDto
             {
@@ -123,38 +123,28 @@ public class ChatRoomService : IChatRoomService
                 StatusCode = 404
             };
         }
-        var chatRoomId = messages.ChatRoomId;
-        if (chatRoomId == null)
+
+        var chatRoomIds = messages.Select(x => x.ChatRoomId).Distinct().ToList();
+        var chatRooms = await _unitOfWork.ChatRoomRepository.GetAllAsync(x => chatRoomIds.Contains(x.ChatRoomId));
+        if (chatRooms == null || !chatRooms.Any())
         {
             return new ResponseDto
             {
-                Message = "Chat room id is null",
-                Result = null,
-                IsSuccess = false,
-                StatusCode = 404
-            };
-        }
-        
-        var chatRoom = await _unitOfWork.ChatRoomRepository.GetById(chatRoomId.Value);
-        if (chatRoom == null)
-        {
-            return new ResponseDto
-            {
-                Message = "Chat room not found",
+                Message = "No chat rooms found",
                 Result = null,
                 IsSuccess = false,
                 StatusCode = 404
             };
         }
 
-        var chatRoomDto = _mapper.Map<GetChatRoomDto>(chatRoom);
+        var chatRoomDtos = chatRooms.Select(x => _mapper.Map<GetChatRoomDto>(x)).ToList();
 
         return new ResponseDto
         {
-            Message = "Chat room found successfully",
-            Result = chatRoomDto,
+            Message = "Chat rooms found successfully",
+            Result = chatRoomDtos,
             IsSuccess = true,
-            StatusCode = 201
+            StatusCode = 200
         };
     }
 

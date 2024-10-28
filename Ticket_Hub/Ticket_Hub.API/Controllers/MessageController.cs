@@ -28,10 +28,10 @@ namespace Ticket_Hub.API.Controllers
             return StatusCode(responseDto.StatusCode, responseDto);
         }
 
-        [HttpGet("{messageId}")]
-        public async Task<ActionResult<ResponseDto>> GetMessage([FromRoute] Guid messageId)
+        [HttpGet("{chatRoomId}")]
+        public async Task<ActionResult<ResponseDto>> GetMessage([FromRoute] Guid chatRoomId)
         {
-            var responseDto = await _messageService.GetMessage(User, messageId);
+            var responseDto = await _messageService.GetMessage(User, chatRoomId);
             return StatusCode(responseDto.StatusCode, responseDto);
         }
 

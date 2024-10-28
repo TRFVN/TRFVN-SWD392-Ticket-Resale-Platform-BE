@@ -71,28 +71,31 @@ namespace Ticket_Hub.Services.Services
             };
         }
 
-        public async Task<ResponseDto> GetMessage(ClaimsPrincipal user, Guid messageId)
+        public async Task<ResponseDto> GetMessage(ClaimsPrincipal user, Guid chatRoomId)
         {
-            var message = await _unitOfWork.MessageRepository.GetById(messageId);
-            if (message == null)
+            var messages = await _unitOfWork.MessageRepository.GetAllAsync(x => x.ChatRoomId == chatRoomId);
+            if (messages == null || !messages.Any())
             {
                 return new ResponseDto
                 {
-                    Message = "Message not found",
+                    Message = "No messages found for the chat room",
+                    Result = null,
                     IsSuccess = false,
                     StatusCode = 404
                 };
             }
 
-            var messageDto = _mapper.Map<GetMessageDto>(message);
+            var messageDtos = messages.Select(x => _mapper.Map<GetMessageDto>(x)).ToList();
+
             return new ResponseDto
             {
-                Message = "Message found successfully",
+                Message = "Messages found successfully",
+                Result = messageDtos,
                 IsSuccess = true,
-                StatusCode = 200,
-                Result = messageDto
+                StatusCode = 200
             };
         }
+        
 
         public async Task<ResponseDto> GetMessages(ClaimsPrincipal user, string? filterOn, string? filterQuery, string? sortBy, int pageNumber = 0, int pageSize = 0)
         {
