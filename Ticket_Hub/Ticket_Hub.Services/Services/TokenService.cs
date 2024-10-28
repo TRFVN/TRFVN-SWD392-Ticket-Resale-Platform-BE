@@ -57,7 +57,7 @@ public class TokenService : ITokenService
             issuer: _configuration["JWT:ValidIssuer"],
             audience: _configuration["JWT:ValidAudience"],
             notBefore: DateTime.Now,
-            expires: DateTime.Now.AddMinutes(1), // Thời gian hết hạn của token
+            expires: DateTime.Now.AddMinutes(3), // Thời gian hết hạn của token
             claims: authClaims, // Danh sách claims
             signingCredentials: signingCredentials
         );
@@ -88,7 +88,7 @@ public class TokenService : ITokenService
             audience: _configuration["JWT:ValidAudience"],
             notBefore: DateTime.Now,
             //expires: DateTime.Now.AddDays(1), //Expiration time is 1 day
-            expires: DateTime.Now.AddMinutes(3), //Expiration time is 1 days
+            expires: DateTime.Now.AddMinutes(10), //Expiration time is 1 days
             claims: authClaims,
             signingCredentials: signingCredentials
         );
