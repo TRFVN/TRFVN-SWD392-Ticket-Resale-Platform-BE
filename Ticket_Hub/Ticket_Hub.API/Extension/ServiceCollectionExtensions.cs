@@ -26,6 +26,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IMessageService, MessageService>();
         services.AddScoped<IPaymentService, PaymentService>();
         services.AddScoped<IChatRoomService, ChatRoomService>();
+        services.AddScoped<ICompanyService, CompanyService>();
+        services.AddScoped<IPrivacyService, PrivacyService>();
+        services.AddScoped<ITermOfUseService, TermOfUseService>();
+        services.AddScoped<IAppLogoService, AppLogoService>();
         return services;
     }
 }

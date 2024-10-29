@@ -22,6 +22,10 @@ public class UnitOfWork : IUnitOfWork
     public ICartHeaderRepository CartHeaderRepository { get; set; }
     public ICartDetailRepository CartDetailRepository { get; set; }
     public IChatRoomRepository ChatRoomRepository { get; set; }
+    public ICompanyRepository CompanyRepository { get; set; }
+    public IPrivacyRepository PrivacyRepository { get; set; }
+    public ITermOfUseRepository TermOfUseRepository { get; set; }
+    public IAppLogoRepository AppLogoRepository { get; set; }
 
     public UnitOfWork(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
     {
@@ -44,6 +48,10 @@ public class UnitOfWork : IUnitOfWork
         FavoriteRepository = new FavouriteRepository(_context);
         MessageRepository = new MessageRepository(_context);    
         ChatRoomRepository = new ChatRoomRepository(_context);
+        CompanyRepository = new CompanyRepository(_context);
+        PrivacyRepository = new PrivacyRepository(_context);
+        TermOfUseRepository = new TermOfUseRepository(_context);
+        AppLogoRepository = new AppLogoRepository(_context);
     }
 
     public async Task<int> SaveAsync()

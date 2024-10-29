@@ -16,5 +16,9 @@ public interface IUnitOfWork
     ICartHeaderRepository CartHeaderRepository { get; }
     ICartDetailRepository CartDetailRepository { get; }
     IChatRoomRepository ChatRoomRepository { get; }
+    ICompanyRepository CompanyRepository { get; }
+    IPrivacyRepository PrivacyRepository { get; }
+    ITermOfUseRepository TermOfUseRepository { get; }
+    IAppLogoRepository AppLogoRepository { get; }
     Task<int> SaveAsync();
 }

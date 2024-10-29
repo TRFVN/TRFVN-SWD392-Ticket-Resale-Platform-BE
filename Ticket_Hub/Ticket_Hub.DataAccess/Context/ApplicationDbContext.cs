@@ -31,6 +31,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<EmailTemplate> EmailTemplates { get; set; }
     public DbSet<RefreshTokens> RefreshTokens { get; set; }
     public DbSet<ChatRoom> ChatRooms { get; set; }
+    public DbSet<Company> Companies { get; set; }
+    public DbSet<Privacy> Privacies { get; set; }
+    public DbSet<TermOfUse> TermOfUses { get; set; }
+    public DbSet<AppLogo> AppLogos { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
