@@ -88,7 +88,7 @@ public class TokenService : ITokenService
             audience: _configuration["JWT:ValidAudience"],
             notBefore: DateTime.Now,
             //expires: DateTime.Now.AddDays(1), //Expiration time is 1 day
-            expires: DateTime.Now.AddMinutes(10), //Expiration time is 1 days
+            expires: DateTime.Now.AddMinutes(30), //Expiration time is 1 days
             claims: authClaims,
             signingCredentials: signingCredentials
         );
