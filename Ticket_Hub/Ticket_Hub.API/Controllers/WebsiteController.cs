@@ -153,11 +153,47 @@ namespace Ticket_Hub.API.Controllers
         
         #region MobileAppLogo
         
+        [Authorize(Roles = StaticUserRoles.Admin + "," + StaticUserRoles.Member + "," + StaticUserRoles.Staff)]
+        [HttpGet("app-logo")]
+        public async Task<ActionResult<ResponseDto>> GetAppLogos()
+        {
+            var responseDto = await _appLogoService.GetAppLogos();
+            return StatusCode(responseDto.StatusCode, responseDto);
+        }
+
+        [HttpGet("app-logo/{appLogoId:guid}")]
+        public async Task<ActionResult<ResponseDto>> GetAppLogo(Guid appLogoId)
+        {
+            var responseDto = await _appLogoService.GetAppLogo(appLogoId);
+            return StatusCode(responseDto.StatusCode, responseDto);
+        }
+
+        [HttpPost("app-logo")]
+        public async Task<ActionResult<ResponseDto>> CreateAppLogo([FromBody] CreateAppLogoDto createAppLogoDto)
+        {
+            var responseDto = await _appLogoService.CreateAppLogo(createAppLogoDto);
+            return StatusCode(responseDto.StatusCode, responseDto);
+        }
+
+        [HttpPut("app-logo")]
+        public async Task<ActionResult<ResponseDto>> UpdateAppLogo([FromBody] UpdateAppLogoDto updateAppLogoDto)
+        {
+            var responseDto = await _appLogoService.UpdateAppLogo(updateAppLogoDto);
+            return StatusCode(responseDto.StatusCode, responseDto);
+        }
+
+        [HttpDelete("app-logo/{appLogoId:guid}")]
+        public async Task<ActionResult<ResponseDto>> DeleteAppLogo(Guid appLogoId)
+        {
+            var responseDto = await _appLogoService.DeleteAppLogo(appLogoId);
+            return StatusCode(responseDto.StatusCode, responseDto);
+        }
+        
         [HttpPost]
         [Route("web-logo")]
         public async Task<ActionResult<ResponseDto>> UploadWebLogo(Guid appLogoId, UploadAppLogoDto uploadMobileAppLogo)
         {
-            var responseDto = await _appLogoService.UploadAppLogo(appLogoId, StaticFirebaseFolders.WebLogo, uploadMobileAppLogo);
+            var responseDto = await _appLogoService.UploadAppLogoImage(appLogoId, StaticFirebaseFolders.WebLogo, uploadMobileAppLogo);
             return StatusCode(responseDto.StatusCode, responseDto);
         }
 
@@ -174,7 +210,7 @@ namespace Ticket_Hub.API.Controllers
         [Route("web-logo")]
         public async Task<ActionResult<ResponseDto>> DeleteWebLogo(Guid appLogoId)
         {
-            var responseDto = await _appLogoService.DeleteAppLogo(appLogoId);
+            var responseDto = await _appLogoService.DeleteAppLogoImage(appLogoId);
             return StatusCode(responseDto.StatusCode, responseDto);
         }
         
@@ -182,7 +218,7 @@ namespace Ticket_Hub.API.Controllers
         [Route("app-store-logo")]
         public async Task<ActionResult<ResponseDto>> UploadAppStoreLogo(Guid appLogoId, UploadAppLogoDto uploadMobileAppLogo)
         {
-            var responseDto = await _appLogoService.UploadAppLogo(appLogoId, StaticFirebaseFolders.AppStoreLogo, uploadMobileAppLogo);
+            var responseDto = await _appLogoService.UploadAppLogoImage(appLogoId, StaticFirebaseFolders.AppStoreLogo, uploadMobileAppLogo);
             return StatusCode(responseDto.StatusCode, responseDto);
         }
 
@@ -199,7 +235,7 @@ namespace Ticket_Hub.API.Controllers
         [Route("app-store-logo")]
         public async Task<ActionResult<ResponseDto>> DeleteAppStoreLogo(Guid appLogoId)
         {
-            var responseDto = await _appLogoService.DeleteAppLogo(appLogoId);
+            var responseDto = await _appLogoService.DeleteAppLogoImage(appLogoId);
             return StatusCode(responseDto.StatusCode, responseDto);
         }
         
@@ -207,7 +243,7 @@ namespace Ticket_Hub.API.Controllers
         [Route("ch-play-logo")]
         public async Task<ActionResult<ResponseDto>> UploadCHPlayLogo(Guid appLogoId, UploadAppLogoDto uploadMobileAppLogo)
         {
-            var responseDto = await _appLogoService.UploadAppLogo(appLogoId, StaticFirebaseFolders.ChPlayLogo, uploadMobileAppLogo);
+            var responseDto = await _appLogoService.UploadAppLogoImage(appLogoId, StaticFirebaseFolders.ChPlayLogo, uploadMobileAppLogo);
             return StatusCode(responseDto.StatusCode, responseDto);
         }
 
@@ -224,7 +260,7 @@ namespace Ticket_Hub.API.Controllers
         [Route("ch-play-logo")]
         public async Task<ActionResult<ResponseDto>> DeleteCHPlayLogo(Guid appLogoId)
         {
-            var responseDto = await _appLogoService.DeleteAppLogo(appLogoId);
+            var responseDto = await _appLogoService.DeleteAppLogoImage(appLogoId);
             return StatusCode(responseDto.StatusCode, responseDto);
         }
         
@@ -232,7 +268,7 @@ namespace Ticket_Hub.API.Controllers
         [Route("qr-code-logo")]
         public async Task<ActionResult<ResponseDto>> UploadQRCodeLogo(Guid appLogoId, UploadAppLogoDto uploadMobileAppLogo)
         {
-            var responseDto = await _appLogoService.UploadAppLogo(appLogoId, StaticFirebaseFolders.QrCodeLogo, uploadMobileAppLogo);
+            var responseDto = await _appLogoService.UploadAppLogoImage(appLogoId, StaticFirebaseFolders.QrCodeLogo, uploadMobileAppLogo);
             return StatusCode(responseDto.StatusCode, responseDto);
         }
 
@@ -249,7 +285,7 @@ namespace Ticket_Hub.API.Controllers
         [Route("qr-code-logo")]
         public async Task<ActionResult<ResponseDto>> DeleteQRCodeLogo(Guid appLogoId)
         {
-            var responseDto = await _appLogoService.DeleteAppLogo(appLogoId);
+            var responseDto = await _appLogoService.DeleteAppLogoImage(appLogoId);
             return StatusCode(responseDto.StatusCode, responseDto);
         }
         
