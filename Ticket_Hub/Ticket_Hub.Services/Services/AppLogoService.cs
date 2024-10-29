@@ -1,6 +1,8 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using AutoMapper;
+using Microsoft.IdentityModel.Tokens;
 using Ticket_Hub.Models.DTO;
 using Ticket_Hub.Models.DTO.Website;
+using Ticket_Hub.Models.Models;
 using Ticket_Hub.Services.IServices;
 using Ticket_Hub.Utility.Constants;
 
@@ -10,14 +12,179 @@ public class AppLogoService : IAppLogoService
 {
     private readonly IFirebaseService _firebaseService;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IMapper _mapper;
 
-    public AppLogoService(IFirebaseService firebaseService, IUnitOfWork unitOfWork)
+    public AppLogoService(IFirebaseService firebaseService, IUnitOfWork unitOfWork, IMapper mapper)
     {
         _firebaseService = firebaseService;
         _unitOfWork = unitOfWork;
+        _mapper = mapper;
+    }
+    
+    public async Task<ResponseDto> GetAppLogos()
+    {
+        try
+        {
+            var appLogos = await _unitOfWork.AppLogoRepository.GetAllAsync();
+            return new ResponseDto
+            {
+                IsSuccess = true,
+                Message = "Get app logos successfully",
+                StatusCode = 200,
+                Result = appLogos
+            };
+        }
+        catch (Exception ex)
+        {
+            return new ResponseDto
+            {
+                IsSuccess = false,
+                Message = ex.Message,
+                StatusCode = 500
+            };
+        }
     }
 
-    public async Task<ResponseDto> UploadAppLogo(Guid appLogoId, string folder, UploadAppLogoDto uploadMobileAppLogo)
+    public async Task<ResponseDto> GetAppLogo(Guid appLogoId)
+    {
+        try
+        {
+            var appLogo = await _unitOfWork.AppLogoRepository.GetAsync(c => c.AppLogoId == appLogoId);
+            if (appLogo == null)
+            {
+                return new ResponseDto
+                {
+                    IsSuccess = false,
+                    Message = "App logo not found",
+                    StatusCode = 404
+                };
+            }
+            return new ResponseDto
+            {
+                IsSuccess = true,
+                Message = "Get app logo successfully",
+                StatusCode = 200,
+                Result = appLogo
+            };
+        }
+        catch (Exception ex)
+        {
+            return new ResponseDto
+            {
+                IsSuccess = false,
+                Message = ex.Message,
+                StatusCode = 500
+            };
+        }
+    }
+    
+    public async Task<ResponseDto> CreateAppLogo(CreateAppLogoDto appLogoDto)
+    {
+        try
+        {
+            var appLogo = _mapper.Map<AppLogo>(appLogoDto);
+            appLogo.AppLogoId = Guid.NewGuid();
+            appLogo.WebLogo = appLogoDto.WebLogo;
+            appLogo.ChPlayLogo = appLogoDto.ChPlayLogo;
+            appLogo.AppStoreLogo = appLogoDto.AppStoreLogo;
+            appLogo.QrCodeLogo = appLogoDto.QrCodeLogo;
+
+            await _unitOfWork.AppLogoRepository.AddAsync(appLogo);
+            await _unitOfWork.SaveAsync();
+
+            return new ResponseDto
+            {
+                IsSuccess = true,
+                Message = "App logo created successfully",
+                StatusCode = 200,
+                Result = appLogo
+            };
+        }
+        catch (Exception ex)
+        {
+            return new ResponseDto
+            {
+                IsSuccess = false,
+                Message = ex.Message,
+                StatusCode = 500
+            };
+        }
+    }
+
+    public async Task<ResponseDto> UpdateAppLogo(UpdateAppLogoDto appLogoDto)
+    {
+        try
+        {
+            var appLogo = await _unitOfWork.AppLogoRepository.GetAsync(c => c.AppLogoId == appLogoDto.AppLogoId);
+            if (appLogo == null)
+            {
+                return new ResponseDto
+                {
+                    IsSuccess = false,
+                    Message = "App logo not found",
+                    StatusCode = 404
+                };
+            }
+
+            _mapper.Map(appLogoDto, appLogo);
+            _unitOfWork.AppLogoRepository.Update(appLogo);
+            await _unitOfWork.SaveAsync();
+
+            return new ResponseDto
+            {
+                IsSuccess = true,
+                Message = "App logo updated successfully",
+                StatusCode = 200
+            };
+        }
+        catch (Exception ex)
+        {
+            return new ResponseDto
+            {
+                IsSuccess = false,
+                Message = ex.Message,
+                StatusCode = 500
+            };
+        }
+    }
+    
+    public async Task<ResponseDto> DeleteAppLogo(Guid appLogoId)
+    {
+        try
+        {
+            var appLogo = await _unitOfWork.AppLogoRepository.GetAsync(p => p.AppLogoId == appLogoId);
+            if (appLogo == null)
+            {
+                return new ResponseDto
+                {
+                    IsSuccess = false,
+                    Message = "App logo not found",
+                    StatusCode = 404
+                };
+            }
+
+            _unitOfWork.AppLogoRepository.Remove(appLogo);
+            await _unitOfWork.SaveAsync();
+
+            return new ResponseDto
+            {
+                IsSuccess = true,
+                Message = "App logo deleted successfully",
+                StatusCode = 200
+            };
+        }
+        catch (Exception ex)
+        {
+            return new ResponseDto
+            {
+                IsSuccess = false,
+                Message = ex.Message,
+                StatusCode = 500
+            };
+        }
+    }
+
+    public async Task<ResponseDto> UploadAppLogoImage(Guid appLogoId, string folder, UploadAppLogoDto uploadMobileAppLogo)
     {
         try
         {
@@ -91,7 +258,7 @@ public class AppLogoService : IAppLogoService
         }
     }
 
-    public async Task<ResponseDto> GetAppLogo(Guid appLogoId)
+    public async Task<ResponseDto> GetAppLogoImage(Guid appLogoId)
     {
         try
         {
@@ -128,7 +295,7 @@ public class AppLogoService : IAppLogoService
         }   
     }
 
-    public async Task<ResponseDto> DeleteAppLogo(Guid appLogoId)
+    public async Task<ResponseDto> DeleteAppLogoImage(Guid appLogoId)
     {
         try
         {
