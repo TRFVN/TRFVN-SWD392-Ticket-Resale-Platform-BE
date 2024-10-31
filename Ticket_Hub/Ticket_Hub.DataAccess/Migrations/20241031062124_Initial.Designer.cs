@@ -12,8 +12,8 @@ using Ticket_Hub.DataAccess.Context;
 namespace Ticket_Hub.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241027081220_Add_ChatRoom_Table")]
-    partial class Add_ChatRoom_Table
+    [Migration("20241031062124_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -188,6 +188,29 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Ticket_Hub.Models.Models.AppLogo", b =>
+                {
+                    b.Property<Guid>("AppLogoId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AppStoreLogo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ChPlayLogo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("QrCodeLogo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("WebLogo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("AppLogoId");
+
+                    b.ToTable("AppLogos");
+                });
+
             modelBuilder.Entity("Ticket_Hub.Models.Models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -201,8 +224,8 @@ namespace Ticket_Hub.DataAccess.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("AvatarUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<DateTime>("BirthDate")
                         .HasColumnType("datetime2");
@@ -216,7 +239,6 @@ namespace Ticket_Hub.DataAccess.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Country")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
@@ -228,7 +250,6 @@ namespace Ticket_Hub.DataAccess.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("FullName")
-                        .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
@@ -286,7 +307,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                             AvatarUrl = "https://example.com/avatar.png",
                             BirthDate = new DateTime(1990, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Cccd = "123456789123",
-                            ConcurrencyStamp = "377cd2ab-d624-4c26-871a-8131599de2e2",
+                            ConcurrencyStamp = "8e60b5e0-d9a1-453a-9b8c-d1a73779b3bf",
                             Country = "Country",
                             Email = "admin@gmail.com",
                             EmailConfirmed = true,
@@ -294,10 +315,10 @@ namespace Ticket_Hub.DataAccess.Migrations
                             LockoutEnabled = true,
                             NormalizedEmail = "ADMIN@GMAIL.COM",
                             NormalizedUserName = "ADMIN@GMAIL.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEKIlycOf9uwYYzDVT1LAIuF7Jf9GHseLOxzXZX/Jd56Ddos7HKyHiQ6pKAKYn26eog==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEIjQvoZS71DU4bVIbnftaky4AXiJr2y9Izh+5J8mFkt0VrKB2ONPbdLH22R3PwYBnQ==",
                             PhoneNumber = "1234567890",
                             PhoneNumberConfirmed = true,
-                            SecurityStamp = "dce3d475-4587-46bc-a3f7-475396a99bce",
+                            SecurityStamp = "43d881ce-b144-4ffa-8834-9965223d69e0",
                             TwoFactorEnabled = false,
                             UserName = "admin@gmail.com"
                         });
@@ -432,6 +453,64 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.ToTable("ChatRooms");
                 });
 
+            modelBuilder.Entity("Ticket_Hub.Models.Models.Company", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Country")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("FoundedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LogoUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PostalCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Website")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Companies");
+                });
+
             modelBuilder.Entity("Ticket_Hub.Models.Models.EmailTemplate", b =>
                 {
                     b.Property<Guid>("Id")
@@ -501,7 +580,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("13ffe3ed-aee5-43eb-9e73-57c5499ad5f7"),
+                            Id = new Guid("0f52c3b6-34ac-4fef-b2c4-74b0a9b048d5"),
                             BodyContent = "Dear [UserFullName],<br><br>Welcome to Ticket Hub!  We are thrilled to have you as part of our community dedicated to providing the best ticket-buying and reselling experience.",
                             CallToAction = "<a href=\"{{VerificationLink}}\">Verify Your Email</a>",
                             Category = "Welcome",
@@ -518,7 +597,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                         },
                         new
                         {
-                            Id = new Guid("902ee488-b656-4bcf-9c39-a2428a7cd10f"),
+                            Id = new Guid("64dd736d-1587-4bae-8d6e-1e61caba8c4f"),
                             BodyContent = "Hi [UserFullName],<br><br>We received a request to reset your password. Click the link below to reset your password.",
                             CallToAction = "https://cursuslms.xyz/sign-in/verify-email?userId=user.Id&token=Uri.EscapeDataString(token)",
                             Category = "Security",
@@ -535,7 +614,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                         },
                         new
                         {
-                            Id = new Guid("d45844d6-d680-46fa-ac8b-8de04510dbbb"),
+                            Id = new Guid("2300abfb-04f0-478b-8513-1340b461772d"),
                             BodyContent = "<p>Thank you for registering your Ticket Hub account. Click here to verify your email.</p>",
                             CallToAction = "<a href=\"https://localhost:5173/verifyemail?userId={{UserId}}&token={{Token}}\" class='button'>Verify Email</a>",
                             Category = "Verify",
@@ -763,18 +842,42 @@ namespace Ticket_Hub.DataAccess.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("ReceiveMessageUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SendMessageUserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("MessageId");
 
                     b.HasIndex("ChatRoomId");
 
-                    b.HasIndex("UserId");
-
                     b.ToTable("Messages");
+                });
+
+            modelBuilder.Entity("Ticket_Hub.Models.Models.Privacy", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Privacies");
                 });
 
             modelBuilder.Entity("Ticket_Hub.Models.Models.RefreshTokens", b =>
@@ -851,6 +954,31 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("SubCategories");
+                });
+
+            modelBuilder.Entity("Ticket_Hub.Models.Models.TermOfUse", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TermOfUses");
                 });
 
             modelBuilder.Entity("Ticket_Hub.Models.Models.Ticket", b =>
@@ -1128,15 +1256,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                         .WithMany("Messages")
                         .HasForeignKey("ChatRoomId");
 
-                    b.HasOne("Ticket_Hub.Models.Models.ApplicationUser", "User")
-                        .WithMany("Messages")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("ChatRoom");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Ticket_Hub.Models.Models.RefreshTokens", b =>
@@ -1228,8 +1348,6 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.Navigation("Favourites");
 
                     b.Navigation("Feedbacks");
-
-                    b.Navigation("Messages");
 
                     b.Navigation("Tickets");
                 });

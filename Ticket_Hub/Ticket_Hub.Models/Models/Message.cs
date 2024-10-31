@@ -9,8 +9,8 @@ public class Message
     public Guid MessageId { get; set; }
     [StringLength(200)] 
     public string MessageContent { get; set; } = null!;
-    [StringLength(450)] public string UserId { get; set; } = null!;
-    [ForeignKey("UserId")] public ApplicationUser User { get; set; } = null!;
+    public Guid SendMessageUserId { get; set; }  
+    public Guid ReceiveMessageUserId { get; set; }
     public DateTime CreateTime { get; set; }
     public Guid? ChatRoomId { get; set; }
     [ForeignKey("ChatRoomId")] 

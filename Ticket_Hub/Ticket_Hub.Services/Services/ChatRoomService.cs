@@ -112,7 +112,7 @@ public class ChatRoomService : IChatRoomService
 
     public async Task<ResponseDto> GetChatRoom(ClaimsPrincipal user, Guid userId)
     {
-        var messages = await _unitOfWork.MessageRepository.GetAllAsync(x => x.UserId == userId.ToString());
+        var messages = await _unitOfWork.MessageRepository.GetAllAsync(x => x.SendMessageUserId == userId);
         if (messages == null || !messages.Any())
         {
             return new ResponseDto
