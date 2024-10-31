@@ -147,7 +147,7 @@ public class CategoryService : ICategoryService
             CategoryName = createCategoryDto.CategoryName,
             CreatedBy = user.Identity.Name,
             UpdatedBy = "",
-            CreatedTime = DateTime.UtcNow,
+            CreatedTime = DateTime.Now,
             UpdatedTime = null,
             Status = 1,
         };

@@ -134,7 +134,7 @@ namespace Ticket_Hub.Services.Services
                 TicketId = createCartDetailDto.TicketId,
                 TicketPrice = createCartDetailDto.TicketPrice,
                 CreatedBy = user.Identity.Name,
-                CreatedTime = DateTime.UtcNow,
+                CreatedTime = DateTime.Now,
                 UpdatedBy = "",
                 UpdatedTime = null,
                 Status = 1,

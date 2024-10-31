@@ -32,7 +32,7 @@ namespace Ticket_Hub.Services.Services
                 MessageContent = createMessageDto.MessageContent,
                 SendMessageUserId = createMessageDto.SendMessageUserId,
                 ReceiveMessageUserId = createMessageDto.ReceiveMessageUserId,
-                CreateTime = DateTime.UtcNow,
+                CreateTime = DateTime.Now,
                 ChatRoomId = createMessageDto.ChatRoomId
             };
 
@@ -186,7 +186,7 @@ namespace Ticket_Hub.Services.Services
             message.MessageContent = updateMessageDto.MessageContent;
             message.SendMessageUserId = updateMessageDto.SendMessageUserId;
             message.ReceiveMessageUserId = updateMessageDto.ReceiveMessageUserId;
-            message.CreateTime = DateTime.UtcNow;
+            message.CreateTime = DateTime.Now;
             message.ChatRoomId = updateMessageDto.ChatRoomId;
 
             _unitOfWork.MessageRepository.Update(message);

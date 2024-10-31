@@ -105,7 +105,7 @@ namespace Ticket_Hub.Services.Services
                 AmountTicket = createCartHeaderDto.AmountTicket,
                 TotalPrice = createCartHeaderDto.TotalPrice,
                 CreatedBy = user.Identity.Name,
-                CreatedTime = DateTime.UtcNow,
+                CreatedTime = DateTime.Now,
                 UpdatedBy = "",
                 UpdatedTime = null,
                 Status = 1,

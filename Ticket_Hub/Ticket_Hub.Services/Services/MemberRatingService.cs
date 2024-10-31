@@ -157,7 +157,7 @@ namespace Ticket_Hub.Services.Services
                 UserId = createMemberRatingDto.UserId.ToString(),
                 Rate = createMemberRatingDto.Rate,
                 CreatedBy = user.Identity.Name,
-                CreatedTime = DateTime.UtcNow,
+                CreatedTime = DateTime.Now,
                 Status = 1 // Giả sử bạn có trường trạng thái
             };
 
