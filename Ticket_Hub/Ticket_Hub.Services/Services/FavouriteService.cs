@@ -32,7 +32,7 @@ namespace Ticket_Hub.Services.Services
                 UserId = createFavouriteDto.UserId,
                 TicketId = createFavouriteDto.TicketId,
                 CreatedBy = user.Identity.Name,
-                CreatedTime = DateTime.UtcNow,
+                CreatedTime = DateTime.Now,
                 UpdatedBy = "",
                 UpdatedTime = null,
                 Status = 1,
@@ -66,7 +66,7 @@ namespace Ticket_Hub.Services.Services
 
             favourite.Status = 0; // Hoặc tùy thuộc vào cách bạn quản lý trạng thái
             favourite.UpdatedBy = user.Identity.Name;
-            favourite.UpdatedTime = DateTime.UtcNow;
+            favourite.UpdatedTime = DateTime.Now;
 
             _unitOfWork.FeedbackRepository.Update(favourite);
             await _unitOfWork.SaveAsync();

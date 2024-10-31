@@ -161,7 +161,7 @@ public class EventService : IEventService
             LocationId = createEventDto.LocationId,
             CreatedBy = user.Identity.Name,
             UpdatedBy = "",
-            CreatedTime = DateTime.UtcNow,
+            CreatedTime = DateTime.Now,
             UpdatedTime = null,
             Status = 1,
         };

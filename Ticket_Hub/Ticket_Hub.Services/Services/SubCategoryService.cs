@@ -149,7 +149,7 @@ public class SubCategoryService : ISubCategoryService
             CategoryId = createSubCategoryDto.CategoryId,
             CreatedBy = user.Identity.Name,
             UpdatedBy = "",
-            CreatedTime = DateTime.UtcNow,
+            CreatedTime = DateTime.Now,
             UpdatedTime = null,
             Status = 1
         };

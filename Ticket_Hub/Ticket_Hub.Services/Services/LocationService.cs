@@ -160,7 +160,7 @@ public class LocationService : ILocationService
             Street = createLocationDto.Street,
             CreatedBy = user.Identity.Name,
             UpdatedBy = "",
-            CreatedTime = DateTime.UtcNow,
+            CreatedTime = DateTime.Now,
             UpdatedTime = null,
             Status = 1
         };
