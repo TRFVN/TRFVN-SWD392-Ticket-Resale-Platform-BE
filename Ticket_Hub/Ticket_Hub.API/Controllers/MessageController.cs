@@ -13,12 +13,10 @@ namespace Ticket_Hub.API.Controllers
     public class MessageController : ControllerBase
     {
         private readonly IMessageService _messageService;
-        private readonly IHubContext<NotificationHub> _hubContext; 
 
-        public MessageController(IMessageService messageService, IHubContext<NotificationHub> hubContext)
+        public MessageController(IMessageService messageService)
         {
             _messageService = messageService;
-            _hubContext = hubContext;
         }
 
         [HttpGet]

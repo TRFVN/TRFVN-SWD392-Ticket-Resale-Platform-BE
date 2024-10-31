@@ -185,6 +185,29 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Ticket_Hub.Models.Models.AppLogo", b =>
+                {
+                    b.Property<Guid>("AppLogoId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AppStoreLogo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ChPlayLogo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("QrCodeLogo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("WebLogo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("AppLogoId");
+
+                    b.ToTable("AppLogos");
+                });
+
             modelBuilder.Entity("Ticket_Hub.Models.Models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -281,7 +304,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                             AvatarUrl = "https://example.com/avatar.png",
                             BirthDate = new DateTime(1990, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Cccd = "123456789123",
-                            ConcurrencyStamp = "89cbde26-f0d1-4e92-a282-b9457c3bd1b2",
+                            ConcurrencyStamp = "8e60b5e0-d9a1-453a-9b8c-d1a73779b3bf",
                             Country = "Country",
                             Email = "admin@gmail.com",
                             EmailConfirmed = true,
@@ -289,10 +312,10 @@ namespace Ticket_Hub.DataAccess.Migrations
                             LockoutEnabled = true,
                             NormalizedEmail = "ADMIN@GMAIL.COM",
                             NormalizedUserName = "ADMIN@GMAIL.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEA15enfRYds/gJOm6w+t9bK5XSSKaaEi78mRJay8pwRPNuUaIHQtxLpRbfF6irK8oA==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEIjQvoZS71DU4bVIbnftaky4AXiJr2y9Izh+5J8mFkt0VrKB2ONPbdLH22R3PwYBnQ==",
                             PhoneNumber = "1234567890",
                             PhoneNumberConfirmed = true,
-                            SecurityStamp = "ffb41cef-f311-4cc3-9919-522f12428c0f",
+                            SecurityStamp = "43d881ce-b144-4ffa-8834-9965223d69e0",
                             TwoFactorEnabled = false,
                             UserName = "admin@gmail.com"
                         });
@@ -554,7 +577,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("9e6b5b11-d25c-4793-8726-74f80c232943"),
+                            Id = new Guid("0f52c3b6-34ac-4fef-b2c4-74b0a9b048d5"),
                             BodyContent = "Dear [UserFullName],<br><br>Welcome to Ticket Hub!  We are thrilled to have you as part of our community dedicated to providing the best ticket-buying and reselling experience.",
                             CallToAction = "<a href=\"{{VerificationLink}}\">Verify Your Email</a>",
                             Category = "Welcome",
@@ -571,7 +594,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                         },
                         new
                         {
-                            Id = new Guid("3fd2b2ab-6bb9-4124-acf1-1f1789b5090c"),
+                            Id = new Guid("64dd736d-1587-4bae-8d6e-1e61caba8c4f"),
                             BodyContent = "Hi [UserFullName],<br><br>We received a request to reset your password. Click the link below to reset your password.",
                             CallToAction = "https://cursuslms.xyz/sign-in/verify-email?userId=user.Id&token=Uri.EscapeDataString(token)",
                             Category = "Security",
@@ -588,7 +611,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                         },
                         new
                         {
-                            Id = new Guid("3499dd15-9afa-471e-a52f-146321de7541"),
+                            Id = new Guid("2300abfb-04f0-478b-8513-1340b461772d"),
                             BodyContent = "<p>Thank you for registering your Ticket Hub account. Click here to verify your email.</p>",
                             CallToAction = "<a href=\"https://localhost:5173/verifyemail?userId={{UserId}}&token={{Token}}\" class='button'>Verify Email</a>",
                             Category = "Verify",
@@ -816,16 +839,15 @@ namespace Ticket_Hub.DataAccess.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("ReceiveMessageUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SendMessageUserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("MessageId");
 
                     b.HasIndex("ChatRoomId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Messages");
                 });
@@ -1231,15 +1253,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                         .WithMany("Messages")
                         .HasForeignKey("ChatRoomId");
 
-                    b.HasOne("Ticket_Hub.Models.Models.ApplicationUser", "User")
-                        .WithMany("Messages")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("ChatRoom");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Ticket_Hub.Models.Models.RefreshTokens", b =>
@@ -1331,8 +1345,6 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.Navigation("Favourites");
 
                     b.Navigation("Feedbacks");
-
-                    b.Navigation("Messages");
 
                     b.Navigation("Tickets");
                 });

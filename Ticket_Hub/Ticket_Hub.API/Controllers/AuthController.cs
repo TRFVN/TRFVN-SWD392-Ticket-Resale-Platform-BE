@@ -17,13 +17,11 @@ namespace Ticket_Hub.API.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IAuthService _authService;
-        private readonly IEmailService _emailService;
 
-        public AuthController(UserManager<ApplicationUser> userManager, IAuthService authService, IEmailService emailService)
+        public AuthController(UserManager<ApplicationUser> userManager, IAuthService authService)
         {
             _userManager = userManager;
             _authService = authService;
-            _emailService = emailService;
         }
 
         /// <summary>
@@ -107,6 +105,18 @@ namespace Ticket_Hub.API.Controllers
             var result = await _authService.UpdateUserProfile(userId, updateUserProfileDto);
             return StatusCode(result.StatusCode, result);
         }
+        
+        /// <summary>
+        /// Lấy thông tin người dùng theo UserID.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        [HttpGet("get-user/{userId:guid}")]
+        public async Task<ActionResult<ResponseDto>> GetUserById(Guid userId)
+        {
+            var responseDto = await _authService.GetUserById(userId);
+            return StatusCode(responseDto.StatusCode, responseDto);
+        }
 
         /// <summary>
         /// RefreshToken
@@ -138,7 +148,6 @@ namespace Ticket_Hub.API.Controllers
         [HttpGet("FetchUserByToken")]
         public async Task<IActionResult> FetchUserByToken(string token)
         {
-            var result = await _authService.FetchUserByToken(token);
             var responseDto = await _authService.FetchUserByToken(token);
             return StatusCode(responseDto.StatusCode, responseDto);
         }
@@ -209,7 +218,20 @@ namespace Ticket_Hub.API.Controllers
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
             // Gọi service để gửi email xác nhận
-            await _authService.SendVerifyEmail(user.Email, user.Id, token);
+            if (!string.IsNullOrEmpty(user.Email))
+            {
+                await _authService.SendVerifyEmail(user.Email, user.Id, token);
+            }
+            else
+            {
+                return new ResponseDto
+                {
+                    IsSuccess = true,
+                    Message = "Email cannot be empty",
+                    StatusCode = 200,
+                    Result = null
+                };
+            }
 
             return new ResponseDto
             {
@@ -250,8 +272,18 @@ namespace Ticket_Hub.API.Controllers
             // Lấy Id người dùng hiện tại.
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var responseDto = await _authService.ChangePassword(userId, changePasswordDto.OldPassword,
-                changePasswordDto.NewPassword, changePasswordDto.ConfirmNewPassword);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return new ResponseDto
+                {
+                    Message = "User not found",
+                    IsSuccess = false,
+                    StatusCode = 400,
+                    Result = null
+                };
+            }
+            
+            var responseDto = await _authService.ChangePassword(userId, changePasswordDto.OldPassword, changePasswordDto.NewPassword, changePasswordDto.ConfirmNewPassword);
 
             if (responseDto.IsSuccess)
             {

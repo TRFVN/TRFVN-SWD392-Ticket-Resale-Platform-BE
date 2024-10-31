@@ -17,7 +17,5 @@ namespace Ticket_Hub.Models.Models
         public virtual ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
         public virtual ICollection<CartHeader> CartHeaders { get; set; } = new List<CartHeader>();
         public virtual ICollection<Favourite> Favourites { get; set; } = new List<Favourite>();
-        public virtual ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();
-        public virtual ICollection<Message> Messages { get; set; } = new List<Message>();
-    }
+        public virtual ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>(); }
 }

@@ -455,6 +455,43 @@ public class AuthService : IAuthService
         };
     }
 
+    public async Task<ResponseDto> GetUserById(Guid userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user == null)
+        {
+            return new ResponseDto
+            {
+                IsSuccess = false,
+                Message = "User not found",
+                StatusCode = 404
+            };
+        }
+
+        var userDto = new GetUserDto
+        {
+            Id = user.Id,
+            FullName = user.FullName,
+            Email = user.Email,
+            PhoneNumber = user.PhoneNumber,
+            Address = user.Address,
+            Country = user.Country,
+            Cccd = user.Cccd,
+            BirthDate = user.BirthDate,
+            AvatarUrl = user.AvatarUrl,
+            UserName = user.UserName,
+            Roles = (await _userManager.GetRolesAsync(user)).ToList()
+        };
+
+        return new ResponseDto
+        {
+            IsSuccess = true,
+            Message = "User retrieved successfully",
+            StatusCode = 200,
+            Result = userDto
+        };
+    }
+
 
     /// <summary>
     /// Refresh token
@@ -702,6 +739,17 @@ public class AuthService : IAuthService
     /// <returns></returns>
     public async Task<ResponseDto> SendVerifyEmail(string email, string userId, string token)
     {
+        if (string.IsNullOrEmpty(email))
+        {
+            return new ResponseDto
+            {
+                Message = "Email is required.",
+                IsSuccess = false,
+                StatusCode = 400,
+                Result = null
+            };
+        }
+        
         // Gọi EmailService để gửi email xác nhận
         await _emailService.SendVerifyEmail(email, userId, token);
         return new()

@@ -17,11 +17,11 @@ COPY ["Ticket_Hub.Services/Ticket_Hub.Services.csproj", "Ticket_Hub.Services/"]
 RUN dotnet restore "./Ticket_Hub.API/Ticket_Hub.API.csproj"
 COPY . .
 WORKDIR "/src/Ticket_Hub.API"
-RUN dotnet build "./Ticket_Hub.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "./Ticket_Hub.API.csproj" -c "$BUILD_CONFIGURATION" -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./Ticket_Hub.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./Ticket_Hub.API.csproj" -c "$BUILD_CONFIGURATION" -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app

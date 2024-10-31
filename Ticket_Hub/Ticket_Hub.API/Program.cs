@@ -14,7 +14,7 @@ using Net.payOS;
 
 namespace Ticket_Hub.API
 {
-    public class Program
+    public static class Program
     {
         public static void Main(string[] args)
         {
@@ -59,6 +59,12 @@ namespace Ticket_Hub.API
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(options =>
             {
+                var jwtSecret = builder.Configuration["JWT:Secret"];
+                if (string.IsNullOrEmpty(jwtSecret))
+                {
+                    throw new InvalidOperationException("JWT:Secret is required and cannot be null or empty.");
+                }
+                
                 options.SaveToken = true;
                 options.RequireHttpsMetadata = false;
                 options.TokenValidationParameters = new TokenValidationParameters
@@ -68,7 +74,7 @@ namespace Ticket_Hub.API
                     ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
                     ValidAudience = builder.Configuration["JWT:ValidAudience"],
                     IssuerSigningKey =
-                        new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]))
+                        new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret))
                 };
             });
 
@@ -114,11 +120,10 @@ namespace Ticket_Hub.API
                 options.AddPolicy("AllowSpecificOrigin", builder =>
                 {
                     builder
-                        .WithOrigins("https://localhost:5173", "https://localhost:7027", "https://tickethub-9f8e9.web.app", "https://nostran.w3spaces.com")
+                        .WithOrigins(corsOrigins ?? Array.Empty<string>())
                         .AllowAnyMethod()
                         .AllowAnyHeader()
                         .AllowCredentials();
-                    // .SetIsOriginAllowed(_ => true); // Cẩn thận với cài đặt này trong môi trường production
                 });
             });
 
@@ -127,9 +132,14 @@ namespace Ticket_Hub.API
             builder.Services.AddSingleton(sp =>
             {
                 var configuration = sp.GetRequiredService<IConfiguration>();
-                string clientId = configuration["PayOS:ClientId"];
-                string apiKey = configuration["PayOS:ApiKey"];
-                string checksumKey = configuration["PayOS:ChecksumKey"];
+                
+                // Retrieve configuration values and check for null
+                string clientId = configuration["PayOS:ClientId"] 
+                                  ?? throw new InvalidOperationException("Client ID is required for PayOS.");
+                string apiKey = configuration["PayOS:ApiKey"] 
+                                ?? throw new InvalidOperationException("API Key is required for PayOS.");
+                string checksumKey = configuration["PayOS:ChecksumKey"] 
+                                     ?? throw new InvalidOperationException("Checksum Key is required for PayOS.");
 
                 return new PayOS(clientId, apiKey, checksumKey);
             });

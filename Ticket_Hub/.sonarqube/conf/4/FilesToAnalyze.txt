@@ -1,0 +1,36 @@
+﻿C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\Ticket_Hub.API\Controllers\AuthController.cs
+C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\Ticket_Hub.API\Controllers\CartDetailController.cs
+C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\Ticket_Hub.API\Controllers\CartHeaderController.cs
+C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\Ticket_Hub.API\Controllers\CategoryController.cs
+C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\Ticket_Hub.API\Controllers\ChatRoomController.cs
+C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\Ticket_Hub.API\Controllers\EventController.cs
+C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\Ticket_Hub.API\Controllers\FavouriteController.cs
+C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\Ticket_Hub.API\Controllers\FeedbackController.cs
+C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\Ticket_Hub.API\Controllers\LocationController.cs
+C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\Ticket_Hub.API\Controllers\MemberRatingController.cs
+C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\Ticket_Hub.API\Controllers\MessageController.cs
+C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\Ticket_Hub.API\Controllers\PaymentController.cs
+C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\Ticket_Hub.API\Controllers\SubCategoryController.cs
+C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\Ticket_Hub.API\Controllers\TicketsController.cs
+C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\Ticket_Hub.API\Controllers\WebsiteController.cs
+C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\Ticket_Hub.API\Extension\FirebaseServiceExtensions.cs
+C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\Ticket_Hub.API\Extension\ServiceCollectionExtensions.cs
+C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\Ticket_Hub.API\Hubs\NotificationHub.cs
+C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\Ticket_Hub.API\Middleware\ErrorHandlerMiddleware.cs
+C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\Ticket_Hub.API\Program.cs
+C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\Ticket_Hub.API\obj\Debug\net8.0\Ticket_Hub.API.GlobalUsings.g.cs
+C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\Ticket_Hub.API\obj\Debug\net8.0\.NETCoreApp,Version=v8.0.AssemblyAttributes.cs
+C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\Ticket_Hub.API\obj\Debug\net8.0\Ticket_Hub.API.AssemblyInfo.cs
+C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\Ticket_Hub.API\obj\Debug\net8.0\Ticket_Hub.API.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\Ticket_Hub.API\appsettings.Development.json
+C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\Ticket_Hub.API\appsettings.json
+C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\Ticket_Hub.API\tickethub-af919-firebase-adminsdk-wlfom-7f3f1ee86d.json
+C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\Ticket_Hub.API\Dockerfile
+C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\Ticket_Hub.API\Ticket_Hub.API.http
+C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\Ticket_Hub.API\Properties\launchSettings.json
+C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\Ticket_Hub.API\Properties\serviceDependencies.json
+C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\Ticket_Hub.API\Properties\ServiceDependencies\TicketHub - Web Deploy\profile.arm.json
+C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\Ticket_Hub.API\Properties\PublishProfiles\TicketHub - FTP.pubxml
+C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\Ticket_Hub.API\Properties\PublishProfiles\TicketHub - Web Deploy.pubxml
+C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\Ticket_Hub.API\Properties\PublishProfiles\TicketHub - Zip Deploy.pubxml
+C:\Users\Son\Desktop\Ticket\TRFVN-SWD392-Ticket-Resale-Platform-BE\Ticket_Hub\.dockerignore
