@@ -7,9 +7,7 @@ namespace Ticket_Hub.Models.Models
     {
         [Key] public Guid WalletId { get; set; }
         public double TotalBalance { get; set; }
-        public double AvailableBalance { get; set; }
-        public double WithdrawnBalance { get; set; }
-        public string Currencies { get; set; } = null!;
+        public double PayoutBalance { get; set; }
         public DateTime UpdateTime { get; set; }
         [StringLength(450)] public string UserId { get; set; } = null!;
         [ForeignKey("UserId")] public virtual ApplicationUser User { get; set; } = null!;

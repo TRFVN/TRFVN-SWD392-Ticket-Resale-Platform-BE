@@ -24,8 +24,10 @@ namespace Ticket_Hub.Models.Models
         [StringLength(500)] public string TicketDescription { get; set; } = null!;
         [StringLength(20)] public string SerialNumber { get; set; } = null!;
         [StringLength(1000)] public string? TicketImage { get; set; }
-        
+    
         public bool IsVisible { get; set; } = true;
         public TicketStatus Status { get; set; }
+        public virtual ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
+        public virtual ICollection<OrderTicket> OrderTickets { get; set; } = new List<OrderTicket>();
     }
 }

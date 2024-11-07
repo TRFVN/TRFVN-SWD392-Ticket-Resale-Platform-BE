@@ -20,16 +20,12 @@ public class AutoMapperProfile : Profile
     public AutoMapperProfile()
     {
         CreateMap<Ticket, GetTicketDto>().ReverseMap();
-        CreateMap<Location, GetLocationDto>().ReverseMap();
+
         CreateMap<Event, GetEventDto>().ReverseMap();
         CreateMap<Category, GetCategoryDto>().ReverseMap();
-        CreateMap<SubCategory, GetSubCategoryDto>().ReverseMap();
-        CreateMap<MemberRating, GetMemberRatingDto>().ReverseMap();
         CreateMap<Feedback, GetFeedbackDto>().ReverseMap();
-        CreateMap<Favourite, GetFavouriteDto>().ReverseMap();
+
         CreateMap<Message, GetMessageDto>().ReverseMap();
-        CreateMap<CartHeader, GetCartHeaderDto>().ReverseMap();
-        CreateMap<CartDetail, GetCartDetailDto>().ReverseMap();
         CreateMap<ChatRoom, GetChatRoomDto>().ReverseMap();
     }
 }
