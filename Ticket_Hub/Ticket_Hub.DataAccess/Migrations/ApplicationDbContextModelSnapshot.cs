@@ -304,7 +304,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                             AvatarUrl = "https://example.com/avatar.png",
                             BirthDate = new DateTime(1990, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Cccd = "123456789123",
-                            ConcurrencyStamp = "8e60b5e0-d9a1-453a-9b8c-d1a73779b3bf",
+                            ConcurrencyStamp = "d91004b7-4760-45da-a682-7cacff0de215",
                             Country = "Country",
                             Email = "admin@gmail.com",
                             EmailConfirmed = true,
@@ -312,10 +312,10 @@ namespace Ticket_Hub.DataAccess.Migrations
                             LockoutEnabled = true,
                             NormalizedEmail = "ADMIN@GMAIL.COM",
                             NormalizedUserName = "ADMIN@GMAIL.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEIjQvoZS71DU4bVIbnftaky4AXiJr2y9Izh+5J8mFkt0VrKB2ONPbdLH22R3PwYBnQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEJzT0WHkg5/4MiSGObGcq5dTSlT4vaqtlvqDzjFAR90W7cCd96sdHFhaYkJoFnDMkw==",
                             PhoneNumber = "1234567890",
                             PhoneNumberConfirmed = true,
-                            SecurityStamp = "43d881ce-b144-4ffa-8834-9965223d69e0",
+                            SecurityStamp = "d19a7982-c839-48ba-8025-9c0e7f645c40",
                             TwoFactorEnabled = false,
                             UserName = "admin@gmail.com"
                         });
@@ -441,6 +441,12 @@ namespace Ticket_Hub.DataAccess.Migrations
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
+
+                    b.Property<Guid>("ReceiveMessageUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SendMessageUserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("UpdateTime")
                         .HasColumnType("datetime2");
@@ -577,7 +583,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("0f52c3b6-34ac-4fef-b2c4-74b0a9b048d5"),
+                            Id = new Guid("16d04d8e-cd23-44dc-ab3d-6e2f96eea3fe"),
                             BodyContent = "Dear [UserFullName],<br><br>Welcome to Ticket Hub!  We are thrilled to have you as part of our community dedicated to providing the best ticket-buying and reselling experience.",
                             CallToAction = "<a href=\"{{VerificationLink}}\">Verify Your Email</a>",
                             Category = "Welcome",
@@ -594,7 +600,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                         },
                         new
                         {
-                            Id = new Guid("64dd736d-1587-4bae-8d6e-1e61caba8c4f"),
+                            Id = new Guid("cb9e6983-c222-4512-ab94-6ee62ca14eae"),
                             BodyContent = "Hi [UserFullName],<br><br>We received a request to reset your password. Click the link below to reset your password.",
                             CallToAction = "https://cursuslms.xyz/sign-in/verify-email?userId=user.Id&token=Uri.EscapeDataString(token)",
                             Category = "Security",
@@ -611,7 +617,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                         },
                         new
                         {
-                            Id = new Guid("2300abfb-04f0-478b-8513-1340b461772d"),
+                            Id = new Guid("87e69a03-fa25-4472-8aa6-b767dff5a231"),
                             BodyContent = "<p>Thank you for registering your Ticket Hub account. Click here to verify your email.</p>",
                             CallToAction = "<a href=\"https://localhost:5173/verifyemail?userId={{UserId}}&token={{Token}}\" class='button'>Verify Email</a>",
                             Category = "Verify",
