@@ -158,7 +158,6 @@ public class EventService : IEventService
             EventName = createEventDto.EventName,
             EventDescription = createEventDto.EventDescription,
             EventDate = createEventDto.EventDate,
-            LocationId = createEventDto.LocationId,
             CreatedBy = user.Identity.Name,
             UpdatedBy = "",
             CreatedTime = DateTime.Now,
@@ -196,7 +195,6 @@ public class EventService : IEventService
         eventId.EventName = updateEventDto.EventName;
         eventId.EventDescription = updateEventDto.EventDescription;
         eventId.EventDate = updateEventDto.EventDate;
-        eventId.LocationId = updateEventDto.LocationId;
         eventId.UpdatedBy = user.Identity.Name;
         eventId.UpdatedTime = DateTime.UtcNow;
 
