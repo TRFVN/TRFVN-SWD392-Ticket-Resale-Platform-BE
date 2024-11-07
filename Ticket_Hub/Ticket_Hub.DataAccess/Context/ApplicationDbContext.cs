@@ -14,27 +14,22 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     }
 
     public DbSet<ApplicationUser> ApplicationUsers { get; set; }
-    public DbSet<CartDetail> CartDetails { get; set; }
-    public DbSet<CartHeader> CartHeaders { get; set; }
-    public DbSet<Favourite> Favourites { get; set; }
     public DbSet<Feedback> Feedbacks { get; set; }
     public DbSet<Message> Messages { get; set; }
     public DbSet<Ticket> Tickets { get; set; }
+    public DbSet<TicketTransfers> TicketTransfers { get; set; }
     public DbSet<Category> Categories { get; set; }
-    public DbSet<SubCategory> SubCategories { get; set; }
     public DbSet<Event> Events { get; set; }
-    public DbSet<Location> Locations { get; set; }
-    public DbSet<MemberRating> MemberRatings { get; set; }
+
     public DbSet<Orders> Orders { get; set; }
+    public DbSet<OrderTicket> OrderTickets { get; set; }
     public DbSet<Transactions> Transactions { get; set; }
     public DbSet<Wallet> Wallets { get; set; }
     public DbSet<EmailTemplate> EmailTemplates { get; set; }
     public DbSet<RefreshTokens> RefreshTokens { get; set; }
     public DbSet<ChatRoom> ChatRooms { get; set; }
-    public DbSet<Company> Companies { get; set; }
-    public DbSet<Privacy> Privacies { get; set; }
-    public DbSet<TermOfUse> TermOfUses { get; set; }
-    public DbSet<AppLogo> AppLogos { get; set; }
+    public DbSet<Negotiations> Negotiations { get; set; }
+    
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -45,5 +40,69 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
         //Seed Email Template
         ApplicationDbContextSeed.SeedEmailTemplate(modelBuilder);
+
+        modelBuilder.Entity<CartItem>()
+        .HasKey(ci => new { ci.CartId, ci.TicketId });
+
+        modelBuilder.Entity<CartItem>()
+            .HasOne(ci => ci.Cart)
+            .WithMany(c => c.CartItems)
+            .HasForeignKey(ci => ci.CartId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<CartItem>()
+            .HasOne(ci => ci.Ticket)
+            .WithMany(t => t.CartItems)
+            .HasForeignKey(ci => ci.TicketId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+
+        modelBuilder.Entity<OrderTicket>()
+                .HasKey(ot => new { ot.OrderId, ot.TicketId });
+
+        modelBuilder.Entity<OrderTicket>()
+            .HasOne(ot => ot.Orders)
+            .WithMany(o => o.OrderTickets)
+            .HasForeignKey(ot => ot.OrderId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<OrderTicket>()
+            .HasOne(ot => ot.Ticket)
+            .WithMany(t => t.OrderTickets)
+            .HasForeignKey(ot => ot.TicketId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+
+        // Configure TicketTransfer's foreign keys to avoid multiple cascade paths
+        modelBuilder.Entity<TicketTransfers>()
+            .HasOne(tt => tt.Seller)
+            .WithMany() // One-to-many relationship with ApplicationUser
+            .HasForeignKey(tt => tt.SellerId)
+            .OnDelete(DeleteBehavior.NoAction);  // Set to NoAction to avoid cascade delete conflicts
+
+        modelBuilder.Entity<TicketTransfers>()
+            .HasOne(tt => tt.Buyer)
+            .WithMany() // One-to-many relationship with ApplicationUser
+            .HasForeignKey(tt => tt.BuyerId)
+            .OnDelete(DeleteBehavior.NoAction);  // Set to NoAction to avoid cascade delete conflicts
+
+        modelBuilder.Entity<TicketTransfers>()
+            .HasOne(tt => tt.Ticket)
+            .WithMany() // One-to-many relationship with Ticket
+            .HasForeignKey(tt => tt.TicketId)
+            .OnDelete(DeleteBehavior.Cascade);  // Allow cascading delete for Ticket when deleted
+
+
+        modelBuilder.Entity<ChatRoom>()
+        .HasOne(c => c.SendMessageUser)
+        .WithMany()
+        .HasForeignKey(c => c.SendMessageUserId)
+        .OnDelete(DeleteBehavior.Restrict);  // Or NoAction, depending on your needs
+
+        modelBuilder.Entity<ChatRoom>()
+            .HasOne(c => c.ReceiveMessageUser)
+            .WithMany()
+            .HasForeignKey(c => c.ReceiveMessageUserId)
+            .OnDelete(DeleteBehavior.Restrict);  // Avoid cascade
     }
 }

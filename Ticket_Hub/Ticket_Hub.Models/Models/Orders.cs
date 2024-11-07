@@ -4,12 +4,12 @@ using Ticket_Hub.Models.Models;
 
 namespace Ticket_Hub.Models
 {
-    public class Orders : BaseEntity<string, string, int>
+    public class Orders
     {
         [Key] public Guid OrderId { get; set; }
-        public Guid CartHeaderId { get; set; }
-        [ForeignKey("CartHeaderId")] public virtual CartHeader CartHeader { get; set; } = null!;
-        public Guid TicketId { get; set; }
+        [StringLength(450)] public string UserId { get; set; } = null!;
+        [ForeignKey("UserId")] public virtual ApplicationUser ApplicationUser { get; set; } = null!;
         public double TotalPrice { get; set; }
+        public virtual ICollection<OrderTicket> OrderTickets { get; set; } = new List<OrderTicket>();
     }
 }

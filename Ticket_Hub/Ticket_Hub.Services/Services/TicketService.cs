@@ -128,10 +128,6 @@ public class TicketService : ITicketService
             IsVisible = ticket.IsVisible,
             //bảng event
             EventDate = ticket.Event.EventDate,
-            //bảng location
-            City = ticket.Event.Location.City,
-            District = ticket.Event.Location.District,
-            Street = ticket.Event.Location.Street
         }).ToList();
 
         return new ResponseDto()

@@ -8,7 +8,7 @@ public class Transactions
     [Key] public Guid TransactionId { get; set; }
     public Guid WalletId { get; set; }
     [ForeignKey("WalletId")] public virtual Wallet Wallet { get; set; } = null!;
-    public int Type { get; set; }
+    [StringLength(400)]public string Type { get; set; } = null!;
     public double Amount { get; set; }
-    public DateTime CreateTime { get; set; }
+    public DateTime TransactionDate  { get; set; }
 }

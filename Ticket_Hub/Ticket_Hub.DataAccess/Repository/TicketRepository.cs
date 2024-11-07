@@ -36,10 +36,9 @@ namespace Ticket_Hub.DataAccess.Repository
 
         public async Task<IEnumerable<Ticket>> GetAllWithEventAndLocationAsync()
         {
-            return await _context.Tickets
-                .Include(t => t.Event)
-                .ThenInclude(e => e.Location)
-                .ToListAsync();
+            return _context.Tickets
+                .Include(t => t.Event);
+
         }
 
         public async Task<int> SaveAsync()
