@@ -91,5 +91,18 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .WithMany() // One-to-many relationship with Ticket
             .HasForeignKey(tt => tt.TicketId)
             .OnDelete(DeleteBehavior.Cascade);  // Allow cascading delete for Ticket when deleted
+
+
+        modelBuilder.Entity<ChatRoom>()
+        .HasOne(c => c.SendMessageUser)
+        .WithMany()
+        .HasForeignKey(c => c.SendMessageUserId)
+        .OnDelete(DeleteBehavior.Restrict);  // Or NoAction, depending on your needs
+
+        modelBuilder.Entity<ChatRoom>()
+            .HasOne(c => c.ReceiveMessageUser)
+            .WithMany()
+            .HasForeignKey(c => c.ReceiveMessageUserId)
+            .OnDelete(DeleteBehavior.Restrict);  // Avoid cascade
     }
 }

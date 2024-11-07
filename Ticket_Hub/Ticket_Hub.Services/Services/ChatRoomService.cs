@@ -97,6 +97,8 @@ public class ChatRoomService : IChatRoomService
         {
             ChatRoomId = chatRoomItem.ChatRoomId,
             NameRoom = chatRoomItem.NameRoom,
+            SendMessageUserId = chatRoomItem.SendMessageUserId,
+            ReceiveMessageUserId = chatRoomItem.ReceiveMessageUserId,
             CreateTime = chatRoomItem.CreateTime,
             UpdateTime = chatRoomItem.UpdateTime,
         }).ToList();
@@ -112,7 +114,7 @@ public class ChatRoomService : IChatRoomService
 
     public async Task<ResponseDto> GetChatRoom(ClaimsPrincipal user, Guid userId)
     {
-        var messages = await _unitOfWork.MessageRepository.GetAllAsync(x => x.SendMessageUserId == userId);
+        var messages = await _unitOfWork.MessageRepository.GetAllAsync(x => x.SendMessageUserId == userId || x.ReceiveMessageUserId == userId);
         if (messages == null || !messages.Any())
         {
             return new ResponseDto
@@ -154,6 +156,8 @@ public class ChatRoomService : IChatRoomService
         {
             ChatRoomId = new Guid(),
             NameRoom = createChatRoomDto.NameRoom,
+            SendMessageUserId = createChatRoomDto.SendMessageUserId,
+            ReceiveMessageUserId = createChatRoomDto.ReceiveMessageUserId,
             CreateTime = createChatRoomDto.CreateTime,
             UpdateTime = createChatRoomDto.UpdateTime,
         };
@@ -186,6 +190,8 @@ public class ChatRoomService : IChatRoomService
 
         chatRoomId.ChatRoomId = updateChatRoomDto.ChatRoomId;
         chatRoomId.NameRoom = updateChatRoomDto.NameRoom;
+        chatRoomId.SendMessageUserId = updateChatRoomDto.SendMessageUserId;
+        chatRoomId.ReceiveMessageUserId = updateChatRoomDto.ReceiveMessageUserId;
         chatRoomId.CreateTime = updateChatRoomDto.CreateTime;
         chatRoomId.UpdateTime = updateChatRoomDto.UpdateTime;
         

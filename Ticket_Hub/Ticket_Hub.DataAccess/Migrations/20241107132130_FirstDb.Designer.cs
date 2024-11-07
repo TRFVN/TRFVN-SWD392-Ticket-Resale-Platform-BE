@@ -12,8 +12,8 @@ using Ticket_Hub.DataAccess.Context;
 namespace Ticket_Hub.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241107125637_FirstDB")]
-    partial class FirstDB
+    [Migration("20241107132130_FirstDb")]
+    partial class FirstDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -284,7 +284,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                             AvatarUrl = "https://example.com/avatar.png",
                             BirthDate = new DateTime(1990, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Cccd = "123456789123",
-                            ConcurrencyStamp = "5005f252-8db2-4ffe-a7ec-152f2666ae05",
+                            ConcurrencyStamp = "8b0f3945-4ac1-48e4-9a5f-d88cedcb0bea",
                             Country = "Country",
                             Email = "admin@gmail.com",
                             EmailConfirmed = true,
@@ -292,10 +292,10 @@ namespace Ticket_Hub.DataAccess.Migrations
                             LockoutEnabled = true,
                             NormalizedEmail = "ADMIN@GMAIL.COM",
                             NormalizedUserName = "ADMIN@GMAIL.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEDPivxOnyY8ZmOKf273yeqfM27CwZXM3hptD5McpkFXWGIdNo2gNZgCQTl8jvUv9NA==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEKyZvGdSRFdsRxfkqtJwURE139P4hdVMW58VQyc99tyUEltamaK7y6OwMmKu676DVQ==",
                             PhoneNumber = "1234567890",
                             PhoneNumberConfirmed = true,
-                            SecurityStamp = "ccddfa0b-1e88-43c2-aeac-8d2d20c4d0af",
+                            SecurityStamp = "13a50071-101b-4dfd-a200-62d661b1f55d",
                             TwoFactorEnabled = false,
                             UserName = "admin@gmail.com"
                         });
@@ -386,6 +386,12 @@ namespace Ticket_Hub.DataAccess.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<Guid>("ReceiveMessageUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SendMessageUserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("UpdateTime")
                         .HasColumnType("datetime2");
 
@@ -463,7 +469,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("d1513f90-ce2b-4621-bae3-3057554c0a51"),
+                            Id = new Guid("79c17ceb-a73d-4174-a737-a81e019694cb"),
                             BodyContent = "Dear [UserFullName],<br><br>Welcome to Ticket Hub!  We are thrilled to have you as part of our community dedicated to providing the best ticket-buying and reselling experience.",
                             CallToAction = "<a href=\"{{VerificationLink}}\">Verify Your Email</a>",
                             Category = "Welcome",
@@ -480,7 +486,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                         },
                         new
                         {
-                            Id = new Guid("033667f4-d01a-4bf0-b0ff-028b1273aee6"),
+                            Id = new Guid("38500366-f70e-4db3-99c5-af634ab02d40"),
                             BodyContent = "Hi [UserFullName],<br><br>We received a request to reset your password. Click the link below to reset your password.",
                             CallToAction = "https://cursuslms.xyz/sign-in/verify-email?userId=user.Id&token=Uri.EscapeDataString(token)",
                             Category = "Security",
@@ -497,7 +503,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                         },
                         new
                         {
-                            Id = new Guid("42a6cc43-8921-4030-89ca-090c56f7c66a"),
+                            Id = new Guid("d8322435-a437-4c63-bb4f-4fec7a28cd9a"),
                             BodyContent = "<p>Thank you for registering your Ticket Hub account. Click here to verify your email.</p>",
                             CallToAction = "<a href=\"https://localhost:5173/verifyemail?userId={{UserId}}&token={{Token}}\" class='button'>Verify Email</a>",
                             Category = "Verify",
