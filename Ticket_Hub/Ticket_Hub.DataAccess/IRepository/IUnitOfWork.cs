@@ -13,6 +13,8 @@ public interface IUnitOfWork
 
     IMessageRepository MessageRepository { get; }
     IChatRoomRepository ChatRoomRepository { get; }
+    IWalletRepository WalletRepository { get; }
+    ITransactionRepository TransactionRepository { get; }
     INegotiationsRepository NegotiationsRepository { get; }
 
     Task<int> SaveAsync();
