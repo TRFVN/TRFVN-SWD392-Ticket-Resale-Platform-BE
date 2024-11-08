@@ -3,12 +3,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Ticket_Hub.Models.Models;
 
-public enum NegotiationStatus  
-{  
-    Pending,  
-    Success,  
-    Cancel  
-}  
 
 public class Negotiations
 {
@@ -20,5 +14,5 @@ public class Negotiations
     public Guid TicketId { get; set; }
     [ForeignKey("TicketId")] public virtual Ticket Ticket { get; set; } = null!;
     public double Price { get; set; }
-    public NegotiationStatus Status { get; set; }
+    public bool Status { get; set; }
 }

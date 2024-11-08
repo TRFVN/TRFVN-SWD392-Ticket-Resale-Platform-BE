@@ -24,6 +24,7 @@ public class UnitOfWork : IUnitOfWork
     public IChatRoomRepository ChatRoomRepository { get; set; }
     public IWalletRepository WalletRepository { get; set; }
     public ITransactionRepository TransactionRepository { get; set; }
+    public INegotiationsRepository NegotiationsRepository { get; set; }
 
 
     public UnitOfWork(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
@@ -43,6 +44,7 @@ public class UnitOfWork : IUnitOfWork
         CartItemRepository = new CartItemRepository(_context);
         WalletRepository = new WalletRepository(_context);
         TransactionRepository = new TransactionRepository(_context);
+        NegotiationsRepository = new NegotiationsRepository(_context);
     }
 
     public async Task<int> SaveAsync()
