@@ -16,6 +16,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IFirebaseService, FirebaseService>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<ITicketService, TicketService>();
+        
+        services.AddScoped<ICartService, CartService>();
 
         services.AddScoped<IEventService, EventService>();
         services.AddScoped<ICategoryService, CategoryService>();

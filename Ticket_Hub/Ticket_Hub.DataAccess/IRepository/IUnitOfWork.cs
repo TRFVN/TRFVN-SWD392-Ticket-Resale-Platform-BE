@@ -7,7 +7,8 @@ public interface IUnitOfWork
     ITicketRepository TicketRepository { get; }
     IEventRepository EventRepository { get; }
     ICategoryRepository CategoryRepository { get; }
-
+    ICartRepository CartRepository { get; }
+    ICartItemRepository CartItemRepository { get; }
     IFeedbackRepository FeedbackRepository { get; }
 
     IMessageRepository MessageRepository { get; }

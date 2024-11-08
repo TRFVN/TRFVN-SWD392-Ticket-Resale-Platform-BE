@@ -1,0 +1,13 @@
+﻿using System.Security.Claims;
+using Ticket_Hub.Models.DTO;
+using Ticket_Hub.Models.DTO.Cart;
+
+namespace Ticket_Hub.Services.IServices;
+
+public interface ICartService
+{
+    Task<ResponseDto> GetCart(ClaimsPrincipal User);
+    Task<ResponseDto> AddToCart(ClaimsPrincipal User, AddToCartDTO addToCartDto);
+    Task<ResponseDto> RemoveFromCart(ClaimsPrincipal User, Guid TicketId);
+    Task<ResponseDto> Checkout(ClaimsPrincipal User);
+}

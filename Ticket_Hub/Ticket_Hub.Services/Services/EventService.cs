@@ -44,6 +44,15 @@ public class EventService : IEventService
                 Result = null
             };
         }
+        
+        // Kiểm tra quyền của người dùng  
+        bool isStaff = user.IsInRole("STAFF");
+
+        // Lọc danh sách sự kiện dựa vào quyền  
+        if (!isStaff)  
+        {  
+            allEvents = allEvents.Where(e => e.Status == 1);  
+        }  
 
         var listEvents = allEvents.ToList();
 
@@ -63,6 +72,21 @@ public class EventService : IEventService
                                 x.EventDate.Date >= filterDate.Date && x.EventDate.Date < filterDate.Date.AddDays(1))
                             .ToList();
                     }
+                    break;
+                case "city":
+                    listEvents = listEvents.Where(x =>
+                        x.City.Contains(filterQuery, StringComparison.CurrentCultureIgnoreCase)).ToList();
+                    
+                    break;
+                case "district":
+                    listEvents = listEvents.Where(x =>
+                        x.District.Contains(filterQuery, StringComparison.CurrentCultureIgnoreCase)).ToList();
+                    
+                    break;
+                case "address":
+                    listEvents = listEvents.Where(x =>
+                        x.Address.Contains(filterQuery, StringComparison.CurrentCultureIgnoreCase)).ToList();
+                    
                     break;
                 default:
                     break;
@@ -114,7 +138,11 @@ public class EventService : IEventService
             EventId = eventItem.EventId,
             EventName = eventItem.EventName,
             EventDate = eventItem.EventDate,
-            // Thêm các thuộc tính khác nếu cần
+            EventDescription = eventItem.EventDescription,
+            City = eventItem.City,
+            District = eventItem.District,
+            Address = eventItem.Address,
+            Status = eventItem.Status
         }).ToList();
 
         return new ResponseDto()
@@ -158,6 +186,9 @@ public class EventService : IEventService
             EventName = createEventDto.EventName,
             EventDescription = createEventDto.EventDescription,
             EventDate = createEventDto.EventDate,
+            City = createEventDto.City,
+            District = createEventDto.District,
+            Address = createEventDto.Address,
             CreatedBy = user.Identity.Name,
             UpdatedBy = "",
             CreatedTime = DateTime.Now,
@@ -195,6 +226,9 @@ public class EventService : IEventService
         eventId.EventName = updateEventDto.EventName;
         eventId.EventDescription = updateEventDto.EventDescription;
         eventId.EventDate = updateEventDto.EventDate;
+        eventId.City = updateEventDto.City;
+        eventId.District = updateEventDto.District;
+        eventId.Address = updateEventDto.Address;
         eventId.UpdatedBy = user.Identity.Name;
         eventId.UpdatedTime = DateTime.UtcNow;
 

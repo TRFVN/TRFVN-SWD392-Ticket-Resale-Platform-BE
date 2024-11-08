@@ -14,6 +14,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     }
 
     public DbSet<ApplicationUser> ApplicationUsers { get; set; }
+    public DbSet<Cart> Carts { get; set; }
+    public DbSet<CartItem> CartItems { get; set; }
     public DbSet<Feedback> Feedbacks { get; set; }
     public DbSet<Message> Messages { get; set; }
     public DbSet<Ticket> Tickets { get; set; }

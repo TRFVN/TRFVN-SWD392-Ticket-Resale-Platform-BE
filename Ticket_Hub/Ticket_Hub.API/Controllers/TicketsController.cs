@@ -139,7 +139,7 @@ namespace Ticket_Hub.API.Controllers
         /// <param name="ticketId"></param>
         /// <returns></returns>
         [HttpPost("{ticketId}/accept")]
-        [Authorize(Roles = StaticUserRoles.Admin)]
+        [Authorize(Roles = StaticUserRoles.Staff)]
         public async Task<ActionResult<ResponseDto>> AcceptTicket([FromRoute] Guid ticketId)
         {
             var responseDto = await _ticketService.AcceptTicket(User, ticketId);
@@ -152,7 +152,7 @@ namespace Ticket_Hub.API.Controllers
         /// <param name="ticketId"></param>
         /// <returns></returns>
         [HttpPost("{ticketId}/reject")]
-        [Authorize(Roles = StaticUserRoles.Admin)]
+        [Authorize(Roles = StaticUserRoles.Staff)]
         public async Task<ActionResult<ResponseDto>> RejectTicket([FromRoute] Guid ticketId)
         {
             var responseDto = await _ticketService.RejectTicket(User, ticketId);

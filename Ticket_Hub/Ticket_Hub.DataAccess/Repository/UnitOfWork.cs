@@ -13,6 +13,9 @@ public class UnitOfWork : IUnitOfWork
     public ITicketRepository TicketRepository { get; set; }
     public IEventRepository EventRepository { get; set; }
 
+    public ICartRepository CartRepository { get; set; }
+    public ICartItemRepository CartItemRepository { get; set; }
+    
     public ICategoryRepository CategoryRepository { get; set; }
 
     public IFeedbackRepository FeedbackRepository { get; set; }
@@ -29,16 +32,13 @@ public class UnitOfWork : IUnitOfWork
         TicketRepository = new TicketRepository(_context);
         EventRepository = new EventRepository(_context);
         CategoryRepository = new CategoryRepository(_context);
-
         FeedbackRepository = new FeedbackRepository(_context);
-
         MessageRepository = new MessageRepository(_context);
-
         FeedbackRepository = new FeedbackRepository(_context);
-
         MessageRepository = new MessageRepository(_context);    
         ChatRoomRepository = new ChatRoomRepository(_context);
-
+        CartRepository = new CartRepository(_context);
+        CartItemRepository = new CartItemRepository(_context);
     }
 
     public async Task<int> SaveAsync()

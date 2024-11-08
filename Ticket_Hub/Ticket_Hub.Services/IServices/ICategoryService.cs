@@ -1,7 +1,6 @@
 ﻿using System.Security.Claims;
 using Ticket_Hub.Models.DTO;
 using Ticket_Hub.Models.DTO.Category;
-using Ticket_Hub.Models.DTO.Location;
 
 namespace Ticket_Hub.Services.IServices;
 
