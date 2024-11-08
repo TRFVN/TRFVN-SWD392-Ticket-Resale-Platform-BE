@@ -88,7 +88,7 @@ public class ApplicationDbContextSeed
     {
         var userRoleId = "8fa7c7bb-b4dc-480d-a660-e07a90855d5u";
         var staffRoleId = "8fa7c7bb-b4dd-480d-a660-e07a90855d5s";
-        var adminRoleId = "8fa7c7bb-daa5-a660-bf02-82301a5eb32a"; // Add admin role
+        var adminRoleId = "8fa7c7bb-daa5-a660-bf02-82301a5eb32a";
 
         var roles = new List<IdentityRole>
         {
@@ -144,8 +144,62 @@ public class ApplicationDbContextSeed
             LockoutEnabled = true,
             AccessFailedCount = 0
         };
+        
+        // Seeding staff user
+        var staffUserId = "StaffId";
+        var staffUser = new ApplicationUser
+        {
+            Id = staffUserId,
+            FullName = "Staff_1 User",
+            BirthDate = new DateTime(1990, 1, 1), 
+            AvatarUrl = "https://example.com/avatarStaff.png", 
+            Cccd = "123456789126",
+            Country = "Country", 
+            Address = "123 Staff St",
+            UserName = "staff1@gmail.com",
+            NormalizedUserName = "STAFF1@GMAIL.COM",
+            Email = "staff1@gmail.com",
+            NormalizedEmail = "STAFF1@GMAIL.COM",
+            EmailConfirmed = true,
+            PasswordHash = hasher.HashPassword(null, "Staff123!"),
+            SecurityStamp = Guid.NewGuid().ToString(),
+            ConcurrencyStamp = Guid.NewGuid().ToString(),
+            PhoneNumber = "0123456789",
+            PhoneNumberConfirmed = true,
+            TwoFactorEnabled = false,
+            LockoutEnd = null,
+            LockoutEnabled = true,
+            AccessFailedCount = 0
+        };
 
-        modelBuilder.Entity<ApplicationUser>().HasData(adminUser);
+
+        var staffUserId2 = "StaffId2";
+        var staffUser2 = new ApplicationUser
+        {
+            Id = staffUserId2,
+            FullName = "Staff_2 User",
+            BirthDate = new DateTime(1991, 2, 2),
+            AvatarUrl = "https://example.com/avatarStaff2.png",
+            Cccd = "123456789124",
+            Country = "Country",
+            Address = "456 Staff St",
+            UserName = "staff2@gmail.com",
+            NormalizedUserName = "STAFF2@GMAIL.COM",
+            Email = "staff2@gmail.com",
+            NormalizedEmail = "STAFF2@GMAIL.COM",
+            EmailConfirmed = true,
+            PasswordHash = hasher.HashPassword(null, "Staff123!"),
+            SecurityStamp = Guid.NewGuid().ToString(),
+            ConcurrencyStamp = Guid.NewGuid().ToString(),
+            PhoneNumber = "0987654321",
+            PhoneNumberConfirmed = true,
+            TwoFactorEnabled = false,
+            LockoutEnd = null,
+            LockoutEnabled = true,
+            AccessFailedCount = 0
+        };
+
+        modelBuilder.Entity<ApplicationUser>().HasData(adminUser, staffUser2, staffUser);
 
         // Assigning the admin role to the admin user
         modelBuilder.Entity<IdentityUserRole<string>>().HasData(new IdentityUserRole<string>
@@ -153,5 +207,18 @@ public class ApplicationDbContextSeed
             RoleId = adminRoleId,
             UserId = adminUserId
         });
+        
+        // Assign the Staff role to the staff users  
+        modelBuilder.Entity<IdentityUserRole<string>>().HasData(new IdentityUserRole<string>  
+        {  
+            UserId = "StaffId",  
+            RoleId = staffRoleId  
+        });  
+    
+        modelBuilder.Entity<IdentityUserRole<string>>().HasData(new IdentityUserRole<string>  
+        {  
+            UserId = "StaffId2",  
+            RoleId = staffRoleId  
+        });  
     }
 }

@@ -11,7 +11,7 @@ public static class FirebaseServiceExtensions
     public static IServiceCollection AddFirebaseService(this IServiceCollection services)
     {
         var credentialPath = Path.Combine(Directory.GetCurrentDirectory(),
-            "tickethub-af919-firebase-adminsdk-wlfom-7f3f1ee86d.json");
+            "tickethub-af919-firebase-adminsdk-wlfom-e4884903c6.json");
         FirebaseApp.Create(new AppOptions()
         {
             Credential = GoogleCredential.FromFile(credentialPath)

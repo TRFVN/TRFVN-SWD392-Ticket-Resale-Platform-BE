@@ -1,7 +1,9 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Ticket_Hub.Models.DTO;
 using Ticket_Hub.Models.DTO.Event;
 using Ticket_Hub.Services.IServices;
+using Ticket_Hub.Utility.Constants;
 
 namespace Ticket_Hub.API.Controllers
 {
@@ -41,6 +43,7 @@ namespace Ticket_Hub.API.Controllers
         }
         
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<ResponseDto>> CreateEvent
         (
             [FromBody] CreateEventDto createLocationDto
@@ -51,6 +54,7 @@ namespace Ticket_Hub.API.Controllers
         }
         
         [HttpPut]
+        [Authorize]
         public async Task<ActionResult<ResponseDto>> UpdateEvent
         (
             [FromBody] UpdateEventDto updateLocationDto
@@ -61,6 +65,7 @@ namespace Ticket_Hub.API.Controllers
         }
         
         [HttpDelete("{eventId}")]
+        [Authorize]
         public async Task<ActionResult<ResponseDto>> DeleteEvent
         (
             [FromRoute] Guid eventId

@@ -103,7 +103,6 @@ public class CategoryService : ICategoryService
             UpdatedBy = categoryItem.UpdatedBy,
             UpdatedTime = categoryItem.UpdatedTime,
             Status = categoryItem.Status
-            
         }).ToList();
 
         return new ResponseDto()
@@ -117,50 +116,87 @@ public class CategoryService : ICategoryService
 
     public async Task<ResponseDto> GetCategory(ClaimsPrincipal user, Guid categoryId)
     {
-        var category = await _unitOfWork.CategoryRepository.GetById(categoryId);
-        if (category == null)
-        {
-            return new ResponseDto
-            {
-                Message = "Category not found",
-                Result = null,
-                IsSuccess = false,
-                StatusCode = 404
-            };
-        }
+        // Lấy danh mục theo ID  
+        var category = await _unitOfWork.CategoryRepository.GetById(categoryId);  
+        if (category == null)  
+        {  
+            return new ResponseDto  
+            {  
+                Message = "Category not found",  
+                Result = null,  
+                IsSuccess = false,  
+                StatusCode = 404  
+            };  
+        }  
 
-        var categoryDto = _mapper.Map<GetCategoryDto>(category);
+        // Khởi tạo DTO cho danh mục  
+        var categoryDto = _mapper.Map<GetCategoryByIdDto>(category);  
+    
+        // Lấy tên danh mục cha (nếu có)  
+        if (category.ParentCategoryId.HasValue)  
+        {  
+            var parentCategory = await _unitOfWork.CategoryRepository.GetById(category.ParentCategoryId.Value);  
+            if (parentCategory != null)  
+            {  
+                categoryDto.ParentCategoryName = parentCategory.CategoryName;  
+            }  
+        }  
 
-        return new ResponseDto
-        {
-            Message = "Location found successfully",
-            Result = categoryDto,
-            IsSuccess = true,
-            StatusCode = 200
-        };
+        // Lấy danh sách các danh mục con  
+        var subcategories = await _unitOfWork.CategoryRepository.GetSubcategories(categoryId);  
+        if (subcategories != null && subcategories.Any())  
+        {  
+            categoryDto.SubcategoryNames = subcategories.Select(sub => sub.CategoryName).ToList();  
+        }  
+
+        return new ResponseDto  
+        {  
+            Message = "Category found successfully",  
+            Result = categoryDto,  
+            IsSuccess = true,  
+            StatusCode = 200  
+        };  
     }
 
     public async Task<ResponseDto> CreateCategory(ClaimsPrincipal user, CreateCategoryDto createCategoryDto)
     {
-        Category newCategory = new Category()
+        // Kiểm tra và parse ParentCategoryId nếu có
+        Guid? parentCategoryId = Guid.TryParse(createCategoryDto.ParentCategoryId, out var guidOutput)
+            ? guidOutput
+            : (Guid?)null;
+
+        // Tạo Category mới
+        var category = new Category
         {
+            CategoryId = Guid.NewGuid(),
             CategoryName = createCategoryDto.CategoryName,
+            ParentCategoryId = parentCategoryId,
+            CreatedTime = DateTime.UtcNow,
             CreatedBy = user.Identity.Name,
-            UpdatedBy = "",
-            CreatedTime = DateTime.Now,
-            UpdatedTime = null,
-            Status = 1,
+            Status = 0,
         };
 
-        await _unitOfWork.CategoryRepository.AddAsync(newCategory);
-        await _unitOfWork.SaveAsync();
+        // Thêm category vào cơ sở dữ liệu
+        await _unitOfWork.CategoryRepository.AddAsync(category);
+        var result = await _unitOfWork.SaveAsync();
+
+        // Kiểm tra kết quả lưu vào cơ sở dữ liệu
+        if (result <= 0)
+        {
+            return new ResponseDto
+            {
+                Message = "Failed to create category",
+                IsSuccess = false,
+                StatusCode = 500
+            };
+        }
 
         return new ResponseDto
         {
             Message = "Category created successfully",
-            Result = newCategory,
+            Result = category,
             IsSuccess = true,
-            StatusCode = 201
+            StatusCode = 200
         };
     }
 
@@ -181,6 +217,7 @@ public class CategoryService : ICategoryService
 
         //update Category
         categoryId.CategoryName = updateCategoryDto.CategoryName;
+        categoryId.ParentCategoryId = updateCategoryDto.ParentCategoryId;
         categoryId.UpdatedBy = user.Identity.Name;
         categoryId.UpdatedTime = DateTime.Now;
 

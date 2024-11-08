@@ -28,4 +28,11 @@ public class CategoryRepository : Repository<Category>, ICategoryRepository
     {
         return await _context.Categories.FirstOrDefaultAsync(x => x.CategoryId == categoryId);
     }
+    
+    public async Task<List<Category>> GetSubcategories(Guid categoryId)  
+    {  
+        return await _context.Categories  
+            .Where(c => c.ParentCategoryId == categoryId)  
+            .ToListAsync();  
+    } 
 }

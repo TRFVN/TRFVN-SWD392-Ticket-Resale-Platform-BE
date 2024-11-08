@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Ticket_Hub.DataAccess.Context;
 
@@ -11,9 +12,11 @@ using Ticket_Hub.DataAccess.Context;
 namespace Ticket_Hub.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241107160646_ModifyDB_Seedings")]
+    partial class ModifyDB_Seedings
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -291,7 +294,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                             AvatarUrl = "https://example.com/avatar.png",
                             BirthDate = new DateTime(1990, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Cccd = "123456789123",
-                            ConcurrencyStamp = "c3a94c15-99a5-4461-9b7d-00d3fa63e30c",
+                            ConcurrencyStamp = "459ebc87-0fe5-46b8-bb6a-675e6d63343b",
                             Country = "Country",
                             Email = "admin@gmail.com",
                             EmailConfirmed = true,
@@ -299,10 +302,10 @@ namespace Ticket_Hub.DataAccess.Migrations
                             LockoutEnabled = true,
                             NormalizedEmail = "ADMIN@GMAIL.COM",
                             NormalizedUserName = "ADMIN@GMAIL.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEDM4BW8haf+x/HB8+RXL+pThRYP3yJscQmCXYMlVqMBcTfoT3t2K04cgI0FSmjmHxg==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEJEbRq24gxd+ge0vEY5bUdk8MZCjauY825umJZnrWE77I09rhWE5jpdPbib/U7y46w==",
                             PhoneNumber = "1234567890",
                             PhoneNumberConfirmed = true,
-                            SecurityStamp = "98ca78bc-5807-4ed4-994a-52ca6d0a4b98",
+                            SecurityStamp = "6cd8a564-dda1-4413-96c0-fc03a22b82b8",
                             TwoFactorEnabled = false,
                             UserName = "admin@gmail.com"
                         },
@@ -314,7 +317,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                             AvatarUrl = "https://example.com/avatarStaff2.png",
                             BirthDate = new DateTime(1991, 2, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Cccd = "123456789124",
-                            ConcurrencyStamp = "31227d43-b4e5-4a09-b265-55fa4c9eb05a",
+                            ConcurrencyStamp = "842447e7-6b95-4bdf-a5fb-3c2aed3beb16",
                             Country = "Country",
                             Email = "staff2@gmail.com",
                             EmailConfirmed = true,
@@ -322,10 +325,10 @@ namespace Ticket_Hub.DataAccess.Migrations
                             LockoutEnabled = true,
                             NormalizedEmail = "STAFF2@GMAIL.COM",
                             NormalizedUserName = "STAFF2@GMAIL.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEI4m6tqv+kBBfl4H0r5EVYq77d5L8L+AI+CXrDTbVrZFhExpngcxjiyV9JWkQCPflw==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEGrUjBR0gXHVFln6KifURTwSNguvylhWp4N0k4HIrniZBlfB/qPcKX+0Zbn/aAxZBg==",
                             PhoneNumber = "0987654321",
                             PhoneNumberConfirmed = true,
-                            SecurityStamp = "72c43545-0d52-4f78-afe7-653ae33cec38",
+                            SecurityStamp = "9c9c08b5-53fd-483c-812d-6b3471253506",
                             TwoFactorEnabled = false,
                             UserName = "staff2@gmail.com"
                         },
@@ -337,7 +340,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                             AvatarUrl = "https://example.com/avatarStaff.png",
                             BirthDate = new DateTime(1990, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Cccd = "123456789126",
-                            ConcurrencyStamp = "92096ebb-9a09-4af9-b592-56c5e2d17ae8",
+                            ConcurrencyStamp = "41abfb63-31a8-48e7-9ad4-fc964c0ae760",
                             Country = "Country",
                             Email = "staff1@gmail.com",
                             EmailConfirmed = true,
@@ -345,10 +348,10 @@ namespace Ticket_Hub.DataAccess.Migrations
                             LockoutEnabled = true,
                             NormalizedEmail = "STAFF1@GMAIL.COM",
                             NormalizedUserName = "STAFF1@GMAIL.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEHKfn69Mz9WjjGfwMVU1Osbv5vNC5lJ5wVAr0XOaTJZ29LtzT1kzB1mYi0WQn8iQaA==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEBSW+HK4vqXoytSLovyyhZ+umIH+9ZOm8oSKZv9N5i/tPNx3yKj3Ha/lFGNCDm24gQ==",
                             PhoneNumber = "0123456789",
                             PhoneNumberConfirmed = true,
-                            SecurityStamp = "565b2006-693f-4e2b-b1b8-7881990f9913",
+                            SecurityStamp = "8b9578b8-3fc6-4dc6-97af-68b2fc1a91d3",
                             TwoFactorEnabled = false,
                             UserName = "staff1@gmail.com"
                         });
@@ -371,7 +374,7 @@ namespace Ticket_Hub.DataAccess.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Carts");
+                    b.ToTable("Cart");
                 });
 
             modelBuilder.Entity("Ticket_Hub.Models.Models.CartItem", b =>
@@ -386,7 +389,7 @@ namespace Ticket_Hub.DataAccess.Migrations
 
                     b.HasIndex("TicketId");
 
-                    b.ToTable("CartItems");
+                    b.ToTable("CartItem");
                 });
 
             modelBuilder.Entity("Ticket_Hub.Models.Models.Category", b =>
@@ -528,7 +531,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("ab0553ed-cbd7-42f9-95cc-a227097395b5"),
+                            Id = new Guid("172269c0-0ee7-4913-b778-8b1e92b1aa49"),
                             BodyContent = "Dear [UserFullName],<br><br>Welcome to Ticket Hub!  We are thrilled to have you as part of our community dedicated to providing the best ticket-buying and reselling experience.",
                             CallToAction = "<a href=\"{{VerificationLink}}\">Verify Your Email</a>",
                             Category = "Welcome",
@@ -545,7 +548,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                         },
                         new
                         {
-                            Id = new Guid("1885fbc8-27c6-4145-9b4c-c678ef65969d"),
+                            Id = new Guid("6df13d22-fdc9-4e19-820d-af6ad500f604"),
                             BodyContent = "Hi [UserFullName],<br><br>We received a request to reset your password. Click the link below to reset your password.",
                             CallToAction = "https://cursuslms.xyz/sign-in/verify-email?userId=user.Id&token=Uri.EscapeDataString(token)",
                             Category = "Security",
@@ -562,7 +565,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                         },
                         new
                         {
-                            Id = new Guid("a1a6d4e0-e038-4013-92f0-1dc5e070ae57"),
+                            Id = new Guid("41d3bc64-3723-47dc-8e23-ee0d90560732"),
                             BodyContent = "<p>Thank you for registering your Ticket Hub account. Click here to verify your email.</p>",
                             CallToAction = "<a href=\"https://localhost:5173/verifyemail?userId={{UserId}}&token={{Token}}\" class='button'>Verify Email</a>",
                             Category = "Verify",

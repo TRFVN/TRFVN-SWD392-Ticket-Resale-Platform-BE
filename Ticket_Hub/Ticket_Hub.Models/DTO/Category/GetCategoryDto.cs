@@ -7,4 +7,5 @@ public class GetCategoryDto : BaseEntity<string, string, int>
 {
     public Guid CategoryId { get; set; }
     [StringLength(50)] public string CategoryName { get; set; } = null!;
+    public Guid? ParentCategoryId { get; set; }
 }

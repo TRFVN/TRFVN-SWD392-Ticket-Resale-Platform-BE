@@ -11,4 +11,6 @@ public class Category : BaseEntity<string, string, int>
 
     [ForeignKey("ParentCategoryId")]
     public virtual Category? ParentCategory { get; set; }
+    
+    [NotMapped] public List<Category> SubCategories { get; set; } = new List<Category>();
 }

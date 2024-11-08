@@ -50,7 +50,30 @@ public class TicketService : ITicketService
             };
         }
 
-        var listTickets = tickets.ToList();
+        bool isStaff = user.IsInRole("STAFF");  
+        bool isMember = user.IsInRole("MEMBER");  
+        string userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;  
+
+        // Lọc danh sách vé  
+        List<Ticket> listTickets;  
+
+        if (isStaff)  
+        {  
+            // Nếu là staff, lấy tất cả vé  
+            listTickets = tickets.ToList();  
+        }  
+        else if (isMember)  
+        {  
+            // Nếu là người bán, lấy tất cả vé của họ nhưng loại bỏ các vé không hiển thị  
+            listTickets = tickets.Where(ticket => ticket.UserId == userId && ticket.IsVisible).ToList();  
+        }  
+        else  
+        {  
+            // Nếu là khách, chỉ lấy vé đã được duyệt và thấy được  
+            listTickets = tickets.Where(ticket => ticket.Status == TicketStatus.Success && ticket.IsVisible).ToList();  
+        }  
+
+
 
         // Filter Query
         if (!string.IsNullOrEmpty(filterOn) && !string.IsNullOrEmpty(filterQuery))
@@ -119,15 +142,19 @@ public class TicketService : ITicketService
             TicketName = ticket.TicketName,
             TicketImage = ticket.TicketImage,
             EventId = ticket.EventId,
+            EventName = ticket.Event?.EventName ?? "N/A",
             UserId = ticket.UserId,
             CategoryId = ticket.CategoryId,
+            CategoryName = ticket.Category?.CategoryName,
             TicketPrice = ticket.TicketPrice,
             TicketDescription = ticket.TicketDescription,
             SerialNumber = ticket.SerialNumber,
+            City = ticket.Event.City,
+            District = ticket.Event.District,
+            Address = ticket.Event.Address,
             Status = ticket.Status,
             IsVisible = ticket.IsVisible,
-            //bảng event
-            EventDate = ticket.Event.EventDate,
+            EventDate = ticket.Event?.EventDate ?? DateTime.MinValue
         }).ToList();
 
         return new ResponseDto()
@@ -147,9 +174,9 @@ public class TicketService : ITicketService
             return new ResponseDto
             {
                 Message = "Ticket not found",
-                Result = null,
+                Result = "",
                 IsSuccess = false,
-                StatusCode = 404
+                StatusCode = 200
             };
         }
 
@@ -179,7 +206,8 @@ public class TicketService : ITicketService
             };
         }
 
-        var serinumber = await _unitOfWork.TicketRepository.GetAsync(s => s.SerialNumber == createTicketDto.SerialNumber);
+        var serinumber =
+            await _unitOfWork.TicketRepository.GetAsync(s => s.SerialNumber == createTicketDto.SerialNumber);
         if (serinumber != null)
         {
             return new ResponseDto
@@ -301,9 +329,9 @@ public class TicketService : ITicketService
     }
 
     public async Task<ResponseDto> UploadTicketImage(
-    ClaimsPrincipal user,
-    UploadTicketImgDto uploadTicketImgDto
-)
+        ClaimsPrincipal user,
+        UploadTicketImgDto uploadTicketImgDto
+    )
     {
         if (uploadTicketImgDto.File == null)
         {
@@ -316,7 +344,8 @@ public class TicketService : ITicketService
         }
 
         // Upload image lên Firebase và nhận URL công khai
-        var responseDto = await _firebaseService.UploadImageTicket(uploadTicketImgDto.File, StaticFirebaseFolders.TicketImages);
+        var responseDto =
+            await _firebaseService.UploadImageTicket(uploadTicketImgDto.File, StaticFirebaseFolders.TicketImages);
 
         if (!responseDto.IsSuccess)
         {
