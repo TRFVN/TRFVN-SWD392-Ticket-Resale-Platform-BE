@@ -140,6 +140,7 @@ public class TicketService : ITicketService
             CategoryId = ticket.CategoryId,
             CategoryName = ticket.Category?.CategoryName,
             TicketPrice = ticket.TicketPrice,
+            NewPrice = ticket.NewPrice,
             TicketDescription = ticket.TicketDescription,
             SerialNumber = ticket.SerialNumber,
             City = ticket.Event.City,
@@ -147,6 +148,7 @@ public class TicketService : ITicketService
             Address = ticket.Event.Address,
             Status = ticket.Status,
             IsVisible = ticket.IsVisible,
+            NegotiationStatus = ticket.NegotiationStatus,
             EventDate = ticket.Event?.EventDate ?? DateTime.MinValue
         }).ToList();
 

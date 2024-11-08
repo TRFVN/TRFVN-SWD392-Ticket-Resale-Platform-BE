@@ -16,6 +16,5 @@ public interface IUnitOfWork
     IWalletRepository WalletRepository { get; }
     ITransactionRepository TransactionRepository { get; }
     INegotiationsRepository NegotiationsRepository { get; }
-
     Task<int> SaveAsync();
 }
