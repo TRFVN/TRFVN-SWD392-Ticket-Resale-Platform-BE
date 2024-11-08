@@ -30,5 +30,17 @@ namespace Ticket_Hub.API.Controllers
             );
             return StatusCode(responseDto.StatusCode, responseDto);
         }
+        
+        [HttpDelete]
+        [Route("RemoveFromCart")]
+        public async Task<IActionResult> RemoveFromCart([FromQuery] Guid ticketId)
+        {
+            var responseDto = await _cartService.RemoveFromCart
+            (
+                User,
+                ticketId
+            );
+            return StatusCode(responseDto.StatusCode, responseDto);
+        }
     }
 }

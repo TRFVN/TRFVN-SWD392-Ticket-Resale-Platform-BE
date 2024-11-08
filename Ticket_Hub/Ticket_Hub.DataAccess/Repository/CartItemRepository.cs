@@ -1,4 +1,5 @@
-﻿using Ticket_Hub.DataAccess.Context;
+﻿using Microsoft.EntityFrameworkCore;
+using Ticket_Hub.DataAccess.Context;
 using Ticket_Hub.DataAccess.IRepository;
 using Ticket_Hub.Models.Models;
 
@@ -20,5 +21,12 @@ public class CartItemRepository : Repository<CartItem>, ICartItemRepository
     public void UpdateRange(IEnumerable<CartItem> cartItems)
     {
         _context.CartItems.UpdateRange(cartItems);
+    }
+    
+    public async Task<CartItem> GetCartItemWithTicketAsync(Guid cartId, Guid ticketId)
+    {
+        return await _context.CartItems
+            .Include(ci => ci.Ticket)
+            .FirstOrDefaultAsync(ci => ci.CartId == cartId && ci.TicketId == ticketId);
     }
 }
