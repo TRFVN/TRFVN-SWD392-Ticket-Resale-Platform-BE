@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Ticket_Hub.Models.DTO;
 using Ticket_Hub.Models.DTO.Cart;
@@ -10,16 +11,53 @@ namespace Ticket_Hub.Services.Services;
 public class CartService : ICartService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IMapper _mapper;
 
-    public CartService(IUnitOfWork unitOfWork)
+    public CartService(IUnitOfWork unitOfWork, IMapper mapper)
     {
         _unitOfWork = unitOfWork;
+        _mapper = mapper;
     }
 
-
-    public Task<ResponseDto> GetCart(ClaimsPrincipal User)
+    public async Task<ResponseDto> GetCart(ClaimsPrincipal User)
     {
-        throw new NotImplementedException();
+        var userId = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+        if (userId == null)
+        {
+            return new ResponseDto()
+            {
+                Message = "User was not found",
+                IsSuccess = false,
+                StatusCode = 404,
+                Result = null
+            };
+        }
+
+        var cart = await _unitOfWork.CartRepository.GetAsync(x => x.UserId == userId);
+        if (cart == null)
+        {
+            cart = new Cart()
+            {
+                CartId = Guid.NewGuid(),
+                UserId = userId,
+                TotalAmount = 0
+            };
+            await _unitOfWork.CartRepository.AddAsync(cart);
+            await _unitOfWork.SaveAsync();
+        }
+
+        var cartItems =
+            await _unitOfWork.CartItemRepository.GetAllAsync(x => x.CartId == cart.CartId, includeProperties: "Ticket");
+        var cartDto = _mapper.Map<CartDto>(cart);
+        cartDto.CartItemsDtos = _mapper.Map<List<CartItemDto>>(cartItems);
+
+        return new ResponseDto()
+        {
+            Message = "Cart retrieved successfully",
+            IsSuccess = true,
+            StatusCode = 200,
+            Result = cartDto
+        };
     }
 
     public async Task<ResponseDto> AddToCart(ClaimsPrincipal User, AddToCartDTO addToCartDto)
@@ -111,7 +149,7 @@ public class CartService : ICartService
                 CartId = cart.CartId,
                 UserId = cart.UserId,
                 TotalAmount = cart.TotalAmount,
-                CartItems = cart.CartItems?.Select(item => new CartItemDto
+                CartItemsDtos = cart.CartItems?.Select(item => new CartItemDto
                 {
                     TicketId = item.TicketId,
                     TicketPrice = ticket.TicketPrice
@@ -199,5 +237,4 @@ public class CartService : ICartService
             Result = null
         };
     }
-
 }

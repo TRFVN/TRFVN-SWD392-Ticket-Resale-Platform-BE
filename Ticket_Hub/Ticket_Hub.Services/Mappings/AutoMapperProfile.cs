@@ -1,11 +1,10 @@
 ﻿using AutoMapper;
+using Ticket_Hub.Models.DTO.Cart;
 using Ticket_Hub.Models.DTO.Category;
 using Ticket_Hub.Models.DTO.ChatRoom;
 using Ticket_Hub.Models.DTO.Event;
 using Ticket_Hub.Models.DTO.Feedback;
-
 using Ticket_Hub.Models.DTO.Message;
-
 using Ticket_Hub.Models.DTO.Ticket;
 using Ticket_Hub.Models.Models;
 
@@ -20,13 +19,20 @@ public class AutoMapperProfile : Profile
         CreateMap<Event, GetEventDto>().ReverseMap();
         CreateMap<Category, GetCategoryDto>().ReverseMap();
         CreateMap<Category, GetCategoryByIdDto>()
-            .ForMember(dest =>dest.Id, opt => opt.MapFrom(src => src.CategoryId))
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.CategoryId))
             .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.CategoryName))
-            .ForMember(dest => dest.ParentCategoryName, opt => opt.MapFrom(src => src.ParentCategory != null ? src.ParentCategory.CategoryName : null))  
-            .ForMember(dest => dest.SubcategoryNames, opt => opt.MapFrom(src => src.SubCategories.Select(sub => sub.SubCategories).ToList())); 
+            .ForMember(dest => dest.ParentCategoryName,
+                opt => opt.MapFrom(src => src.ParentCategory != null ? src.ParentCategory.CategoryName : null))
+            .ForMember(dest => dest.SubcategoryNames,
+                opt => opt.MapFrom(src => src.SubCategories.Select(sub => sub.SubCategories).ToList()));
         CreateMap<Feedback, GetFeedbackDto>().ReverseMap();
 
         CreateMap<Message, GetMessageDto>().ReverseMap();
         CreateMap<ChatRoom, GetChatRoomDto>().ReverseMap();
+        CreateMap<Cart, CartDto>().ReverseMap();
+        CreateMap<CartItem, CartItemDto>()
+            .ForMember(dest => dest.TicketPrice, opt => opt.MapFrom(src => src.Ticket.TicketPrice))
+            .ForMember(dest => dest.TicketId, opt => opt.MapFrom(src => src.TicketId))
+            .ReverseMap();
     }
 }

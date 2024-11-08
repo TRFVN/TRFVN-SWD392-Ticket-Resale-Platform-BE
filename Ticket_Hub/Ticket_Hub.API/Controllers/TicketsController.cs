@@ -65,6 +65,14 @@ namespace Ticket_Hub.API.Controllers
             var responseDto = await _ticketService.GetTicket(User, ticketId);
             return StatusCode(responseDto.StatusCode, responseDto);
         }
+        
+        [HttpGet]
+        [Route("user")]
+        public async Task<ActionResult<ResponseDto>> GetTicketByUserId()
+        {
+            var responseDto = await _ticketService.GetTicketByUserId(User);
+            return StatusCode(responseDto.StatusCode, responseDto);
+        }
 
         /// <summary>
         /// Create a new ticket
@@ -72,6 +80,7 @@ namespace Ticket_Hub.API.Controllers
         /// <param name="createLevelDto"></param>
         /// <returns></returns>
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<ResponseDto>> CreateTicket
         (
             [FromBody] CreateTicketDto createLevelDto
@@ -87,6 +96,7 @@ namespace Ticket_Hub.API.Controllers
         /// <param name="updateLevelDto"></param>
         /// <returns></returns>
         [HttpPut]
+        [Authorize]
         public async Task<ActionResult<ResponseDto>> UpdateTicket
         (
             [FromBody] UpdateTicketDto updateLevelDto
@@ -102,6 +112,7 @@ namespace Ticket_Hub.API.Controllers
         /// <param name="ticketId"></param>
         /// <returns></returns>
         [HttpDelete("{ticketId}")]
+        [Authorize]
         public async Task<ActionResult<ResponseDto>> DeleteTicket
         (
             [FromRoute] Guid ticketId
@@ -118,7 +129,7 @@ namespace Ticket_Hub.API.Controllers
         /// <param name="uploadTicketImgDto"></param>
         /// <returns></returns>
         [HttpPost]
-        [Route("/upload-image")]
+        [Route("upload-image")]
         public async Task<ActionResult<ResponseDto>> UploadTicketImage
         (
             UploadTicketImgDto uploadTicketImgDto
