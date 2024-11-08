@@ -27,4 +27,9 @@ public class NegotiationsRepository : Repository<Negotiations>, INegotiationsRep
             .Where(m => m.SendMessageUserId == userId || m.ReceiveMessageUserId == userId)
             .ToListAsync();
     }
+
+    public void Update(Negotiations negotiations)
+    {
+        _context.Negotiations.Update(negotiations);
+    }
 }

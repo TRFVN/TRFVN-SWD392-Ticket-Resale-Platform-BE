@@ -79,8 +79,38 @@ public class NegotiationsService : INegotiationsService
                 StatusCode = 404
             };
         }
-        
+
+        // Cập nhật trạng thái của Negotiation
         nego.Status = true;
-        return null;
+
+        // Lấy Ticket liên quan và cập nhật thông tin
+        var ticket = await _unitOfWork.TicketRepository.GetAsync(t => t.TicketId == nego.TicketId);
+        if (ticket == null)
+        {
+            return new ResponseDto
+            {
+                Message = "Ticket not found",
+                Result = null,
+                IsSuccess = false,
+                StatusCode = 404
+            };
+        }
+
+        // Cập nhật NewPrice và NegotiationStatus của Ticket
+        ticket.NewPrice = nego.Price;
+        ticket.NegotiationStatus = true;
+
+        // Lưu các thay đổi vào cơ sở dữ liệu
+        _unitOfWork.TicketRepository.Update(ticket);
+        _unitOfWork.NegotiationsRepository.Update(nego);
+        await _unitOfWork.SaveAsync();
+
+        return new ResponseDto
+        {
+            Message = "Negotiation accepted and ticket price updated",
+            Result = null,
+            IsSuccess = true,
+            StatusCode = 200
+        };
     }
 }

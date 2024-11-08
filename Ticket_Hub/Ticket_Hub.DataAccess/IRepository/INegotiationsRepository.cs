@@ -6,4 +6,5 @@ public interface INegotiationsRepository : IRepository<Negotiations>
 {
     Task<IEnumerable<Message>> GetMessagesByChatRoomIdAsync(Guid chatRoomId);
     Task<IEnumerable<Message>> GetMessagesByUserIdAsync(Guid userId);
+    void Update(Negotiations negotiations);
 }
