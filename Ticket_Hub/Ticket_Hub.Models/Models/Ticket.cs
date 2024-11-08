@@ -21,10 +21,12 @@ namespace Ticket_Hub.Models.Models
         public Guid CategoryId { get; set; }
         [ForeignKey("CategoryId")] public virtual Category Category { get; set; } = null!;
         public double TicketPrice { get; set; }
+        public double? NewPrice { get; set; }
         [StringLength(500)] public string TicketDescription { get; set; } = null!;
         [StringLength(20)] public string SerialNumber { get; set; } = null!;
         [StringLength(1000)] public string? TicketImage { get; set; }
-    
+        public bool NegotiationStatus { get; set; }
+        
         public bool IsVisible { get; set; } = true;
         public TicketStatus Status { get; set; }
         public virtual ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();

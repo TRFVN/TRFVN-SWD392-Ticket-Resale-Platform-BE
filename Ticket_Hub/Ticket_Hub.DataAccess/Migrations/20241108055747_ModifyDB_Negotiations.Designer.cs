@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Ticket_Hub.DataAccess.Context;
 
@@ -11,9 +12,11 @@ using Ticket_Hub.DataAccess.Context;
 namespace Ticket_Hub.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241108055747_ModifyDB_Negotiations")]
+    partial class ModifyDB_Negotiations
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -291,7 +294,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                             AvatarUrl = "https://example.com/avatar.png",
                             BirthDate = new DateTime(1990, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Cccd = "123456789123",
-                            ConcurrencyStamp = "05f9d8d0-1fee-4a6f-9c8e-3c5d91edce8d",
+                            ConcurrencyStamp = "41ebc4d6-c48b-4627-ad52-0276ceeadc7a",
                             Country = "Country",
                             Email = "admin@gmail.com",
                             EmailConfirmed = true,
@@ -299,10 +302,10 @@ namespace Ticket_Hub.DataAccess.Migrations
                             LockoutEnabled = true,
                             NormalizedEmail = "ADMIN@GMAIL.COM",
                             NormalizedUserName = "ADMIN@GMAIL.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEEau8AbD+7p086YX7Cc7c5zrxU+KpMQ5qyUY6SuaHzvwtuWTu2C4ImoXRubz1pEpZw==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEHrnzNRSfW2G9kZLb07EDLtqBrI+u3O1EuVXGsXOB0poC9rWS1K4wiCcn3Wgf3bTQw==",
                             PhoneNumber = "1234567890",
                             PhoneNumberConfirmed = true,
-                            SecurityStamp = "faf0fbba-f55c-45e6-832a-cf05b960cf54",
+                            SecurityStamp = "01787fcf-2256-4e1b-9bca-eb85d0b487ae",
                             TwoFactorEnabled = false,
                             UserName = "admin@gmail.com"
                         },
@@ -314,7 +317,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                             AvatarUrl = "https://example.com/avatarStaff2.png",
                             BirthDate = new DateTime(1991, 2, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Cccd = "123456789124",
-                            ConcurrencyStamp = "3079fe7a-11a2-45f0-8cac-8cac9bb3bf34",
+                            ConcurrencyStamp = "e118387c-ff5b-4d28-9f20-036673b88d5e",
                             Country = "Country",
                             Email = "staff2@gmail.com",
                             EmailConfirmed = true,
@@ -322,10 +325,10 @@ namespace Ticket_Hub.DataAccess.Migrations
                             LockoutEnabled = true,
                             NormalizedEmail = "STAFF2@GMAIL.COM",
                             NormalizedUserName = "STAFF2@GMAIL.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEE69WsvRt7fyQKDuR5ZS7rNmLK4gLI6FM3S6Z4KcZUDWx4pAp8D7L1oKy1tgtzSdVQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEDUrEyqs1luKuPRYL9n08akoUwNzFJMTU8TYm6ZbjoQbc6MfhL43oJ/G2U6iudHWDg==",
                             PhoneNumber = "0987654321",
                             PhoneNumberConfirmed = true,
-                            SecurityStamp = "7f2eac10-103a-43f3-9e9e-ec6eb74c64c0",
+                            SecurityStamp = "c47dc3f2-61e3-4826-8b11-a8d71c87a50d",
                             TwoFactorEnabled = false,
                             UserName = "staff2@gmail.com"
                         },
@@ -337,7 +340,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                             AvatarUrl = "https://example.com/avatarStaff.png",
                             BirthDate = new DateTime(1990, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Cccd = "123456789126",
-                            ConcurrencyStamp = "8ec79a6b-b1fb-49b5-8211-7473fc434730",
+                            ConcurrencyStamp = "a1cca6ac-95a2-4f97-b34c-c717d100086d",
                             Country = "Country",
                             Email = "staff1@gmail.com",
                             EmailConfirmed = true,
@@ -345,10 +348,10 @@ namespace Ticket_Hub.DataAccess.Migrations
                             LockoutEnabled = true,
                             NormalizedEmail = "STAFF1@GMAIL.COM",
                             NormalizedUserName = "STAFF1@GMAIL.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEAiHoBgvKRz5fI8Gf+TsEAabHXGHDsV24rn2z6jjUkgcSU2ID0sMVNvvV0WFH0cMtg==",
+                            PasswordHash = "AQAAAAIAAYagAAAAECg127nxW+xusLAoP8cRLfdNVHsF7w6E3eFNANaGSRXb+3//zal7DB5Po5mqRf8g9A==",
                             PhoneNumber = "0123456789",
                             PhoneNumberConfirmed = true,
-                            SecurityStamp = "73639c82-46d1-4af8-95eb-ea77c18d817f",
+                            SecurityStamp = "b16b9fed-231f-4ac5-8489-d8c8a2f74e42",
                             TwoFactorEnabled = false,
                             UserName = "staff1@gmail.com"
                         });
@@ -528,7 +531,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("c22c996d-6e53-4181-9229-e6667da289f1"),
+                            Id = new Guid("61d05f0b-312d-440a-80d1-ef19c0a6d2ca"),
                             BodyContent = "Dear [UserFullName],<br><br>Welcome to Ticket Hub!  We are thrilled to have you as part of our community dedicated to providing the best ticket-buying and reselling experience.",
                             CallToAction = "<a href=\"{{VerificationLink}}\">Verify Your Email</a>",
                             Category = "Welcome",
@@ -545,7 +548,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                         },
                         new
                         {
-                            Id = new Guid("48e09eca-d12c-46f6-87d4-25a3dc09a39f"),
+                            Id = new Guid("d8ec3f16-5f55-4c1f-9be3-81a05a174f35"),
                             BodyContent = "Hi [UserFullName],<br><br>We received a request to reset your password. Click the link below to reset your password.",
                             CallToAction = "https://cursuslms.xyz/sign-in/verify-email?userId=user.Id&token=Uri.EscapeDataString(token)",
                             Category = "Security",
@@ -562,7 +565,7 @@ namespace Ticket_Hub.DataAccess.Migrations
                         },
                         new
                         {
-                            Id = new Guid("977b1e1c-02ea-4d14-b266-338a1d7b78ff"),
+                            Id = new Guid("03498463-610f-4320-923e-8e63b48d6b4c"),
                             BodyContent = "<p>Thank you for registering your Ticket Hub account. Click here to verify your email.</p>",
                             CallToAction = "<a href=\"https://localhost:5173/verifyemail?userId={{UserId}}&token={{Token}}\" class='button'>Verify Email</a>",
                             Category = "Verify",
@@ -725,8 +728,6 @@ namespace Ticket_Hub.DataAccess.Migrations
 
                     b.HasIndex("ChatRoomId");
 
-                    b.HasIndex("MessageId");
-
                     b.HasIndex("TicketId");
 
                     b.ToTable("Negotiations");
@@ -800,9 +801,6 @@ namespace Ticket_Hub.DataAccess.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsVisible")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("NegotiationStatus")
                         .HasColumnType("bit");
 
                     b.Property<double>("NewPrice")
@@ -1092,12 +1090,6 @@ namespace Ticket_Hub.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Ticket_Hub.Models.Models.Message", "Message")
-                        .WithMany()
-                        .HasForeignKey("MessageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Ticket_Hub.Models.Models.Ticket", "Ticket")
                         .WithMany()
                         .HasForeignKey("TicketId")
@@ -1105,8 +1097,6 @@ namespace Ticket_Hub.DataAccess.Migrations
                         .IsRequired();
 
                     b.Navigation("ChatRoom");
-
-                    b.Navigation("Message");
 
                     b.Navigation("Ticket");
                 });

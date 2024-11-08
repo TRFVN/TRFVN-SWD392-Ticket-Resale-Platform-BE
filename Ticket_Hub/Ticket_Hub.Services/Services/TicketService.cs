@@ -51,7 +51,6 @@ public class TicketService : ITicketService
         }
 
         bool isStaff = user.IsInRole("STAFF");  
-        bool isMember = user.IsInRole("MEMBER");  
         string userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;  
 
         // Lọc danh sách vé  
@@ -61,20 +60,14 @@ public class TicketService : ITicketService
         {  
             // Nếu là staff, lấy tất cả vé  
             listTickets = tickets.ToList();  
-        }  
-        else if (isMember)  
-        {  
-            // Nếu là người bán, lấy tất cả vé của họ nhưng loại bỏ các vé không hiển thị  
-            listTickets = tickets.Where(ticket => ticket.UserId == userId && ticket.IsVisible).ToList();  
-        }  
-        else  
-        {  
+        }
+        else
+        {
             // Nếu là khách, chỉ lấy vé đã được duyệt và thấy được  
             listTickets = tickets.Where(ticket => ticket.Status == TicketStatus.Success && ticket.IsVisible).ToList();  
-        }  
+        }
 
-
-
+        
         // Filter Query
         if (!string.IsNullOrEmpty(filterOn) && !string.IsNullOrEmpty(filterQuery))
         {
@@ -192,6 +185,46 @@ public class TicketService : ITicketService
         };
     }
 
+    public async Task<ResponseDto> GetTicketByUserId(ClaimsPrincipal user)
+    {
+        var userId = user.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+        if (userId == null)
+        {
+            return new ResponseDto
+            {
+                Message = "User not found",
+                Result = null,
+                IsSuccess = false,
+                StatusCode = 404
+            };
+        }
+
+        // Truy vấn tất cả vé của người dùng từ cơ sở dữ liệu
+        var tickets = await _unitOfWork.TicketRepository.GetAllAsync(x => x.UserId == userId);
+
+        if (tickets == null || !tickets.Any())
+        {
+            return new ResponseDto
+            {
+                Message = "No tickets found for the user",
+                Result = null,
+                IsSuccess = false,
+                StatusCode = 404
+            };
+        }
+
+        // Ánh xạ vé lấy được từ cơ sở dữ liệu thành DTO
+        var ticketDtos = _mapper.Map<List<GetTicketDto>>(tickets);
+
+        return new ResponseDto
+        {
+            Message = "Get Ticket successfully",
+            Result = ticketDtos,
+            IsSuccess = true,
+            StatusCode = 200
+        };
+    }
+
     public async Task<ResponseDto> CreateTicket(ClaimsPrincipal user, CreateTicketDto createTicketDto)
     {
         var userId = user.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
@@ -230,6 +263,8 @@ public class TicketService : ITicketService
             TicketImage = createTicketDto.TicketImage,
             TicketDescription = createTicketDto.TicketDescription,
             SerialNumber = createTicketDto.SerialNumber,
+            NewPrice = 0,
+            NegotiationStatus = false,
             Status = TicketStatus.Processing,
             IsVisible = true
         };

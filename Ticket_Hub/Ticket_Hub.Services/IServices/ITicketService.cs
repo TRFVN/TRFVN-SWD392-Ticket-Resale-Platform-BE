@@ -18,6 +18,7 @@ public interface ITicketService
     );
 
     Task<ResponseDto> GetTicket(ClaimsPrincipal user, Guid ticketId);
+    Task<ResponseDto> GetTicketByUserId(ClaimsPrincipal user);
     Task<ResponseDto> CreateTicket(ClaimsPrincipal user, CreateTicketDto createTicketDto);
     Task<ResponseDto> UpdateTicket(ClaimsPrincipal user, UpdateTicketDto updateTicketDto);
     Task<ResponseDto> DeleteTicket(ClaimsPrincipal user, Guid ticketId);

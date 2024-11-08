@@ -19,6 +19,14 @@ namespace Ticket_Hub.API.Controllers
             _cartService = cartService;
         }
         
+        [HttpGet]
+        [Route("GetCart")]
+        public async Task<IActionResult> GetCart()
+        {
+            var responseDto = await _cartService.GetCart(User);
+            return StatusCode(responseDto.StatusCode, responseDto);
+        }
+        
         [HttpPost]
         [Route("AddToCart")]
         public async Task<IActionResult> AddToCart([FromBody] AddToCartDTO addToCartDto)

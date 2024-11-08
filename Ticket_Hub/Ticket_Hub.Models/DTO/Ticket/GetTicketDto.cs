@@ -13,11 +13,13 @@ public class GetTicketDto
     public Guid CategoryId { get; set; }
     public string CategoryName { get; set; } = null!;
     public double TicketPrice { get; set; }
+    public double? NewPrice { get; set; }
     public string? TicketImage { get; set; }
     public string TicketDescription { get; set; } = null!;
     public string SerialNumber { get; set; } = null!;
     public TicketStatus Status { get; set; }
     public bool IsVisible { get; set; }
+    public bool NegotiationStatus { get; set; }
     
     
     public DateTime EventDate { get; set; }
