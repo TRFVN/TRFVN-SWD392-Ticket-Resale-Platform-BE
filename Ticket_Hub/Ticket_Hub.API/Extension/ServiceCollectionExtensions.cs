@@ -27,6 +27,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IMessageService, MessageService>();
         services.AddScoped<IPaymentService, PaymentService>();
         services.AddScoped<IChatRoomService, ChatRoomService>();
+        services.AddScoped<IWalletService, WalletService>();
+        services.AddScoped<ITransactionService, TransactionService>();
 
         return services;
     }
